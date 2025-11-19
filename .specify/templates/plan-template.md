@@ -31,7 +31,21 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+* **Code Quality & Standards**: All code must be clean, modular, and testable. Automated linting, formatting, and static analysis must be configured. Unit, integration, and end-to-end tests with high coverage targets are required.
+    * **Vue 3 & TypeScript Conventions**: All new components MUST use the Composition API with `<script setup>` for better logic reuse and type inference. Component props MUST be explicitly typed using TypeScript interfaces.
+    * **Pinia Store Design**: Each feature domain MUST have its own Pinia store. Stores MUST be organized with a clear separation of `state`, `getters`, and `actions`.
+    * **Form Handling & Validation**: A consistent, project-wide form validation library MUST be used. Forms MUST provide clear, immediate, and accessible error messages for each field.
+    * **DRY & Abstraction**: Create reusable components and composables to avoid code duplication. Each component and function MUST have a single, well-defined responsibility.
+    * **Data Fetching & Performance**: Data fetching logic MUST be abstracted into composables or services. Use Pinia stores to share and cache fetched data.
+    * **Testing & QA**: All new functions, composables, and components MUST have accompanying tests. Critical user flows MUST be covered by end-to-end tests.
+* **Collaboration & Workflow**: All work must follow GitHub Flow with feature branches, pull requests, and mandatory code reviews. Commit messages must be clear and follow conventional changelog standards.
+* **Documentation**: All features must have up-to-date READMEs, architecture diagrams, and API docs. Inline code comments are required for complex logic. Major technical choices must be documented with ADRs.
+    * **Component Documentation**: All components MUST be documented using JSDoc/TSDoc, explaining their purpose, props, and events.
+    * **README**: The project's `README.md` file MUST be kept up-to-date with setup instructions, available scripts, and a clear project overview.
+* **Integration & CI/CD**: All builds, tests, and deployments must be automated. All tests must pass before merging. Continuous delivery with staging and production environments is required.
+* **Security & Compliance**: All code must be scanned for dependencies and vulnerabilities. Secure coding practices must be followed, including input validation and secrets management. OWASP Top 10 guidelines must be followed.
+* **Continuous Improvement**: Regular retrospectives and feedback loops are encouraged. Technical debt must be tracked and prioritized for refactoring. DevOps health must be measured with metrics like lead time, deployment frequency, and change failure rate.
+* **Internationalization (i18n)**: A dedicated library MUST be used for all user-facing strings.
 
 ## Project Structure
 
