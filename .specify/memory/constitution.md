@@ -1,30 +1,28 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.1.0 → 1.2.0
 - Modified principles:
-  - I. Code Quality & Standards (added sub-sections)
-  - III. Documentation (added sub-sections)
-- Added sections:
-  - VII. Internationalization (i18n)
-- Removed sections: None
-- Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md
-- Follow-up TODOs: None
+  - I. Code Quality & Standards (strengthened rules for TypeScript, DRY, Testing, and added Tooling section)
+  - IV. Integration & CI/CD (added linting enforcement)
+  - VII. Internationalization (i18n) (clarified rule)
+- Governance section updated.
 -->
 # Entrepreneurs App Constitution
 
 ## Core Principles
 
 ### I. Code Quality & Standards
-Enforce clean, modular, and testable code.
+Enforce clean, modular, and testable code. These rules apply to all contributors, including human developers and AI agents, to ensure consistency and maintainability.
 Require automated linting, formatting, and static analysis.
 Mandate unit, integration, and end-to-end testing with high coverage targets.
 
-#### I.a. Vue 3 & TypeScript Conventions
-- **Composition API:** All new components MUST use the Composition API with `<script setup>` for better logic reuse and type inference.
-- **Props:** Component props MUST be explicitly typed using TypeScript interfaces.
+#### I.a. TypeScript & Vue Conventions
+- **Composition API:** All new components MUST use the Composition API with `<script setup>`.
+- **Comprehensive Typing:** All props, store state, and composable return values MUST be explicitly typed.
+- **No `any` Type:** The `any` type is strictly forbidden. Always prefer narrow, explicit typings. Expand type scope only when necessary, but keep contracts strict.
 - **Reactivity:** Use `ref` for primitive values and `reactive` for objects.
-- **Typing:** Avoid the `any` type. Define clear interfaces and types for all data structures.
+- **Component Toolkit:** Prefer PrimeVue components and PrimeFlex utilities over custom implementations.
+- **Reuse Existing Logic:** Never reinvent the wheel. Reuse proven existing features, helpers, and utils from available packages instead of recreating them.
 
 #### I.b. Pinia Store Design
 - **Modularity:** Each feature domain MUST have its own Pinia store.
@@ -38,9 +36,10 @@ Mandate unit, integration, and end-to-end testing with high coverage targets.
 - **Server-Side Validation:** All form submissions MUST be re-validated on the server-side to ensure data integrity.
 
 #### I.d. DRY & Abstraction
-- **Reusability:** Create reusable components and composables to avoid code duplication.
-- **Single Responsibility:** Each component and function MUST have a single, well-defined responsibility.
-- **Abstraction:** Hide complex implementation details behind simple, intuitive APIs.
+- **Enforce DRY:** Do not repeat code. Shared logic MUST be abstracted into helpers or composables. No copy-paste duplication across components.
+- **Lightweight Components:** Components must remain light. Delegate repeated or complex business logic to composables or wrappers.
+- **Single Responsibility:** Each component/composable must have one clear purpose.
+- **Abstraction:** Hide complexity behind intuitive APIs.
 
 #### I.e. Data Fetching & Performance
 - **Centralized Fetching:** Data fetching logic MUST be abstracted into composables or services, separate from components.
@@ -49,10 +48,14 @@ Mandate unit, integration, and end-to-end testing with high coverage targets.
 - **Virtual Scrolling:** For long lists, virtual scrolling MUST be implemented to maintain a smooth user experience.
 
 #### I.f. Testing & QA
-- **Unit Tests:** All new functions and composables MUST have accompanying unit tests.
-- **Component Tests:** All new components MUST have tests covering their props, events, and user interactions.
-- **E2E Tests:** Critical user flows MUST be covered by end-to-end tests.
-- **Test Runner:** A consistent test runner and framework (e.g., Vitest, Cypress) MUST be used across the project.
+- **Test Frameworks:** Use Vitest for unit and integration testing, and Cypress for E2E tests.
+- **Test Location:** Unit tests MUST be colocated with composables and schemas. Component tests MUST be stored in `/tests/integration` and not colocated.
+- **Test Coverage:** All new code MUST include tests for props, events, and user-facing contracts.
+
+#### I.g. Tooling & Environment
+- **Linting & Formatting:** Use ESLint + Prettier consistently across the project.
+- **Forbidden Tools:** Do not use Biome (not mature enough for Vue SFC).
+- **CI Enforcement:** Linting MUST be enforced in CI/CD pipelines.
 
 ### II. Collaboration & Workflow
 Use GitHub Flow with feature branches, pull requests, and mandatory code reviews.
@@ -72,7 +75,7 @@ Use ADRs (Architecture Decision Records) for major technical choices.
 
 ### IV. Integration & CI/CD
 Automate builds, tests, and deployments via GitHub Actions (or equivalent).
-Require all tests to pass before merging.
+Require all tests and linting to pass before merging.
 Support continuous delivery with staging and production environments.
 
 ### V. Security & Compliance
@@ -86,12 +89,12 @@ Track technical debt and prioritize refactoring.
 Adopt metrics (e.g., lead time, deployment frequency, change failure rate) to measure DevOps health.
 
 ### VII. Internationalization (i18n)
-- **i18n Library:** A dedicated library (e.g., `vue-i18n`) MUST be used for all user-facing strings.
+- **i18n Library:** All user-facing strings must use `vue-i18n`.
 - **Translation Files:** All translation strings MUST be stored in separate JSON files for each locale.
 - **Keys:** Use semantic keys for all translation strings.
 
 ## Governance
 
-Amendments to this constitution require a pull request and approval from the project maintainers.
+Amendments to this constitution require a pull request and approval from the project maintainers. The constitution must be kept current with enforced practices.
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-11-04
+**Version**: 1.2.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-11-20
