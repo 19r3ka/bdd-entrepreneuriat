@@ -1,0 +1,63 @@
+{
+	"name": "app",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": "^20.19.0 || >=22.12.0"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "run-p type-check \"build-only {@}\" --",
+		"preview": "vite preview",
+		"test": "vitest",
+		"build-only": "vite build",
+		"type-check": "vue-tsc --build",
+		"lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+		"format": "prettier --write src/"
+	},
+	"dependencies": {
+		"@primeuix/themes": "^1.2.5",
+		"@supabase/supabase-js": "^2.78.0",
+		"@vue-leaflet/vue-leaflet": "^0.10.1",
+		"@vueuse/core": "^14.0.0",
+		"dexie": "^4.2.1",
+		"leaflet": "^1.9.4",
+		"leaflet.markercluster": "^1.5.3",
+		"pinia": "^3.0.3",
+		"primeflex": "^4.0.0",
+		"primeicons": "^7.0.0",
+		"primevue": "^4.4.1",
+		"uuid": "^13.0.0",
+		"vue": "^3.5.22",
+		"vue-i18n": "^11.1.12",
+		"vue-router": "^4.6.3",
+		"vue-toastification": "^2.0.0-rc.5",
+		"zod": "^4.1.12"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "^10.1.0",
+		"@pinia/testing": "^1.0.3",
+		"@tsconfig/node22": "^22.0.2",
+		"@types/leaflet": "^1.9.21",
+		"@types/leaflet.markercluster": "^1.5.6",
+		"@types/node": "^22.18.11",
+		"@types/uuid": "^10.0.0",
+		"@typescript-eslint/eslint-plugin": "^8.47.0",
+		"@typescript-eslint/parser": "^8.47.0",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"@vue/test-utils": "^2.4.6",
+		"@vue/tsconfig": "^0.8.1",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-vue": "^10.5.1",
+		"happy-dom": "^20.0.10",
+		"npm-run-all2": "^8.0.4",
+		"prettier": "^3.6.2",
+		"typescript": "~5.9.0",
+		"vite": "^7.1.11",
+		"vite-plugin-vue-devtools": "^8.0.3",
+		"vitest": "^4.0.6",
+		"vue-tsc": "^3.1.1"
+	}
+}

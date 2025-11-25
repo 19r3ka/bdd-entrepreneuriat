@@ -1,0 +1,1 @@
+export const togoleseRegex = /^\+228(2\d{7}|7\d{7}|9\d{7})$/;

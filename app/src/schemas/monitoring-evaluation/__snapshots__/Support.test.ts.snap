@@ -1,0 +1,157 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SupportSchema > should invalidate a support object with invalid enum values 1`] = `
+[ZodError: [
+  {
+    "origin": "string",
+    "code": "invalid_format",
+    "format": "uuid",
+    "pattern": "/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid UUID"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "POLICY",
+      "CAPACITY_DEV",
+      "GRANT",
+      "DIGITAL",
+      "SES_SUPPORT"
+    ],
+    "path": [
+      "modality"
+    ],
+    "message": "Invalid option: expected one of \\"POLICY\\"|\\"CAPACITY_DEV\\"|\\"GRANT\\"|\\"DIGITAL\\"|\\"SES_SUPPORT\\""
+  },
+  {
+    "expected": "date",
+    "code": "invalid_type",
+    "path": [
+      "date"
+    ],
+    "message": "Invalid input: expected date, received undefined"
+  }
+]]
+`;
+
+exports[`SupportSchema > should invalidate a support object with missing required fields 1`] = `
+[ZodError: [
+  {
+    "origin": "string",
+    "code": "invalid_format",
+    "format": "uuid",
+    "pattern": "/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid UUID"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "POLICY",
+      "CAPACITY_DEV",
+      "GRANT",
+      "DIGITAL",
+      "SES_SUPPORT"
+    ],
+    "path": [
+      "modality"
+    ],
+    "message": "Invalid option: expected one of \\"POLICY\\"|\\"CAPACITY_DEV\\"|\\"GRANT\\"|\\"DIGITAL\\"|\\"SES_SUPPORT\\""
+  },
+  {
+    "expected": "date",
+    "code": "invalid_type",
+    "path": [
+      "date"
+    ],
+    "message": "Invalid input: expected date, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "description"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  }
+]]
+`;
+
+exports[`SupportSchema > should invalidate financeDetails with negative amount 1`] = `
+[ZodError: [
+  {
+    "origin": "string",
+    "code": "invalid_format",
+    "format": "uuid",
+    "pattern": "/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid UUID"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "POLICY",
+      "CAPACITY_DEV",
+      "GRANT",
+      "DIGITAL",
+      "SES_SUPPORT"
+    ],
+    "path": [
+      "modality"
+    ],
+    "message": "Invalid option: expected one of \\"POLICY\\"|\\"CAPACITY_DEV\\"|\\"GRANT\\"|\\"DIGITAL\\"|\\"SES_SUPPORT\\""
+  },
+  {
+    "expected": "date",
+    "code": "invalid_type",
+    "path": [
+      "date"
+    ],
+    "message": "Invalid input: expected date, received undefined"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "Loan",
+      "Grant",
+      "Guarantee"
+    ],
+    "path": [
+      "financeDetails",
+      "instrument"
+    ],
+    "message": "Invalid option: expected one of \\"Loan\\"|\\"Grant\\"|\\"Guarantee\\""
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "MFI",
+      "Bank",
+      "UNDP_DIRECT"
+    ],
+    "path": [
+      "financeDetails",
+      "source"
+    ],
+    "message": "Invalid option: expected one of \\"MFI\\"|\\"Bank\\"|\\"UNDP_DIRECT\\""
+  },
+  {
+    "origin": "number",
+    "code": "too_small",
+    "minimum": 0,
+    "inclusive": false,
+    "path": [
+      "financeDetails",
+      "amount"
+    ],
+    "message": "Too small: expected number to be >0"
+  }
+]]
+`;

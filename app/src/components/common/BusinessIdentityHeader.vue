@@ -1,0 +1,114 @@
+<script setup lang="ts">
+  import { computed } from 'vue'
+  import { useRouter } from 'vue-router'
+  import SplitButton from 'primevue/splitbutton'
+  import Tag from 'primevue/tag'
+  import Avatar from 'primevue/avatar'
+  import type { Business } from '@/types/business'
+  import type { Entrepreneur } from '@/types/entrepreneur'
+
+  // STRICT CONTRACT
+  interface Props {
+    business: Business
+    entrepreneur?: Entrepreneur | null
+  }
+
+  const props = defineProps<Props>()
+
+  const emit = defineEmits<{
+    (e: 'action', actionType: 'log_intervention' | 'edit' | 'delete'): void
+  }>()
+
+  const router = useRouter()
+
+  // Actions Menu
+  const actionItems = [
+    {
+      label: 'Edit Profile',
+      icon: 'pi pi-pencil',
+      command: () => emit('action', 'edit')
+    },
+    { separator: true },
+    {
+      label: 'Delete Business',
+      icon: 'pi pi-trash',
+      class: 'text-red-500',
+      command: () => emit('action', 'delete')
+    }
+  ]
+
+  // Computed Helpers
+  const statusSeverity = computed(() => {
+    // Assuming you might have a status field, defaulting to success/active for now
+    return 'success'
+  })
+
+  const goToOwner = () => {
+    if (props.entrepreneur?.id) {
+      router.push(`/entrepreneurs/${props.entrepreneur.id}`)
+    }
+  }
+</script>
+
+<template>
+  <div
+    class="bg-surface-0 dark:bg-surface-900 p-4 md:p-6 border-round-xl shadow-1 mb-4 border-1 border-200 dark:border-700"
+  >
+    <div
+      class="flex flex-column lg:flex-row align-items-start lg:align-items-center justify-content-between gap-4"
+    >
+      <div class="flex align-items-start gap-4">
+        <div class="relative">
+          <img
+            :src="business.avatar || '/placeholder-biz.png'"
+            class="w-5rem h-5rem md:w-7rem md:h-7rem border-round-xl object-cover border-1 border-200 shadow-1"
+            alt="Logo"
+          />
+          <div class="absolute -bottom-2 -right-2">
+            <Tag :severity="statusSeverity" value="ACTIVE" class="text-xs" />
+          </div>
+        </div>
+
+        <div class="flex flex-column gap-2">
+          <h1 class="text-2xl md:text-3xl font-bold m-0 text-900">{{ business.name }}</h1>
+
+          <div class="flex flex-wrap align-items-center gap-3 text-sm text-600">
+            <Tag
+              :value="business.primaryBusinessArea"
+              class="bg-primary-50 text-primary-700 px-2 py-1 border-round-md text-xs font-medium border-none"
+            />
+            <div v-if="business.location?.address" class="flex align-items-center gap-1">
+              <i class="pi pi-map-marker text-xs"></i>
+              <span>{{ business.location.address }}</span>
+            </div>
+          </div>
+
+          <div
+            v-if="entrepreneur"
+            @click="goToOwner"
+            class="flex align-items-center gap-2 mt-1 pt-2 border-top-1 border-200 cursor-pointer hover:surface-100 transition-colors p-1 border-round"
+          >
+            <span class="text-xs text-500 uppercase font-medium">Owned by:</span>
+            <div class="flex align-items-center gap-2">
+              <Avatar :image="entrepreneur.avatar" shape="circle" size="normal" />
+              <span class="text-sm font-bold text-800"
+                >{{ entrepreneur.firstName }} {{ entrepreneur.lastName }}</span
+              >
+              <i class="pi pi-external-link text-xs text-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 align-self-end lg:align-self-center">
+        <SplitButton
+          label="Log Intervention"
+          icon="pi pi-plus"
+          :model="actionItems"
+          severity="primary"
+          @click="emit('action', 'log_intervention')"
+        />
+      </div>
+    </div>
+  </div>
+</template>
