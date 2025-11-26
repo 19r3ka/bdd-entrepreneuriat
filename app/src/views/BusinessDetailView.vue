@@ -16,13 +16,15 @@
   import BusinessIdentityHeader from '@/components/common/BusinessIdentityHeader.vue'
   import BusinessOverviewTab from '@/components/BusinessOverviewTab.vue'
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue';
-  import SupportBoostTimeline from '@/components/monitoring-evaluation/SupportBoostTimeline.vue';
+  import ActivityTimeline from '@/components/monitoring-evaluation/ActivityTimeline.vue';
 
   // Logic
   import { useBusinessStore } from '@/stores/useBusinessStore'
   import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
   import { useSupportStore } from '@/stores/useSupportStore';
+  import { useQuickWinStore } from '@/stores/useQuickWinStore';
   import type { Support } from '@/types/monitoring-evaluation/Support';
+  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
   import GoalForm from '@/components/monitoring-evaluation/GoalForm.vue';
   import MeasurementForm from '@/components/monitoring-evaluation/MeasurementForm.vue';
   import { useIndicatorStore } from '@/stores/useIndicatorStore';
@@ -40,11 +42,13 @@
   const entrepreneurStore = useEntrepreneurStore()
   const supportStore = useSupportStore();
   const indicatorStore = useIndicatorStore();
+  const quickWinStore = useQuickWinStore();
 
   const businessId = route.params.id as string
   const activeTabIndex = ref('0')
   const isSupportFormVisible = ref(false);
-  const supports = ref<Support[]>([]);
+  const businessSupports = ref<Support[]>([]);
+  const businessQuickWins = ref<QuickWin[]>([]);
   const selectedSupport = ref<Support | undefined>(undefined);
   const isEditMode = ref(false);
 
@@ -65,7 +69,8 @@
     if (businessStore.getById(businessId)?.entrepreneurId) {
       await entrepreneurStore.fetchAll()
     }
-    supports.value = await supportStore.getSupportsByBusinessId(businessId);
+    businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
+    businessQuickWins.value = await quickWinStore.getQuickWinsByBusinessId(businessId);
     await fetchGoalsAndMeasurements();
   })
 
@@ -107,6 +112,8 @@
       confirmDelete()
     } else if (action === 'log_intervention') {
       openSupportForm();
+    } else if (action === 'log_quick_win') { // Added
+      openQuickWinForm(); // Added
     }
   }
 
@@ -136,9 +143,14 @@
     )
   }
 
-  const openSupportForm = () => {
-    isEditMode.value = false;
-    selectedSupport.value = undefined;
+  const openSupportForm = (id?: string) => { // Modified to accept id
+    if (id) {
+      isEditMode.value = true;
+      selectedSupport.value = businessSupports.value.find(s => s.id === id);
+    } else {
+      isEditMode.value = false;
+      selectedSupport.value = undefined;
+    }
     isSupportFormVisible.value = true;
   };
 
@@ -152,14 +164,14 @@
         toast.add({ severity: 'success', summary: 'Success', detail: 'Support boost logged successfully', life: 3000 });
       }
       isSupportFormVisible.value = false;
-      supports.value = await supportStore.getSupportsByBusinessId(businessId);
+      businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
     } catch (error) {
       console.error(error);
       toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save support boost', life: 3000 });
     }
   };
 
-  const editSupport = async (id: string) => {
+  const editSupport = async (id: string) => { // Modified to accept id
     const support = await supportStore.getSupportById(id);
     if (support) {
       isEditMode.value = true;
@@ -175,13 +187,18 @@
       async () => {
         try {
           await supportStore.deleteSupport(support.id);
-          supports.value = await supportStore.getSupportsByBusinessId(businessId);
+          businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
           toast.add({ severity: 'success', summary: 'Success', detail: 'Support boost deleted successfully', life: 3000 });
         } catch {
           toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete support boost', life: 3000 });
         }
       }
     );
+  };
+
+  // Quick Win Handlers (Added)
+  const openQuickWinForm = () => {
+    router.push(`/quick-wins/new?businessId=${businessId}`);
   };
 
   // Goal & Measurement Handlers
@@ -353,7 +370,7 @@
                          <Button label="Add Measurement" icon="pi pi-plus" size="small" outlined @click="openMeasurementForm(goal)" />
                        </div>
                        
-                       <div v-if="!goalMeasurements[goal.id] || goalMeasurements[goal.id].length === 0" class="text-sm text-500">
+                       <div v-if="!goalMeasurements[goal.id] || goalMeasurements[goal.id]?.length === 0" class="text-sm text-500">
                          No measurements recorded.
                        </div>
                        <DataTable v-else :value="goalMeasurements[goal.id] || []" size="small">
@@ -378,11 +395,15 @@
             </TabPanel>
             <TabPanel value="3">
               <div class="p-4">
-                <SupportBoostTimeline
+                <ActivityTimeline
                   :supports="businessSupports"
-                  @add="openSupportForm()"
-                  @view="(id) => router.push(`/supports/${id}`)"
-                  @edit="openSupportForm"
+                  :quick-wins="businessQuickWins"
+                  @add-support="openSupportForm()"
+                  @add-quick-win="openQuickWinForm()"
+                  @view-support="(id: string) => router.push(`/supports/${id}`)"
+                  @view-quick-win="(id: string) => router.push(`/quick-wins/${id}`)"
+                  @edit-support="openSupportForm"
+                  @edit-quick-win="(id: string) => router.push(`/quick-wins/${id}/edit`)"
                 />
               </div>
             </TabPanel>

@@ -53,6 +53,11 @@
 		"updatedAt": "Updated At",
 		"actions": "Actions",
 		"close": "Close",
+		"yes": "Yes",
+		"no": "No",
+		"requiredFields": "Required Information",
+		"notes": "Notes",
+		"uploadedBy": "Uploaded by",
 		"back": "Back",
 		"next": "Next",
 		"previous": "Previous",
@@ -194,6 +199,12 @@
 			"generateBusinessReport": "Generate Business Report",
 			"entrepreneurReport": "Entrepreneur Report",
 			"businessReport": "Business Report"
+		},
+		"quickWins": {
+			"title": "Quick Wins",
+			"new": "New Quick Win",
+			"edit": "Edit Quick Win",
+			"detail": "Quick Win Details"
 		}
 	},
 	"forms": {
@@ -268,6 +279,47 @@
 			"financeAmountPositive": "Amount must be positive"
 		}
 	},
+	"outputIndicator": {
+		"name": "Indicator Name",
+		"description": "Description",
+		"category": "Category",
+		"unit": "Unit",
+		"irrfIndicatorCode": "IRRF Code",
+		"cpdOutputCode": "CPD Output Code",
+		"sdgTargets": "SDG Targets",
+		"createTitle": "Create New Indicator",
+		"placeholders": {
+			"name": "e.g. MSMEs trained in financial literacy",
+			"description": "Describe what this indicator measures...",
+			"category": "Select a category",
+			"unit": "Select a unit"
+		},
+		"categories": {
+			"capacity_development": "Capacity Development",
+			"access_to_finance": "Access to Finance",
+			"market_access": "Market Access",
+			"policy_regulatory": "Policy & Regulatory",
+			"innovation_sustainability": "Innovation & Sustainability",
+			"digital_transformation": "Digital Transformation"
+		},
+		"units": {
+			"count": "Count (#)",
+			"percent": "Percentage (%)",
+			"boolean": "Yes/No",
+			"hours": "Hours",
+			"currency": "Currency",
+			"index": "Index/Score",
+			"text": "Text"
+		},
+		"selector": {
+			"placeholder": "Search or create indicator...",
+			"noResults": "No indicators found",
+			"createNew": "Create new indicator"
+		},
+		"sections": {
+			"alignment": "UNDP Alignment (Optional)"
+		}
+	},
 	"support": {
 		"title": "Title",
 		"titlePlaceholder": "e.g., 'Digital Kickstart Grant'",
@@ -292,7 +344,8 @@
 		"currencyPlaceholder": "e.g. USD",
 		"notes": "Notes",
 		"notesPlaceholder": "Additional information...",
-		"saveSupport": "Save Support"
+		"saveSupport": "Save Support",
+		"add": "Add Support"
 	},
 	"supportModality": {
 		"POLICY": "Policy",
@@ -304,6 +357,15 @@
 	"sesRiskCategory": {
 		"Low": "Low",
 		"High": "High"
+	},
+	"activity": {
+		"title": "Activity History",
+		"all": "All Activity",
+		"supports": "Supports",
+		"quickWins": "Quick Wins",
+		"noActivity": "No activity recorded yet.",
+		"noSupports": "No supports recorded yet.",
+		"noQuickWins": "No quick wins recorded yet."
 	},
 	"genderMarker": {
 		"GEN0": "GEN0 - No contribution",
@@ -455,6 +517,52 @@
 			"goalCount": "Goals Defined",
 			"maturityLevel": "Maturity Level",
 			"latestMaturity": "Latest Maturity Score"
+		}
+	},
+	"quickWin": {
+		"title": "Title",
+		"business": "Business",
+		"supportBoost": "Linked Support",
+		"achievedOn": "Achieved On",
+		"resultSummary": "Result Summary",
+		"indicators": "Indicators",
+		"tabs": {
+			"details": "Details",
+			"rbmAlignment": "RBM Alignment",
+			"evidence": "Evidence"
+		},
+		"rbmCodes": "RBM Codes",
+		"rbmLevel": "RBM Level",
+		"cpdOutputCode": "CPD Output Code",
+		"spOutputCode": "SP Output Code",
+		"classificationsTargets": "Classifications & Targets",
+		"irrfIndicators": "IRRF Indicator IDs",
+		"sdgTargets": "SDG Targets",
+		"evidence": "Evidence & Attachments",
+		"addEvidence": "Add Evidence",
+		"noEvidence": "No evidence uploaded yet",
+		"dragDropFiles": "Drag & drop files here",
+		"orClickBrowse": "or click to browse",
+		"addIndicator": "Add Indicator",
+		"noIndicators": "No indicators added yet. Add one to track results.",
+		"baseline": "Baseline",
+		"target": "Target",
+		"currentValue": "Current Value",
+		"genderMarker": "Gender Marker",
+		"tags": "Tags",
+		"add": "Add Quick Win",
+		"linkedQuickWins": "Linked Quick Wins",
+		"noQuickWins": "No quick wins recorded yet.",
+		"sections": {
+			"advanced": "Advanced / RBM Details"
+		},
+		"placeholders": {
+			"title": "e.g. Digital storefront launched",
+			"business": "Select business",
+			"resultSummary": "Describe what was achieved...",
+			"selectSupport": "Select linked support (optional)",
+			"indicatorNotes": "Notes...",
+			"genderMarker": "Select gender marker"
 		}
 	}
 }

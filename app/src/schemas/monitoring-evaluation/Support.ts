@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { GenderMarkerEnum } from "../common/genderMarker";
 
 /**
  * Minimal, relational-friendly SupportBoost schema (Inputs)
@@ -63,7 +64,7 @@ export const SupportBoostSchema = z.object({
   spOutcomeCode: z.string().optional(),
   irrfIndicatorIds: z.array(z.string()).optional(),
   sdgTargets: z.array(z.string()).optional(),
-  genderMarker: z.enum(["GEN0", "GEN1", "GEN2", "GEN3"]),
+  genderMarker: GenderMarkerEnum,
 
   // Free-form notes
   notes: z.string().max(2000).optional(),

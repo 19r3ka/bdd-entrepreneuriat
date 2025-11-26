@@ -39,20 +39,49 @@ export interface SeedOptions {
     entrepreneurCount: number;
     businessCount: number;
     supportCount: number;
+    quickWinCount: number;
     clear: boolean;
 }
 
 export const seedDatabase = async (options: SeedOptions) => {
-    const { entrepreneurCount, businessCount, supportCount, clear } = options;
+    const { entrepreneurCount, businessCount, supportCount, quickWinCount, clear } = options;
+
+    // Generate standard output indicators
+    const standardIndicators = [
+        { name: 'Revenue Increase', unit: 'currency', category: 'economic', description: 'Increase in monthly revenue' },
+        { name: 'Jobs Created', unit: 'count', category: 'social', description: 'Number of new full-time equivalent jobs created' },
+        { name: 'New Product Launched', unit: 'boolean', category: 'innovation', description: 'Whether a new product or service was launched' },
+        { name: 'Digital Presence Established', unit: 'boolean', category: 'digital', description: 'Website or social media page created' },
+        { name: 'Funding Secured', unit: 'currency', category: 'economic', description: 'Amount of external funding secured' },
+        { name: 'Partnership Formed', unit: 'count', category: 'institutional', description: 'Number of new strategic partnerships' },
+        { name: 'Training Completed', unit: 'boolean', category: 'capacity', description: 'Completion of relevant training program' },
+        { name: 'Customer Base Growth', unit: 'percent', category: 'economic', description: 'Percentage growth in active customers' }
+    ];
+
+    const createdIndicators: any[] = [];
+
+    for (const ind of standardIndicators) {
+        const indicator = {
+            id: uuidv4(),
+            ...ind,
+            isStandard: true,
+            usageCount: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        createdIndicators.push(indicator);
+    }
 
     if (clear) {
-        await db.transaction('rw', [db.entrepreneurs, db.businesses, db.supports, db.maturityAssessments, db.indicatorDefinitions, db.measurements], async () => {
+        await db.transaction('rw', [db.entrepreneurs, db.businesses, db.supports, db.maturityAssessments, db.indicatorDefinitions, db.measurements, db.outputIndicators, db.quickWins], async () => {
             await db.entrepreneurs.clear();
             await db.businesses.clear();
             await db.supports.clear();
             await db.maturityAssessments.clear();
             await db.indicatorDefinitions.clear();
             await db.measurements.clear();
+            await db.outputIndicators.clear();
+            await db.quickWins.clear();
         });
     }
 
@@ -227,26 +256,68 @@ export const seedDatabase = async (options: SeedOptions) => {
         }
     }
 
-    // Save all data
-    if (entrepreneurs.length > 0 || businesses.length > 0 || supports.length > 0) {
-        await db.transaction('rw', [db.entrepreneurs, db.businesses, db.supports], async () => {
-            if (entrepreneurs.length > 0) {
-                await db.entrepreneurs.bulkAdd(entrepreneurs);
-            }
-            if (businesses.length > 0) {
-                await db.businesses.bulkAdd(businesses);
-            }
-            if (supports.length > 0) {
-                await db.supports.bulkAdd(supports);
-            }
+    // Generate Quick Wins
+    const quickWins: any[] = [];
+
+    for (let i = 0; i < quickWinCount; i++) {
+        if (businesses.length === 0) break;
+
+        const business = faker.helpers.arrayElement(businesses);
+        // 50% chance to link to a support if available for this business
+        const businessSupports = supports.filter(s => s.businessId === business.id);
+        const linkedSupport = businessSupports.length > 0 && faker.datatype.boolean()
+            ? faker.helpers.arrayElement(businessSupports)
+            : undefined;
+
+        const numIndicators = faker.number.int({ min: 1, max: 3 });
+        const selectedIndicators = faker.helpers.arrayElements(createdIndicators, numIndicators);
+
+        const indicatorValues = selectedIndicators.map((ind: any) => {
+            // Increment usage count
+            ind.usageCount++;
+
+            return {
+                indicatorId: ind.id,
+                baseline: ind.unit === 'boolean' ? 0 : faker.number.int({ min: 0, max: 100 }),
+                target: ind.unit === 'boolean' ? 1 : faker.number.int({ min: 100, max: 200 }),
+                currentValue: ind.unit === 'boolean' ? faker.datatype.boolean() : faker.number.int({ min: 50, max: 250 }),
+                notes: faker.datatype.boolean() ? faker.lorem.sentence() : undefined
+            };
         });
+
+        const quickWin = {
+            id: uuidv4(),
+            businessId: business.id,
+            supportBoostId: linkedSupport?.id,
+            title: faker.company.catchPhrase(),
+            achievedOn: faker.date.past().toISOString(),
+            resultSummary: faker.lorem.paragraph(),
+            indicatorValues,
+            tags: faker.helpers.arrayElements(['Innovation', 'Growth', 'Digital', 'Green', 'Youth', 'Women'], faker.number.int({ min: 1, max: 3 })),
+            genderMarker: faker.helpers.arrayElement(['GEN0', 'GEN1', 'GEN2', 'GEN3']),
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        quickWins.push(quickWin);
     }
 
-    // Return results including any errors
-    return {
-        entrepreneurs: entrepreneurs.length,
-        businesses: businesses.length,
-        supports: supports.length,
-        errors: errors.length > 0 ? errors : undefined
-    };
+    // Save all data
+    await db.transaction('rw', [db.entrepreneurs, db.businesses, db.supports, db.maturityAssessments, db.indicatorDefinitions, db.measurements, db.outputIndicators, db.quickWins], async () => {
+        if (entrepreneurs.length > 0) await db.entrepreneurs.bulkAdd(entrepreneurs);
+        if (businesses.length > 0) await db.businesses.bulkAdd(businesses);
+        if (supports.length > 0) await db.supports.bulkAdd(supports);
+        if (createdIndicators.length > 0) await db.outputIndicators.bulkAdd(createdIndicators);
+        if (quickWins.length > 0) await db.quickWins.bulkAdd(quickWins);
+    });
+
+    console.log(`Seeding complete:
+    - ${entrepreneurs.length} entrepreneurs
+    - ${businesses.length} businesses
+    - ${supports.length} supports
+    - ${createdIndicators.length} indicators
+    - ${quickWins.length} quick wins
+    - ${errors.length} validation errors`);
+
+    return { entrepreneurs, businesses, supports, quickWins, errors };
 };

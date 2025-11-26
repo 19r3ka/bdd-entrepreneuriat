@@ -57,6 +57,9 @@
 		"next": "Suivant",
 		"previous": "Précédent",
 		"requiredMarker": "*",
+		"requiredFields": "Informations requises",
+		"notes": "Notes",
+		"uploadedBy": "Téléchargé par",
 		"overview": "Aperçu",
 		"financials": "Finances",
 		"revenue": "Revenu",
@@ -113,7 +116,8 @@
 		"minLength": "Doit contenir au moins {min} caractères",
 		"maxLength": "Ne doit pas dépasser {max} caractères",
 		"invalidSlug": "Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets",
-		"invalidDate": "Veuillez entrer une date valide",		"invalidCoordinates": "Veuillez entrer des coordonnées valides",
+		"invalidDate": "Veuillez entrer une date valide",
+		"invalidCoordinates": "Veuillez entrer des coordonnées valides",
 		"invalidE164": "Numéro E.164 invalide",
 		"invalidTogoNumber": "Veuillez entrer un numéro togolais valide.",
 		"duplicate": "Cette valeur existe déjà",
@@ -124,76 +128,6 @@
 		"longitudeRange": "La longitude doit être comprise entre -180 et 180",
 		"invalidLatitude": "Veuillez entrer une latitude valide",
 		"latitudeRange": "La latitude doit être comprise entre -90 et 90"
-	},
-	"pages": {
-		"supports": {
-			"title": "Interventions de soutien"
-		},
-		"dashboard": {
-			"totalEntrepreneurs": "Total des entrepreneurs",
-			"totalBusinesses": "Total des entreprises",
-			"quickAddEntrepreneur": "Ajouter rapidement un entrepreneur"
-		},
-		"entrepreneurs": {
-			"title": "Entrepreneurs",
-			"new": "Nouvel entrepreneur",
-			"edit": "Modifier l'entrepreneur",
-			"createSuccess": "Entrepreneur créé avec succès",
-			"updateSuccess": "Entrepreneur mis à jour avec succès",
-			"deleteSuccess": "Entrepreneur supprimé avec succès",
-			"deleteError": "Échec de la suppression de l'entrepreneur",
-			"deleteTitle": "Confirmer la suppression",
-			"deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet entrepreneur ? Cette action est définitive.",
-			"deleteSelectedConfirmation": "Êtes-vous sûr de vouloir supprimer {count} entrepreneurs ? Cette action est définitive.",
-			"deleteSelectedSuccess": "{count} entrepreneurs supprimés avec succès.",
-			"profile": "Profil de l'entrepreneur",
-			"associatedBusinesses": "Entreprises associées",
-			"noAssociatedBusinesses": "Aucune entreprise associée à cet entrepreneur.",
-			"add": "Ajouter un entrepreneur",
-			"addBusiness": "Ajouter une entreprise",
-			"quickAddSuccess": "Entrepreneur ajouté avec succès !"
-		},
-		"businesses": {
-			"title": "Entreprises",
-			"new": "Nouvelle entreprise",
-			"edit": "Modifier l'entreprise",
-			"createSuccess": "Entreprise créée avec succès",
-			"updateSuccess": "Entreprise mise à jour avec succès",
-			"deleteSuccess": "Entreprise supprimée avec succès",
-			"deleteError": "Échec de la suppression de l'entreprise",
-			"deleteTitle": "Confirmer la suppression",
-			"deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action est définitive.",
-			"deleteSelectedConfirmation": "Êtes-vous sûr de vouloir supprimer {count} entreprises ? Cette action est définitive.",
-			"deleteSelectedSuccess": "{count} entreprises supprimées avec succès.",
-			"details": "Détails de l'entreprise",
-			"noAssociatedEntrepreneur": "Aucun entrepreneur associé.",
-			"add": "Ajouter une entreprise",
-			"addAriaLabel": "Naviguer pour ajouter une nouvelle entreprise",
-			"searchAriaLabel": "Rechercher des entreprises",
-			"noBusinessesFound": "Aucune entreprise trouvée",
-			"addFirst": "Ajoutez votre première entreprise",
-			"paginationReport": "Affichage de {first} à {last} sur {totalRecords} entreprises",
-			"viewAriaLabel": "Voir l'entreprise {name}",
-			"noMatch": "Aucune entreprise ne correspond à vos critères de recherche.",
-			"view": "Voir l'entreprise",
-			"edit_page": {
-				"loading": "Chargement de l'entreprise...",
-				"notFoundTitle": "Entreprise introuvable",
-				"notFoundDetail": "L'entreprise demandée est introuvable.",
-				"invalidRequestTitle": "Requête invalide",
-				"invalidRequestDetail": "Identifiant d'entreprise manquant ou invalide.",
-				"errorTitle": "Impossible de charger l'entreprise",
-				"errorDetail": "Une erreur inattendue s'est produite lors du chargement de l'entreprise."
-			}
-		},
-		"reports": {
-			"title": "Rapports",
-			"description": "Générez divers rapports pour les entrepreneurs et les entreprises.",
-			"generateEntrepreneurReport": "Générer le rapport des entrepreneurs",
-			"generateBusinessReport": "Générer le rapport des entreprises",
-			"entrepreneurReport": "Rapport des entrepreneurs",
-			"businessReport": "Rapport des entreprises"
-		}
 	},
 	"forms": {
 		"entrepreneur": {
@@ -278,6 +212,15 @@
 		"Low": "Faible",
 		"High": "Élevé"
 	},
+	"activity": {
+		"title": "Historique des activités",
+		"all": "Toutes les activités",
+		"supports": "Soutiens",
+		"quickWins": "Victoires rapides",
+		"noActivity": "Aucune activité enregistrée pour le moment.",
+		"noSupports": "Aucun soutien enregistré pour le moment.",
+		"noQuickWins": "Aucune victoire rapide enregistrée pour le moment."
+	},
 	"genderMarker": {
 		"GEN0": "GEN0 - Aucune contribution",
 		"GEN1": "GEN1 - Contribution limitée",
@@ -313,7 +256,8 @@
 		"selectArea": "Sélectionner une zone",
 		"selectOwners": "Sélectionner des propriétaires",
 		"registeredOnly": "Uniquement enregistrés",
-		"selectDate": "Sélectionnez une date"
+		"selectDate": "Sélectionnez une date",
+		"selectBusiness": "Sélectionner une entreprise"
 	},
 	"fields": {
 		"firstName": "prénom",
@@ -402,6 +346,196 @@
 		"measurement": "Mesure des résultats",
 		"noEvents": "Aucun événement enregistré pour le moment.",
 		"viewDetails": "Voir les détails"
+	},
+	"outputIndicator": {
+		"name": "Nom de l'indicateur",
+		"description": "Description",
+		"category": "Catégorie",
+		"unit": "Unité",
+		"irrfIndicatorCode": "Code IRRF",
+		"cpdOutputCode": "Code de produit CPD",
+		"sdgTargets": "Cibles ODD",
+		"createTitle": "Créer un nouvel indicateur",
+		"placeholders": {
+			"name": "ex. MPME formées en littératie financière",
+			"description": "Décrivez ce que cet indicateur mesure...",
+			"category": "Sélectionner une catégorie",
+			"unit": "Sélectionner une unité"
+		},
+		"categories": {
+			"capacity_development": "Développement des capacités",
+			"access_to_finance": "Accès au financement",
+			"market_access": "Accès au marché",
+			"policy_regulatory": "Politique et réglementation",
+			"innovation_sustainability": "Innovation et durabilité",
+			"digital_transformation": "Transformation numérique"
+		},
+		"units": {
+			"count": "Nombre (#)",
+			"percent": "Pourcentage (%)",
+			"boolean": "Oui/Non",
+			"hours": "Heures",
+			"currency": "Devise",
+			"index": "Indice/Score",
+			"text": "Texte"
+		},
+		"selector": {
+			"placeholder": "Rechercher ou créer un indicateur...",
+			"noResults": "Aucun indicateur trouvé",
+			"createNew": "Créer un nouvel indicateur"
+		},
+		"sections": {
+			"alignment": "Alignement PNUD (Optionnel)"
+		}
+	},
+	"support": {
+		"title": "Titre",
+		"titlePlaceholder": "ex. 'Subvention de démarrage numérique'",
+		"boostType": "Type",
+		"selectType": "Sélectionner le type",
+		"modality": "Modalité",
+		"selectModality": "Sélectionner la modalité",
+		"startDate": "Date de début",
+		"endDate": "Date de fin",
+		"channel": "Canal",
+		"selectChannel": "Sélectionner le canal",
+		"genderMarker": "Marqueur de genre",
+		"selectMarker": "Sélectionner le marqueur",
+		"provider": "Fournisseur",
+		"providerPlaceholder": "Unité PNUD ou partenaire",
+		"quantityValue": "Quantité / Valeur",
+		"value": "Valeur",
+		"valuePlaceholder": "Montant",
+		"unit": "Unité",
+		"selectUnit": "Sélectionner l'unité",
+		"currency": "Devise (ISO)",
+		"currencyPlaceholder": "ex. USD",
+		"notes": "Notes",
+		"notesPlaceholder": "Informations supplémentaires...",
+		"saveSupport": "Enregistrer le soutien",
+		"add": "Ajouter un soutien"
+	},
+	"quickWin": {
+		"title": "Titre",
+		"business": "Entreprise",
+		"supportBoost": "Soutien lié",
+		"achievedOn": "Réalisé le",
+		"resultSummary": "Résumé des résultats",
+		"indicators": "Indicateurs",
+		"tabs": {
+			"details": "Détails",
+			"rbmAlignment": "Alignement RBM",
+			"evidence": "Preuves"
+		},
+		"rbmCodes": "Codes RBM",
+		"rbmLevel": "Niveau RBM",
+		"cpdOutputCode": "Code de produit CPD",
+		"spOutputCode": "Code de produit SP",
+		"classificationsTargets": "Classifications et cibles",
+		"irrfIndicators": "Indicateurs IRRF",
+		"sdgTargets": "Cibles ODD",
+		"evidence": "Preuves et pièces jointes",
+		"addEvidence": "Ajouter une preuve",
+		"noEvidence": "Aucune preuve téléchargée",
+		"dragDropFiles": "Glissez-déposez les fichiers ici",
+		"orClickBrowse": "ou cliquez pour parcourir",
+		"addIndicator": "Ajouter un indicateur",
+		"noIndicators": "Aucun indicateur ajouté. Ajoutez-en un pour suivre les résultats.",
+		"baseline": "Référence",
+		"target": "Cible",
+		"currentValue": "Valeur actuelle",
+		"genderMarker": "Marqueur de genre",
+		"tags": "Étiquettes",
+		"add": "Ajouter une victoire rapide",
+		"linkedQuickWins": "Victoires rapides liées",
+		"noQuickWins": "Aucune victoire rapide enregistrée pour le moment.",
+		"sections": {
+			"advanced": "Détails avancés / RBM"
+		},
+		"placeholders": {
+			"title": "ex. Vitrine numérique lancée",
+			"business": "Sélectionner l'entreprise",
+			"resultSummary": "Décrivez ce qui a été réalisé...",
+			"selectSupport": "Sélectionner le soutien lié (optionnel)",
+			"indicatorNotes": "Notes...",
+			"genderMarker": "Sélectionner le marqueur de genre"
+		}
+	},
+	"pages": {
+		"supports": {
+			"title": "Interventions de soutien"
+		},
+		"dashboard": {
+			"totalEntrepreneurs": "Total des entrepreneurs",
+			"totalBusinesses": "Total des entreprises",
+			"quickAddEntrepreneur": "Ajouter rapidement un entrepreneur"
+		},
+		"entrepreneurs": {
+			"title": "Entrepreneurs",
+			"new": "Nouvel entrepreneur",
+			"edit": "Modifier l'entrepreneur",
+			"createSuccess": "Entrepreneur créé avec succès",
+			"updateSuccess": "Entrepreneur mis à jour avec succès",
+			"deleteSuccess": "Entrepreneur supprimé avec succès",
+			"deleteError": "Échec de la suppression de l'entrepreneur",
+			"deleteTitle": "Confirmer la suppression",
+			"deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet entrepreneur ? Cette action est définitive.",
+			"deleteSelectedConfirmation": "Êtes-vous sûr de vouloir supprimer {count} entrepreneurs ? Cette action est définitive.",
+			"deleteSelectedSuccess": "{count} entrepreneurs supprimés avec succès.",
+			"profile": "Profil de l'entrepreneur",
+			"associatedBusinesses": "Entreprises associées",
+			"noAssociatedBusinesses": "Aucune entreprise associée à cet entrepreneur.",
+			"add": "Ajouter un entrepreneur",
+			"addBusiness": "Ajouter une entreprise",
+			"quickAddSuccess": "Entrepreneur ajouté avec succès !"
+		},
+		"businesses": {
+			"title": "Entreprises",
+			"new": "Nouvelle entreprise",
+			"edit": "Modifier l'entreprise",
+			"createSuccess": "Entreprise créée avec succès",
+			"updateSuccess": "Entreprise mise à jour avec succès",
+			"deleteSuccess": "Entreprise supprimée avec succès",
+			"deleteError": "Échec de la suppression de l'entreprise",
+			"deleteTitle": "Confirmer la suppression",
+			"deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action est définitive.",
+			"deleteSelectedConfirmation": "Êtes-vous sûr de vouloir supprimer {count} entreprises ? Cette action est définitive.",
+			"deleteSelectedSuccess": "{count} entreprises supprimées avec succès.",
+			"details": "Détails de l'entreprise",
+			"noAssociatedEntrepreneur": "Aucun entrepreneur associé.",
+			"add": "Ajouter une entreprise",
+			"addAriaLabel": "Naviguer pour ajouter une nouvelle entreprise",
+			"searchAriaLabel": "Rechercher des entreprises",
+			"noBusinessesFound": "Aucune entreprise trouvée",
+			"addFirst": "Ajoutez votre première entreprise",
+			"paginationReport": "Affichage de {first} à {last} sur {totalRecords} entreprises",
+			"viewAriaLabel": "Voir l'entreprise {name}",
+			"noMatch": "Aucune entreprise ne correspond à vos critères de recherche.",
+			"view": "Voir l'entreprise",
+			"edit_page": {
+				"loading": "Chargement de l'entreprise...",
+				"notFoundTitle": "Entreprise introuvable",
+				"notFoundDetail": "L'entreprise demandée est introuvable.",
+				"invalidRequestTitle": "Requête invalide",
+				"invalidRequestDetail": "Identifiant d'entreprise manquant ou invalide.",
+				"errorTitle": "Impossible de charger l'entreprise",
+				"errorDetail": "Une erreur inattendue s'est produite lors du chargement de l'entreprise."
+			}
+		},
+		"reports": {
+			"title": "Rapports",
+			"description": "Générez divers rapports pour les entrepreneurs et les entreprises.",
+			"generateEntrepreneurReport": "Générer le rapport des entrepreneurs",
+			"generateBusinessReport": "Générer le rapport des entreprises",
+			"entrepreneurReport": "Rapport des entrepreneurs",
+			"businessReport": "Rapport des entreprises"
+		},
+		"quickWins": {
+			"title": "Victoires rapides",
+			"new": "Nouvelle victoire rapide",
+			"edit": "Modifier la victoire rapide",
+			"detail": "Détails de la victoire rapide"
+		}
 	},
 	"reporting": {
 		"filters": {

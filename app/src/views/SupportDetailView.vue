@@ -137,6 +137,17 @@
           </div>
         </div>
 
+        <!-- Quick Wins Section -->
+        <div class="mb-4">
+          <QuickWinTimeline 
+            :quick-wins="linkedQuickWins" 
+            :title="$t('quickWin.linkedQuickWins', 'Linked Quick Wins')"
+            @add="addQuickWin"
+            @view="(id) => router.push(`/quick-wins/${id}`)"
+            @edit="(id) => router.push(`/quick-wins/${id}/edit`)"
+          />
+        </div>
+
         <!-- Metadata -->
         <div class="border-top-1 surface-border pt-3 mt-4">
           <div class="flex justify-content-between text-sm text-500">
@@ -164,23 +175,28 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSupportStore } from '@/stores/useSupportStore';
 import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Message from 'primevue/message';
+import QuickWinTimeline from '@/components/monitoring-evaluation/QuickWinTimeline.vue';
 import type { Support } from '@/types/monitoring-evaluation/Support';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
 const route = useRoute();
 const router = useRouter();
 const supportStore = useSupportStore();
 const businessStore = useBusinessStore();
+const quickWinStore = useQuickWinStore();
 const { showConfirmation } = useConfirmation();
 const toast = useToast();
 
 const supportId = route.params.id as string;
 const loading = ref(true);
 const support = ref<Support | undefined>();
+const linkedQuickWins = ref<QuickWin[]>([]);
 
 const business = computed(() => {
   if (!support.value) return null;
@@ -193,6 +209,7 @@ onMounted(async () => {
     await Promise.all([
       loadSupport(),
       businessStore.fetchAll(),
+      loadQuickWins()
     ]);
   } finally {
     loading.value = false;
@@ -201,6 +218,16 @@ onMounted(async () => {
 
 async function loadSupport() {
   support.value = await supportStore.getSupportById(supportId);
+}
+
+async function loadQuickWins() {
+  linkedQuickWins.value = await quickWinStore.getQuickWinsBySupportId(supportId);
+}
+
+function addQuickWin() {
+  if (support.value) {
+    router.push(`/quick-wins/new?businessId=${support.value.businessId}&supportBoostId=${supportId}`);
+  }
 }
 
 function formatDate(dateString: string | undefined) {

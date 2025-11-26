@@ -79,6 +79,26 @@ const router = createRouter({
 			component: () => import("../views/SupportDetailView.vue"),
 		},
 		{
+			path: "/quick-wins",
+			name: "quick-win-list",
+			component: () => import("../views/QuickWinListView.vue"),
+		},
+		{
+			path: "/quick-wins/new",
+			name: "quick-win-new",
+			component: () => import("../views/QuickWinCreateView.vue"),
+		},
+		{
+			path: "/quick-wins/:id",
+			name: "quick-win-detail",
+			component: () => import("../views/QuickWinDetailView.vue"),
+		},
+		{
+			path: "/quick-wins/:id/edit",
+			name: "quick-win-edit",
+			component: () => import("../views/QuickWinEditView.vue"),
+		},
+		{
 			path: "/dev-tools",
 			name: "dev-tools",
 			component: () => import("../views/DevToolsView.vue"),

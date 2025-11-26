@@ -5,6 +5,8 @@ import type { Business } from "@/types/business";
 import type { MaturityAssessment } from "@/types/monitoring-evaluation/Maturity";
 import type { Support } from "@/types/monitoring-evaluation/Support";
 import type { IndicatorDefinition, Measurement } from "@/types/monitoring-evaluation/Indicator";
+import type { OutputIndicator } from "@/types/monitoring-evaluation/OutputIndicator";
+import type { QuickWin } from "@/types/monitoring-evaluation/QuickWin";
 
 // Dexie DB class
 export class LocalDB extends Dexie {
@@ -16,11 +18,13 @@ export class LocalDB extends Dexie {
   indicatorDefinitions!: Table<IndicatorDefinition, string>;
   measurements!: Table<Measurement, string>;
   evidenceFiles!: Table<{ id: string; data: string; type: string; name: string }, string>;
+  outputIndicators!: Table<OutputIndicator, string>;
+  quickWins!: Table<QuickWin, string>;
 
   constructor() {
     super("BusinessTrackerDB");
 
-    this.version(3).stores({
+    this.version(4).stores({
       entrepreneurs: "&id, slug, contact.email",
       businesses: "&id, entrepreneurId",
       avatars: "&id",
@@ -29,6 +33,8 @@ export class LocalDB extends Dexie {
       indicatorDefinitions: "&id, businessId",
       measurements: "&id, indicatorId",
       evidenceFiles: "&id",
+      outputIndicators: "&id, name, category, isStandard, usageCount",
+      quickWins: "&id, businessId, supportBoostId, achievedOn, createdAt",
     });
   }
 }

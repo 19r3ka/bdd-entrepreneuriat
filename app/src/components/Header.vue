@@ -39,6 +39,11 @@
             <span>{{ $t('common.supports') }}</span>
           </router-link>
         </li>
+        <li class="mx-3">
+          <router-link to="/quick-wins" v-ripple class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900">
+            <span>{{ $t('pages.quickWins.title') }}</span>
+          </router-link>
+        </li>
         <li class="mx-3" v-if="isDev">
           <router-link to="/dev-tools" v-ripple class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900">
             <span>Dev Tools</span>

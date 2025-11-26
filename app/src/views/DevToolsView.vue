@@ -26,6 +26,12 @@
               <small class="text-500">(distributed among businesses)</small>
             </div>
             
+            <div class="flex align-items-center gap-2">
+              <label for="quickWinCount" class="font-semibold w-10rem">Quick Wins:</label>
+              <InputNumber v-model="quickWinCount" inputId="quickWinCount" :min="0" :max="200" showButtons />
+              <small class="text-500">(~1.5 per business)</small>
+            </div>
+            
             <div class="flex align-items-center gap-2 mt-2">
               <Checkbox v-model="clearDb" binary inputId="clearDb" />
               <label for="clearDb">Clear existing database before seeding</label>
@@ -46,11 +52,12 @@
         <div class="mb-6">
           <h3>Database Info</h3>
           <p><strong>Database Name:</strong> BusinessTrackerDB</p>
-          <p><strong>Version:</strong> 3</p>
+          <p><strong>Version:</strong> 4</p>
           <p class="text-600 text-sm mt-2">
             <i class="pi pi-info-circle mr-1"></i>
             Businesses are randomly distributed among entrepreneurs (some may have 0, 1, or 2+).
             Supports are randomly distributed among businesses (not all businesses will be supported).
+            Quick Wins are generated with linked indicators and may be linked to supports.
           </p>
         </div>
       </div>
@@ -70,6 +77,7 @@ const toast = useToast();
 const entrepreneurCount = ref(10);
 const businessCount = ref(15);
 const supportCount = ref(10);
+const quickWinCount = ref(20);
 const clearDb = ref(false);
 const seeding = ref(false);
 
@@ -80,10 +88,11 @@ const handleSeed = async () => {
       entrepreneurCount: entrepreneurCount.value,
       businessCount: businessCount.value,
       supportCount: supportCount.value,
+      quickWinCount: quickWinCount.value,
       clear: clearDb.value,
     });
     
-    let detail = `Generated ${result.entrepreneurs} entrepreneurs, ${result.businesses} businesses, and ${result.supports} support boosts.`;
+    let detail = `Generated ${result.entrepreneurs.length} entrepreneurs, ${result.businesses.length} businesses, ${result.supports.length} supports, and ${result.quickWins.length} quick wins.`;
     if (result.errors && result.errors.length > 0) {
       detail += ` (${result.errors.length} validation errors - check console)`;
       console.warn('Seeding validation errors:', result.errors);

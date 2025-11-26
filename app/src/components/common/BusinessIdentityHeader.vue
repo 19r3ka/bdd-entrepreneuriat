@@ -3,7 +3,7 @@
   import { useRouter } from 'vue-router'
   import SplitButton from 'primevue/splitbutton'
   import Tag from 'primevue/tag'
-  import Avatar from 'primevue/avatar'
+  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
   import type { Business } from '@/types/business'
   import type { Entrepreneur } from '@/types/entrepreneur'
 
@@ -59,12 +59,13 @@
     >
       <div class="flex align-items-start gap-4">
         <div class="relative">
-          <img
-            :src="business.avatar || '/placeholder-biz.png'"
-            class="w-5rem h-5rem md:w-7rem md:h-7rem border-round-xl object-cover border-1 border-200 shadow-1"
-            alt="Logo"
+          <AvatarDisplay
+            :src="business.avatar || undefined"
+            :label="business.name"
+            shape="square"
+            class="w-5rem h-5rem md:w-7rem md:h-7rem border-round-xl object-cover border-1 border-200 shadow-1 text-3xl"
           />
-          <div class="absolute -bottom-2 -right-2">
+          <div class="absolute -bottom-2 -right-2 z-1">
             <Tag :severity="statusSeverity" value="ACTIVE" class="text-xs" />
           </div>
         </div>
@@ -74,13 +75,10 @@
 
           <div class="flex flex-wrap align-items-center gap-3 text-sm text-600">
             <Tag
-              :value="business.primaryBusinessArea"
+              :value="$t(`businessAreas.${business.primaryBusinessArea}`)"
               class="bg-primary-50 text-primary-700 px-2 py-1 border-round-md text-xs font-medium border-none"
             />
-            <div v-if="business.location?.address" class="flex align-items-center gap-1">
-              <i class="pi pi-map-marker text-xs"></i>
-              <span>{{ business.location.address }}</span>
-            </div>
+            <!-- Address removed as it is not in the schema -->
           </div>
 
           <div
@@ -90,7 +88,12 @@
           >
             <span class="text-xs text-500 uppercase font-medium">Owned by:</span>
             <div class="flex align-items-center gap-2">
-              <Avatar :image="entrepreneur.avatar" shape="circle" size="normal" />
+              <AvatarDisplay 
+                :src="entrepreneur.avatar || undefined" 
+                :label="entrepreneur.firstName + ' ' + entrepreneur.lastName"
+                shape="circle" 
+                size="normal" 
+              />
               <span class="text-sm font-bold text-800"
                 >{{ entrepreneur.firstName }} {{ entrepreneur.lastName }}</span
               >
