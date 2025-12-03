@@ -46,4 +46,6 @@ export const BusinessSchema = z.object({
 			z.null(),
 		])
 		.optional(),
+
+    maturityLevels: z.record(z.string(), z.number()).optional(),
 });

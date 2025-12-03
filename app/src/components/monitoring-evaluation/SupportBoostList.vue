@@ -27,6 +27,9 @@
     <template #col-quantity="{ data }">
       {{ formatQuantity(data.quantity) }}
     </template>
+    <template #append-actions="{ data }">
+      <slot name="append-actions" :data="data"></slot>
+    </template>
   </ResourceDataTable>
 </template>
 
@@ -38,6 +41,7 @@ import { useSupportStore } from '@/stores/useSupportStore';
 import { useBusinessStore } from '@/stores/useBusinessStore';
 import { useRouter } from 'vue-router';
 import type { Support } from '@/types/monitoring-evaluation/Support';
+import { useConfirmation } from '@/composables/useConfirmation';
 
 const router = useRouter();
 const supportStore = useSupportStore();
@@ -73,7 +77,7 @@ const columns = [
 onMounted(async () => {
   loading.value = true;
   await Promise.all([
-    supportStore.getAllSupports(),
+    supportStore.fetchAll(),
     businessStore.fetchAll(), // Ensure businesses are loaded for name lookup
   ]);
   loading.value = false;
@@ -106,8 +110,15 @@ function onEdit(id: string) {
   emit('edit', id);
 }
 
+const { confirmDelete } = useConfirmation();
+
 function onDelete(id: string) {
-  supportStore.deleteSupport(id);
+  const support = supports.value.find(s => s.id === id);
+  const name = support?.title || 'Support';
+
+  confirmDelete(name, async () => {
+    await supportStore.deleteSupport(id);
+  });
 }
 
 const emit = defineEmits<{

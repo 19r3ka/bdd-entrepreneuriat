@@ -1,5 +1,5 @@
 <template>
-  <div class="map-container">
+  <div class="map-container" :style="containerStyle">
     <div v-if="showOverlay" class="no-location-overlay">
       <span>Location not set</span>
     </div>
@@ -21,7 +21,7 @@
           </li>
         </ul>
       </div>
-      <l-map ref="mapRef" :zoom="zoom" :center="center" @ready="onMapReady">
+      <l-map ref="mapRef" :zoom="zoom" :center="center" @ready="onMapReady" style="height: 100%; width: 100%">
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           layer-type="base"
@@ -61,11 +61,13 @@
    * @property {number} lat - Latitude of the location.
    * @property {number} lng - Longitude of the location.
    * @property {string} name - Name or description of the location.
+   * @property {string} [address] - Address of the location.
    */
   interface Location {
     lat: number
     lng: number
     name: string
+    address?: string
   }
 
   /**
@@ -89,10 +91,15 @@
    * @property {Location[]} locations - An array of locations to display on the map. In editable mode, only the first location is used for the draggable marker.
    * @property {boolean} isEditable - If true, enables address search and a draggable marker.
    */
-  const props = defineProps<{
+  const props = withDefaults(defineProps<{
     locations: Location[]
     isEditable: boolean
-  }>()
+    height?: string
+    width?: string
+  }>(), {
+    height: '400px',
+    width: '100%'
+  })
 
   /**
    * @event update:location
@@ -106,7 +113,7 @@
    * @description Emitted when reverse geocoding completes for a new location.
    * @property {string} address - The reverse geocoded address.
    */
-  const emit = defineEmits(['update:location', 'update:address'])
+  const emit = defineEmits(['update:location', 'update:address', 'update:bounds'])
 
   const zoom = ref(2)
   const center = ref([47.41322, -1.219482])
@@ -116,6 +123,11 @@
 
   const searchQuery = ref('')
   const searchResults = ref<GeocodeResult[]>([])
+
+  const containerStyle = computed(() => ({
+    height: props.height,
+    width: props.width
+  }))
 
   const hasLocations = computed(() => props.locations && props.locations.length > 0 && props.locations.some(loc => loc.lat != null && loc.lng != null));
   const showOverlay = computed(() => !props.isEditable && !hasLocations.value);
@@ -177,7 +189,7 @@
   const onMapReady = () => {
     if (mapRef.value && mapRef.value.leafletObject) {
       if (props.isEditable) {
-        // Add a single draggable marker for editing
+        // ... (editable logic remains same)
         const initialLatLng =
           props.locations.length > 0
             ? L.latLng(props.locations[0].lat, props.locations[0].lng)
@@ -191,7 +203,6 @@
         editableMarker.on('dragend', async (event) => {
           const newLatLng = event.target.getLatLng()
           emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng })
-          // Reverse geocode to get address
           try {
             const address = await reverseGeocode(newLatLng.lat, newLatLng.lng)
             emit('update:address', address)
@@ -200,12 +211,10 @@
           }
         })
 
-        // Add map click listener to move marker
         mapRef.value.leafletObject.on('click', async (e: L.LeafletMouseEvent) => {
           if (editableMarker) {
             editableMarker.setLatLng(e.latlng);
             emit('update:location', { lat: e.latlng.lat, lng: e.latlng.lng });
-            // Reverse geocode to get address
             try {
               const address = await reverseGeocode(e.latlng.lat, e.latlng.lng)
               emit('update:address', address)
@@ -215,14 +224,44 @@
           }
         });
 
-        // Adjust map center to initial editable marker
         center.value = [initialLatLng.lat, initialLatLng.lng]
-        zoom.value = 14 // Zoom in for better editing experience
+        zoom.value = 14
       } else {
-        // For view-only mode, use marker cluster group
+        // For view-only mode
         markerClusterGroup = L.markerClusterGroup()
         mapRef.value.leafletObject.addLayer(markerClusterGroup)
         updateMarkers(props.locations)
+        
+        // Center and Zoom if locations exist
+        if (props.locations.length > 0) {
+            if (props.locations.length === 1) {
+                const loc = props.locations[0];
+                center.value = [loc.lat, loc.lng];
+                zoom.value = 13; // Zoom to show context, not max zoom
+                mapRef.value.leafletObject.setView([loc.lat, loc.lng], 13);
+            } else {
+                const bounds = L.latLngBounds(props.locations.map(l => [l.lat, l.lng]));
+                mapRef.value.leafletObject.fitBounds(bounds, { 
+                  padding: [50, 50],
+                  maxZoom: 12 // Don't zoom in too close on clusters
+                });
+            }
+        }
+        // Emit initial bounds
+        if (props.locations.length > 0) {
+            // Wait for next tick or animation frame to ensure map is sized
+            setTimeout(() => {
+                if (mapRef.value && mapRef.value.leafletObject) {
+                    const bounds = mapRef.value.leafletObject.getBounds();
+                    emit('update:bounds', bounds);
+                }
+            }, 500);
+        }
+
+        mapRef.value.leafletObject.on('moveend', () => {
+            const bounds = mapRef.value.leafletObject.getBounds();
+            emit('update:bounds', bounds);
+        });
       }
     }
   }
@@ -238,7 +277,17 @@
       markerClusterGroup.clearLayers()
       locations.forEach((loc) => {
         const marker = L.marker([loc.lat, loc.lng])
-        marker.bindPopup(`<b>${loc.name}</b>`)
+        // Display address if available, otherwise name
+        const popupContent = loc.address ? `<b>${loc.name}</b><br>${loc.address}` : `<b>${loc.name}</b>`;
+        marker.bindPopup(popupContent)
+        
+        // Zoom to marker on click
+        marker.on('click', () => {
+            if (mapRef.value && mapRef.value.leafletObject) {
+                mapRef.value.leafletObject.setView([loc.lat, loc.lng], 18); // Max zoom
+            }
+        });
+
         markerClusterGroup?.addLayer(marker)
       })
     }
@@ -251,17 +300,33 @@
   watch(
     () => props.locations,
     (newLocations) => {
-      // Only update markers if not in editable mode, as editable mode has its own marker
       if (!props.isEditable) {
         updateMarkers(newLocations)
+        // Update center and zoom if locations change in view-only mode
+        if (newLocations.length > 0) {
+            if (newLocations.length === 1) {
+                const loc = newLocations[0];
+                center.value = [loc.lat, loc.lng];
+                zoom.value = 13;
+                if (mapRef.value && mapRef.value.leafletObject) {
+                    mapRef.value.leafletObject.setView([loc.lat, loc.lng], 13);
+                }
+            } else {
+                if (mapRef.value && mapRef.value.leafletObject) {
+                    const bounds = L.latLngBounds(newLocations.map(l => [l.lat, l.lng]));
+                    mapRef.value.leafletObject.fitBounds(bounds, { 
+                      padding: [50, 50],
+                      maxZoom: 12
+                    });
+                }
+            }
+        }
       } else if (newLocations.length > 0) {
-        // If in editable mode and locations change, update the single editable marker
-        // This is useful if the initial location comes from an external source after component load
+        // ... (editable update logic remains same)
         if (mapRef.value && mapRef.value.leafletObject) {
           if (editableMarker) {
             editableMarker.setLatLng(L.latLng(newLocations[0].lat, newLocations[0].lng))
           } else {
-            // Should ideally not happen if onMapReady correctly initializes
             editableMarker = L.marker([newLocations[0].lat, newLocations[0].lng], {
               draggable: true,
               autoPan: true
@@ -282,9 +347,8 @@
 
 <style scoped>
   .map-container {
-    height: 400px;
-    width: 100%;
     position: relative; /* Needed for absolute positioning of search results */
+    z-index: 1;
   }
 
   .no-location-overlay {
@@ -342,5 +406,47 @@
 
   .search-results li:hover {
     background-color: #f0f0f0;
+  }
+
+  /* Fix for Marker Clusters */
+  :deep(.marker-cluster-small) {
+    background-color: rgba(181, 226, 140, 0.6);
+  }
+  :deep(.marker-cluster-small div) {
+    background-color: rgba(110, 204, 57, 0.6);
+  }
+  :deep(.marker-cluster-medium) {
+    background-color: rgba(241, 211, 87, 0.6);
+  }
+  :deep(.marker-cluster-medium div) {
+    background-color: rgba(240, 194, 12, 0.6);
+  }
+  :deep(.marker-cluster-large) {
+    background-color: rgba(253, 156, 115, 0.6);
+  }
+  :deep(.marker-cluster-large div) {
+    background-color: rgba(241, 128, 23, 0.6);
+  }
+
+  :deep(.marker-cluster) {
+    background-clip: padding-box;
+    border-radius: 20px;
+  }
+  :deep(.marker-cluster div) {
+    width: 30px;
+    height: 30px;
+    margin-left: 5px;
+    margin-top: 5px;
+    text-align: center;
+    border-radius: 15px;
+    font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+  }
+  :deep(.marker-cluster span) {
+    line-height: 30px;
   }
 </style>

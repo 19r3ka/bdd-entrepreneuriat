@@ -31,7 +31,7 @@ export const useSupportStore = defineStore('support', {
       return await db.supports.get(id);
     },
 
-    async getAllSupports(): Promise<Support[]> {
+    async fetchAll(): Promise<Support[]> {
       this.supports = await db.supports.toArray();
       return this.supports;
     },

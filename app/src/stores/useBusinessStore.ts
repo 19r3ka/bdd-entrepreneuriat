@@ -1,6 +1,6 @@
 // src/stores/useBusinessStore.ts
 import { defineStore } from 'pinia';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { z } from 'zod';
 import { useCrudStore } from '@/composables/useCrudStore';
 import { BusinessSchema } from '@/schemas/business';
@@ -8,6 +8,7 @@ import { db } from '@/services/local-db';
 import type { Business } from '@/types/business';
 import { isProfileCompletedStrict } from '@/utils/schemaCompletion';
 import { useEntrepreneurStore } from './useEntrepreneurStore';
+import { useActivityLogStore } from './useActivityLogStore';
 
 // Schema-derived types
 type BusinessInput = z.input<typeof BusinessSchema>; // raw persisted shape
@@ -15,11 +16,15 @@ type BusinessBase = z.output<typeof BusinessSchema>; // parsed shape
 
 export const useBusinessStore = defineStore('business', () => {
 	// CRUD store works with raw persisted input
-	const crudStore = useCrudStore<BusinessInput>({
+    // We cast to any to avoid strict type mismatch between Zod output and T constraint
+    // The store internally handles the difference via parsedBusinesses
+	const crudStore = useCrudStore<any>({
 		schema: BusinessSchema,
 		tableName: 'businesses',
 		db,
 	});
+
+    const validationError = ref<string | null>(null);
 
 	const {
 		items: rawBusinessRecords,
@@ -34,11 +39,25 @@ export const useBusinessStore = defineStore('business', () => {
 	} = crudStore;
 
 	const entrepreneurStore = useEntrepreneurStore();
+    const activityLogStore = useActivityLogStore();
 
 	// Parse raw records into schema-validated objects
-	const parsedBusinesses = computed<BusinessBase[]>(() =>
-		rawBusinessRecords.value.map((rawRecord) => BusinessSchema.parse(rawRecord)),
-	);
+	const parsedBusinesses = computed<BusinessBase[]>(() => {
+        validationError.value = null; // Reset error
+		return rawBusinessRecords.value
+            .map((rawRecord: any) => {
+                try {
+                    return BusinessSchema.parse(rawRecord);
+                } catch (err) {
+                    console.error('Business validation failed for record:', rawRecord, err);
+                    if (!validationError.value) {
+                        validationError.value = `Validation failed: ${err instanceof Error ? err.message : String(err)}`;
+                    }
+                    return null;
+                }
+            })
+            .filter((b: any): b is BusinessBase => b !== null);
+    });
 
 	// Enrich parsed businesses with entrepreneur info and computed flags
 	const businesses = computed<Business[]>(() =>
@@ -82,11 +101,11 @@ export const useBusinessStore = defineStore('business', () => {
 		secondaryBusinessArea: business.secondaryBusinessArea,
 		socialMedia: business.socialMedia
 			? {
-					linkedin: business.socialMedia.linkedin ?? null,
-					twitter: business.socialMedia.twitter ?? null,
-					facebook: business.socialMedia.facebook ?? null,
-					tiktok: business.socialMedia.tiktok ?? null,
-					instagram: business.socialMedia.instagram ?? null,
+					linkedin: business.socialMedia.linkedin ?? undefined,
+					twitter: business.socialMedia.twitter ?? undefined,
+					facebook: business.socialMedia.facebook ?? undefined,
+					tiktok: business.socialMedia.tiktok ?? undefined,
+					instagram: business.socialMedia.instagram ?? undefined,
 				}
 			: undefined,
 		registrationNumber: business.registrationNumber,
@@ -132,11 +151,20 @@ export const useBusinessStore = defineStore('business', () => {
 
 	const add = async (business: Business): Promise<void> => {
 		await addRaw(toBusinessInput(business));
+        await activityLogStore.logAction('create', 'business', business.id || 'unknown', business.name);
 	};
 
 	const update = async (business: Business): Promise<void> => {
 		await updateRaw(toBusinessInput(business));
+        await activityLogStore.logAction('update', 'business', business.id || 'unknown', business.name);
 	};
+
+    const removeWithLog = async (id: string): Promise<void> => {
+        const business = getById(id);
+        const name = business?.name || 'Unknown Business';
+        await remove(id);
+        await activityLogStore.logAction('delete', 'business', id, name);
+    };
 
 	const getById = (id: string): Business | undefined => businesses.value.find((b) => b.id === id);
 
@@ -159,11 +187,12 @@ export const useBusinessStore = defineStore('business', () => {
 		fetchOne,
 		add,
 		update,
-		remove,
+		remove: removeWithLog,
 		removeMany,
 		getById,
 		getByRegistrationNumber,
 		getByEmail,
 		searchByName,
+        validationError,
 	};
 });

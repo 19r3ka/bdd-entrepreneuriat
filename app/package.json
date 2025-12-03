@@ -21,6 +21,7 @@
 		"@supabase/supabase-js": "^2.78.0",
 		"@vue-leaflet/vue-leaflet": "^0.10.1",
 		"@vueuse/core": "^14.0.0",
+		"chart.js": "^4.5.1",
 		"dexie": "^4.2.1",
 		"leaflet": "^1.9.4",
 		"leaflet.markercluster": "^1.5.3",

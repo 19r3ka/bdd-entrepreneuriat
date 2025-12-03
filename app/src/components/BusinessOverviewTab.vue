@@ -20,7 +20,8 @@
   // Helper functions internal to this display component
   function getBusinessAreaName(code?: string) {
     if (!code) return t('common.notAvailable')
-    return BUSINESS_AREA_MAP[code] || code
+    const area = BUSINESS_AREA_MAP.find(a => a.code === code)
+    return area ? area.name : code
   }
 
   function formatDate(date: string | Date | undefined): string {
@@ -114,7 +115,7 @@
         </template>
       </Card>
 
-      <SocialMediaCard :title="$t('common.onlinePresence')" :socials="socials" />
+      <SocialMediaCard :title="$t('common.socialMedia.title')" :socials="socials" />
     </div>
 
     <div class="col-12 lg:col-4">
@@ -123,8 +124,8 @@
           :title="$t('common.contactInformation')"
           :email="business.contact?.email"
           :telephone="business.contact?.telephone"
-          :address="business.address"
-          :website="business.website"
+          :address="business.location?.address"
+          :website="business.socialMedia?.website"
         />
       </div>
     </div>

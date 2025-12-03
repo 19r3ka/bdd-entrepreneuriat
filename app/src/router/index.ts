@@ -3,7 +3,7 @@ import BusinessDetailView from "../views/BusinessDetailView.vue";
 import BusinessListView from "../views/BusinessListView.vue";
 import EntrepreneurDetailView from "../views/EntrepreneurDetailView.vue";
 import EntrepreneurListView from "../views/EntrepreneurListView.vue";
-import HomeView from "../views/HomeView.vue";
+import PortfolioDashboardView from "../views/PortfolioDashboardView.vue";
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,7 +11,7 @@ const router = createRouter({
 		{
 			path: "/",
 			name: "home",
-			component: HomeView,
+			component: PortfolioDashboardView,
 		},
 		{
 			path: "/entrepreneurs",

@@ -12,6 +12,9 @@ export type QuickWin = {
     businessId: string;
     supportBoostId?: string;
     title: string;
+    category: 'digital_adoption' | 'finance_access' | 'market_integration' | 'innovation' | 'performance' | 'employment_inclusion' | 'resilience' | 'sustainability';
+    dimension?: string;
+    milestone?: number;
     resultSummary: string;
     achievedOn: string;
     rbmLevel: "output";

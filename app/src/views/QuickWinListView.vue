@@ -27,7 +27,7 @@ const store = useQuickWinStore();
 const quickWins = ref<QuickWin[]>([]);
 
 onMounted(async () => {
-  quickWins.value = await store.getAllQuickWins();
+  quickWins.value = await store.fetchAll();
 });
 
 const createQuickWin = () => {

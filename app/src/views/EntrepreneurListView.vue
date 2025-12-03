@@ -110,14 +110,12 @@ const EditEntrepreneur = (id: string) => router.push(`/entrepreneurs/${id}/edit`
 
 /** Delete confirmations using extended useConfirmation */
 const confirmDelete = (id: string) => {
-	confirmDeleteEntrepreneur('Entrepreneur', async () => {
+    const entrepreneur = entrepreneurs.value.find(e => e.id === id);
+    const name = entrepreneur ? `${entrepreneur.firstName} ${entrepreneur.lastName}` : t('common.entrepreneur');
+
+	confirmDeleteEntrepreneur(name, async () => {
 		try {
 			await store.remove(id);
-			toast.add({
-				severity: 'success',
-				summary: t('pages.entrepreneurs.deleteSuccess'),
-				life: 3000,
-			});
 		} catch {
 			toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 });
 		}
@@ -128,11 +126,6 @@ const confirmDeleteSelected = (ids: string[]) => {
 	confirmDeleteSelectedEntrepreneurs('Entrepreneur', ids.length, async () => {
 		try {
 			await store.removeMany(ids);
-			toast.add({
-				severity: 'success',
-				summary: t('pages.entrepreneurs.deleteSelectedSuccess', { count: ids.length }),
-				life: 3000,
-			});
 		} catch {
 			toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 });
 		}

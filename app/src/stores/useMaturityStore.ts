@@ -1,55 +1,76 @@
 import { defineStore } from 'pinia';
-import { db } from '@/services/local-db';
-import type { MaturityAssessment } from '@/types/monitoring-evaluation/Maturity';
-import { v4 as uuidv4 } from 'uuid';
+import { ref, computed } from 'vue';
+import { MaturityCatalog, MaturityDimensions, type MaturityDimension, type MilestoneDefinition } from '@/constants/maturityCatalog';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import { useQuickWinStore } from './useQuickWinStore';
 
-interface MaturityState {
-  assessments: MaturityAssessment[];
-}
+export const useMaturityStore = defineStore('maturity', () => {
+  const quickWinStore = useQuickWinStore();
 
-export const useMaturityStore = defineStore('maturity', {
-  state: (): MaturityState => ({
-    assessments: [],
-  }),
-  actions: {
-    async addMaturityAssessment(assessment: Omit<MaturityAssessment, 'id' | 'createdAt' | 'updatedAt'>): Promise<MaturityAssessment> {
-      const newAssessment: MaturityAssessment = {
-        ...assessment,
-        id: uuidv4(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      await db.maturityAssessments.add(newAssessment);
-      this.assessments.push(newAssessment);
-      return newAssessment;
-    },
+  // State
+  // We don't strictly need state if we compute everything from QuickWins, 
+  // but caching could be useful if calculation is heavy. For now, computed is fine.
 
-    async getMaturityAssessmentById(id: string): Promise<MaturityAssessment | undefined> {
-      return await db.maturityAssessments.get(id);
-    },
+  // Getters
+  const getMaturityLevels = (quickWins: QuickWin[]) => {
+    const levels: Record<MaturityDimension, number> = {
+      Digital: 0,
+      Finance: 0,
+      Market: 0,
+      Green: 0,
+      Formalization: 0
+    };
 
-    async getMaturityAssessmentByBusinessId(businessId: string): Promise<MaturityAssessment | undefined> {
-        const assessments = await db.maturityAssessments.where({ businessId }).toArray();
-        // Assuming one assessment per business for now
-        return assessments[0];
-    },
-
-    async getAllMaturityAssessments(): Promise<MaturityAssessment[]> {
-      this.assessments = await db.maturityAssessments.toArray();
-      return this.assessments;
-    },
-
-    async updateMaturityAssessment(id: string, updates: Partial<Omit<MaturityAssessment, 'id' | 'createdAt'>>): Promise<void> {
-      await db.maturityAssessments.update(id, { ...updates, updatedAt: new Date() });
-      const index = this.assessments.findIndex(a => a.id === id);
-      if (index !== -1) {
-        Object.assign(this.assessments[index], { ...updates, updatedAt: new Date() });
+    quickWins.forEach(qw => {
+      if (qw.dimension && qw.milestone) {
+        // Cast string to specific union type if needed, or rely on validation
+        const dim = qw.dimension as MaturityDimension;
+        if (MaturityDimensions.includes(dim)) {
+          if (qw.milestone > levels[dim]) {
+            levels[dim] = qw.milestone;
+          }
+        }
       }
-    },
+    });
 
-    async deleteMaturityAssessment(id: string): Promise<void> {
-      await db.maturityAssessments.delete(id);
-      this.assessments = this.assessments.filter(a => a.id !== id);
-    },
-  },
+    return levels;
+  };
+
+  const getNextMilestones = (quickWins: QuickWin[]) => {
+    const currentLevels = getMaturityLevels(quickWins);
+    const suggestions: { dimension: MaturityDimension; milestone: MilestoneDefinition }[] = [];
+
+    MaturityDimensions.forEach(dim => {
+      const currentLevel = currentLevels[dim];
+      const nextLevel = currentLevel + 1;
+      const milestoneDef = MaturityCatalog[dim].find(m => m.level === nextLevel);
+
+      if (milestoneDef) {
+        suggestions.push({
+          dimension: dim,
+          milestone: milestoneDef
+        });
+      }
+    });
+
+    return suggestions;
+  };
+
+  const getOverallMaturityScore = (quickWins: QuickWin[]) => {
+    const levels = getMaturityLevels(quickWins);
+    let totalScore = 0;
+    const maxScore = MaturityDimensions.length * 4; // 5 dimensions * 4 levels
+
+    Object.values(levels).forEach(level => {
+      totalScore += level;
+    });
+
+    return Math.round((totalScore / maxScore) * 100);
+  };
+
+  return {
+    getMaturityLevels,
+    getNextMilestones,
+    getOverallMaturityScore
+  };
 });

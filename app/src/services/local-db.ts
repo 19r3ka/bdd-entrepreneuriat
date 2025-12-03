@@ -7,6 +7,8 @@ import type { Support } from "@/types/monitoring-evaluation/Support";
 import type { IndicatorDefinition, Measurement } from "@/types/monitoring-evaluation/Indicator";
 import type { OutputIndicator } from "@/types/monitoring-evaluation/OutputIndicator";
 import type { QuickWin } from "@/types/monitoring-evaluation/QuickWin";
+import type { MomentumMetric } from "@/types/monitoring-evaluation/MomentumMetric";
+import type { ActivityLog } from "@/types/ActivityLog";
 
 // Dexie DB class
 export class LocalDB extends Dexie {
@@ -20,6 +22,8 @@ export class LocalDB extends Dexie {
   evidenceFiles!: Table<{ id: string; data: string; type: string; name: string }, string>;
   outputIndicators!: Table<OutputIndicator, string>;
   quickWins!: Table<QuickWin, string>;
+  momentumMetrics!: Table<MomentumMetric, string>;
+  activityLogs!: Table<ActivityLog, string>;
 
   constructor() {
     super("BusinessTrackerDB");
@@ -35,6 +39,14 @@ export class LocalDB extends Dexie {
       evidenceFiles: "&id",
       outputIndicators: "&id, name, category, isStandard, usageCount",
       quickWins: "&id, businessId, supportBoostId, achievedOn, createdAt",
+    });
+
+    this.version(5).stores({
+      momentumMetrics: "&momentumMetricId, businessId, quickWinId, category, createdAt",
+    });
+
+    this.version(6).stores({
+      activityLogs: "&id, action, entityType, timestamp",
     });
   }
 }

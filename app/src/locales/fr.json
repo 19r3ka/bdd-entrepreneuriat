@@ -108,6 +108,9 @@
 		"age": "Âge",
 		"years": "ans"
 	},
+	"business": {
+		"label": "Entreprise"
+	},
 	"validation": {
 		"required": "Ce champ est requis",
 		"email": "Veuillez entrer une adresse e-mail valide",
@@ -148,6 +151,7 @@
 		},
 		"business": {
 			"title": "Formulaire d'entreprise",
+			"label": "Entreprise",
 			"name": "Nom de l'entreprise",
 			"entrepreneur": "Entrepreneur associé",
 			"primaryBusinessArea": "Secteur principal",
@@ -390,6 +394,7 @@
 	},
 	"support": {
 		"title": "Titre",
+		"titlePlural": "Interventions de soutien",
 		"titlePlaceholder": "ex. 'Subvention de démarrage numérique'",
 		"boostType": "Type",
 		"selectType": "Sélectionner le type",
@@ -530,8 +535,9 @@
 			"entrepreneurReport": "Rapport des entrepreneurs",
 			"businessReport": "Rapport des entreprises"
 		},
-		"quickWins": {
+		"quickWin": {
 			"title": "Victoires rapides",
+			"titlePlural": "Victoires rapides",
 			"new": "Nouvelle victoire rapide",
 			"edit": "Modifier la victoire rapide",
 			"detail": "Détails de la victoire rapide"
@@ -562,5 +568,57 @@
 			"maturityLevel": "Niveau de maturité",
 			"latestMaturity": "Dernier score de maturité"
 		}
+	},
+	"momentumMetric": {
+		"title": "Titre",
+		"quickWinId": "ID Victoire Rapide",
+		"linkedSupport": "Soutien lié",
+		"category": "Catégorie",
+		"genderMarker": "Marqueur de genre",
+		"rbmLevel": "Niveau RBM",
+		"cpdOutputCode": "Code de produit CPD",
+		"spOutcomeCode": "Code de résultat SP",
+		"irrfIndicatorIds": "Identifiants d'indicateurs IRRF",
+		"sdgTargets": "Cibles ODD",
+		"contributionNarrative": "Récit de contribution",
+		"narrativeHelp": "Décrivez comment le soutien a contribué à ce résultat.",
+		"indicators": "Indicateurs",
+		"addIndicator": "Ajouter un indicateur",
+		"noIndicators": "Aucun indicateur ajouté. Ajoutez au moins un indicateur pour suivre les progrès.",
+		"indicatorName": "Nom",
+		"unit": "Unité",
+		"baseline": "Référence",
+		"target": "Cible",
+		"readings": "Relevés",
+		"addReading": "Ajouter un relevé",
+		"titlePlural": "Mesures de performance",
+		"description": "Suivre les indicateurs de performance et d'impact à moyen terme.",
+		"add": "Ajouter une mesure",
+		"edit": "Modifier la mesure de performance",
+		"new": "Nouvelle mesure de performance",
+		"trackOutcome": "Suivre la performance",
+		"sections": {
+			"core": "Informations principales",
+			"parent": "Lien vers le soutien",
+			"context": "Contexte et classification",
+			"alignment": "Alignement stratégique",
+			"narrative": "Récit"
+		},
+		"placeholders": {
+			"category": "Sélectionner une catégorie",
+			"genderMarker": "Sélectionner un marqueur de genre",
+			"selectSupport": "Sélectionner un soutien (optionnel)"
+		},
+		"categories": {
+			"performance": "Performance",
+			"employment_inclusion": "Emploi et inclusion",
+			"finance_access": "Accès au financement",
+			"innovation": "Innovation",
+			"sustainability": "Durabilité",
+			"resilience": "Résilience",
+			"digital_adoption": "Adoption numérique",
+			"market_integration": "Intégration au marché"
+		},
+		"noMetrics": "Aucune mesure de performance enregistrée pour le moment."
 	}
 }

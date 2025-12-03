@@ -31,6 +31,28 @@ export const useOutputIndicatorStore = defineStore('outputIndicator', () => {
     }
 
     /**
+     * Find indicator by name
+     */
+    async function findIndicatorByName(name: string): Promise<OutputIndicator | undefined> {
+        return await db.outputIndicators.where('name').equals(name).first();
+    }
+
+    /**
+     * Add a new output indicator (alias for createIndicator, or for specific use cases)
+     */
+    async function addIndicator(indicator: Omit<OutputIndicator, 'id' | 'createdAt' | 'updatedAt'>) {
+        const newIndicator: OutputIndicator = {
+            ...indicator,
+            id: uuidv4(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        await db.outputIndicators.add(newIndicator);
+        indicators.value.push(newIndicator);
+        return newIndicator;
+    }
+
+    /**
      * Get all indicators
      */
     async function getAllIndicators(): Promise<OutputIndicator[]> {
@@ -120,5 +142,7 @@ export const useOutputIndicatorStore = defineStore('outputIndicator', () => {
         incrementUsageCount,
         updateIndicator,
         deleteIndicator,
+        findIndicatorByName,
+        addIndicator,
     };
 });

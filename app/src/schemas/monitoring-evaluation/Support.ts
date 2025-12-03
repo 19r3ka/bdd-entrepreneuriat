@@ -29,6 +29,8 @@ export const SupportBoostSchema = z.object({
   ]).describe("Minimal modality-agnostic categorization of support"),
   modality: z.enum(["DIM", "NIM", "hybrid"])
     .describe("UNDP implementation modality (keep simple for now)"),
+  dimension: z.enum(["Digital", "Finance", "Market", "Green", "Formalization"]).optional()
+    .describe("Maturity dimension targeted by this support"),
   startDate: z.string().date().describe("ISO date string (YYYY-MM-DD)"),
 
   // Nice-to-have, but optional (kept minimal)
@@ -37,7 +39,7 @@ export const SupportBoostSchema = z.object({
   channel: z.enum(["in-person", "online", "hybrid"]).optional(),
 
   /**
-   * Minimal quantity object: don’t overspecify now.
+   * Minimal quantity object: don't overspecify now.
    * - One generic numeric value + a simple unit enum.
    * - Add specialized fields later (currencyAmount, sessions, hours, items, etc.)
    */
@@ -101,3 +103,5 @@ export const SupportBoostSchema = z.object({
     }
   });
 
+
+export type Support = z.infer<typeof SupportBoostSchema>;

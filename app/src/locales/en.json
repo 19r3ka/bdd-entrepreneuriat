@@ -110,6 +110,9 @@
 		"age": "Age",
 		"years": "years"
 	},
+	"business": {
+		"label": "Business"
+	},
 	"validation": {
 		"required": "This field is required",
 		"email": "Please enter a valid email address",
@@ -226,6 +229,7 @@
 		},
 		"business": {
 			"title": "Business Form",
+			"label": "Business",
 			"name": "Business Name",
 			"entrepreneur": "Associated Entrepreneur",
 			"primaryBusinessArea": "Primary Business Area",
@@ -322,6 +326,7 @@
 	},
 	"support": {
 		"title": "Title",
+		"titlePlural": "Support Interventions",
 		"titlePlaceholder": "e.g., 'Digital Kickstart Grant'",
 		"boostType": "Type",
 		"selectType": "Select type",
@@ -521,6 +526,7 @@
 	},
 	"quickWin": {
 		"title": "Title",
+		"titlePlural": "Quick Wins",
 		"business": "Business",
 		"supportBoost": "Linked Support",
 		"achievedOn": "Achieved On",
@@ -564,5 +570,57 @@
 			"indicatorNotes": "Notes...",
 			"genderMarker": "Select gender marker"
 		}
+	},
+	"momentumMetric": {
+		"title": "Title",
+		"quickWinId": "Quick Win ID",
+		"linkedSupport": "Linked Support",
+		"category": "Category",
+		"genderMarker": "Gender Marker",
+		"rbmLevel": "RBM Level",
+		"cpdOutputCode": "CPD Output Code",
+		"spOutcomeCode": "SP Outcome Code",
+		"irrfIndicatorIds": "IRRF Indicator IDS",
+		"sdgTargets": "SDG Targets",
+		"contributionNarrative": "Contribution Narrative",
+		"narrativeHelp": "Describe how the support contributed to this result.",
+		"indicators": "Indicators",
+		"addIndicator": "Add Indicator",
+		"noIndicators": "No indicators added yet. Add at least one indicator to track progress.",
+		"indicatorName": "Name",
+		"unit": "Unit",
+		"baseline": "Baseline",
+		"target": "Target",
+		"readings": "Readings",
+		"addReading": "Add Reading",
+		"titlePlural": "Performance Measurements",
+		"description": "Track medium-term performance and impact indicators.",
+		"add": "Add Measurement",
+		"edit": "Edit Performance Measurement",
+		"new": "New Performance Measurement",
+		"trackOutcome": "Track Performance",
+		"sections": {
+			"core": "Core Information",
+			"parent": "Link to Support",
+			"context": "Context & Classification",
+			"alignment": "Strategic Alignment",
+			"narrative": "Narrative"
+		},
+		"placeholders": {
+			"category": "Select category",
+			"genderMarker": "Select gender marker",
+			"selectSupport": "Select support (optional)"
+		},
+		"categories": {
+			"performance": "Performance",
+			"employment_inclusion": "Employment & Inclusion",
+			"finance_access": "Access to Finance",
+			"innovation": "Innovation",
+			"sustainability": "Sustainability",
+			"resilience": "Resilience",
+			"digital_adoption": "Digital Adoption",
+			"market_integration": "Market Integration"
+		},
+		"noMetrics": "No performance measurements recorded yet."
 	}
 }

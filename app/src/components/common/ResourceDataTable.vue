@@ -90,7 +90,16 @@
           >
             <template #body="slotProps">
               <slot :name="`col-${col.field}`" :data="slotProps.data">
-                {{ resolveFieldData(slotProps.data, col.field) }}
+                <template v-if="col.dataType === 'date'">
+                  {{ resolveFieldData(slotProps.data, col.field) ? new Date(resolveFieldData(slotProps.data, col.field) as string).toLocaleDateString() : '-' }}
+                </template>
+                <template v-else-if="col.dataType === 'boolean'">
+                  <i v-if="resolveFieldData(slotProps.data, col.field)" class="pi pi-check text-green-500"></i>
+                  <i v-else class="pi pi-times text-red-500"></i>
+                </template>
+                <template v-else>
+                  {{ resolveFieldData(slotProps.data, col.field) }}
+                </template>
               </slot>
             </template>
 

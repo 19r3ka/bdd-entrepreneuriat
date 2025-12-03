@@ -35,6 +35,9 @@
         <span v-if="data.tags.length > 2" class="text-xs text-500">+{{ data.tags.length - 2 }}</span>
       </div>
     </template>
+    <template #append-actions="{ data }">
+      <slot name="append-actions" :data="data"></slot>
+    </template>
   </ResourceDataTable>
 </template>
 
@@ -48,6 +51,7 @@ import { useQuickWinStore } from '@/stores/useQuickWinStore';
 import { useBusinessStore } from '@/stores/useBusinessStore';
 import { useRouter } from 'vue-router';
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import { useConfirmation } from '@/composables/useConfirmation';
 
 const router = useRouter();
 const quickWinStore = useQuickWinStore();
@@ -76,7 +80,7 @@ const columns = [
 onMounted(async () => {
   loading.value = true;
   await Promise.all([
-    quickWinStore.getAllQuickWins(),
+    quickWinStore.fetchAll(),
     businessStore.fetchAll(), // Ensure businesses are loaded for name lookup
   ]);
   loading.value = false;
@@ -103,8 +107,15 @@ function onEdit(id: string) {
   emit('edit', id);
 }
 
+const { confirmDelete } = useConfirmation();
+
 function onDelete(id: string) {
-  quickWinStore.deleteQuickWin(id);
+  const quickWin = quickWins.value.find(qw => qw.id === id);
+  const name = quickWin?.title || 'Quick Win';
+
+  confirmDelete(name, async () => {
+    await quickWinStore.deleteQuickWin(id);
+  });
 }
 
 const emit = defineEmits<{

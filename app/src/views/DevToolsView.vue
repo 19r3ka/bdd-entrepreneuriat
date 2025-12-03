@@ -31,7 +31,31 @@
               <InputNumber v-model="quickWinCount" inputId="quickWinCount" :min="0" :max="200" showButtons />
               <small class="text-500">(~1.5 per business)</small>
             </div>
+
+            <div class="flex align-items-center gap-2">
+              <label for="momentumMetricCount" class="font-semibold w-10rem">Momentum Metrics:</label>
+              <InputNumber v-model="momentumMetricCount" inputId="momentumMetricCount" :min="0" :max="200" showButtons />
+              <small class="text-500">(Outcomes)</small>
+            </div>
             
+            <div class="field mt-4 border-top-1 border-gray-200 pt-4">
+                <h4 class="m-0 mb-3">Geodata Settings</h4>
+                <div class="flex flex-column gap-3">
+                    <div class="flex align-items-center gap-2">
+                        <label for="epicenterLat" class="font-semibold w-10rem">Epicenter Lat:</label>
+                        <InputNumber v-model="epicenterLat" inputId="epicenterLat" :min="-90" :max="90" :minFractionDigits="4" :maxFractionDigits="6" mode="decimal" showButtons />
+                    </div>
+                    <div class="flex align-items-center gap-2">
+                        <label for="epicenterLng" class="font-semibold w-10rem">Epicenter Lng:</label>
+                        <InputNumber v-model="epicenterLng" inputId="epicenterLng" :min="-180" :max="180" :minFractionDigits="4" :maxFractionDigits="6" mode="decimal" showButtons />
+                    </div>
+                    <div class="flex align-items-center gap-2">
+                        <label for="seedRadius" class="font-semibold w-10rem">Radius (km):</label>
+                        <InputNumber v-model="seedRadius" inputId="seedRadius" :min="1" :max="500" showButtons />
+                    </div>
+                </div>
+            </div>
+
             <div class="flex align-items-center gap-2 mt-2">
               <Checkbox v-model="clearDb" binary inputId="clearDb" />
               <label for="clearDb">Clear existing database before seeding</label>
@@ -58,6 +82,7 @@
             Businesses are randomly distributed among entrepreneurs (some may have 0, 1, or 2+).
             Supports are randomly distributed among businesses (not all businesses will be supported).
             Quick Wins are generated with linked indicators and may be linked to supports.
+            Momentum Metrics are generated for businesses, optionally linked to Quick Wins.
           </p>
         </div>
       </div>
@@ -78,8 +103,14 @@ const entrepreneurCount = ref(10);
 const businessCount = ref(15);
 const supportCount = ref(10);
 const quickWinCount = ref(20);
+const momentumMetricCount = ref(15);
 const clearDb = ref(false);
 const seeding = ref(false);
+
+// Geodata defaults (Lomé)
+const epicenterLat = ref(6.1375);
+const epicenterLng = ref(1.2125);
+const seedRadius = ref(15);
 
 const handleSeed = async () => {
   try {
@@ -89,10 +120,16 @@ const handleSeed = async () => {
       businessCount: businessCount.value,
       supportCount: supportCount.value,
       quickWinCount: quickWinCount.value,
+      momentumMetricCount: momentumMetricCount.value,
       clear: clearDb.value,
+      epicenter: {
+          latitude: epicenterLat.value,
+          longitude: epicenterLng.value
+      },
+      radius: seedRadius.value
     });
     
-    let detail = `Generated ${result.entrepreneurs.length} entrepreneurs, ${result.businesses.length} businesses, ${result.supports.length} supports, and ${result.quickWins.length} quick wins.`;
+    let detail = `Generated ${result.entrepreneurs.length} entrepreneurs, ${result.businesses.length} businesses, ${result.supports.length} supports, ${result.quickWins.length} quick wins, and ${result.momentumMetrics?.length || 0} momentum metrics.`;
     if (result.errors && result.errors.length > 0) {
       detail += ` (${result.errors.length} validation errors - check console)`;
       console.warn('Seeding validation errors:', result.errors);

@@ -121,9 +121,13 @@
             <MapComponent
               :locations="mapLocations"
               :is-editable="true"
+              height="350px"
               @update:location="(newCoords) => {
                 setFieldValue('location.latitude', newCoords.lat);
                 setFieldValue('location.longitude', newCoords.lng);
+              }"
+              @update:address="(address) => {
+                setFieldValue('location.address', address);
               }"
             />
           </Section>

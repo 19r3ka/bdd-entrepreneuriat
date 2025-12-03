@@ -15,8 +15,12 @@
   import TabPanel from 'primevue/tabpanel'
   import BusinessIdentityHeader from '@/components/common/BusinessIdentityHeader.vue'
   import BusinessOverviewTab from '@/components/BusinessOverviewTab.vue'
+  import SupportBoostList from '@/components/monitoring-evaluation/SupportBoostList.vue';
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue';
-  import ActivityTimeline from '@/components/monitoring-evaluation/ActivityTimeline.vue';
+  import QuickWinList from '@/components/monitoring-evaluation/QuickWinList.vue';
+  import Tooltip from 'primevue/tooltip';
+
+  const vTooltip = Tooltip;
 
   // Logic
   import { useBusinessStore } from '@/stores/useBusinessStore'
@@ -31,18 +35,24 @@
   import type { IndicatorDefinition, Measurement } from '@/types/monitoring-evaluation/Indicator';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
+  import MomentumMetricList from '@/components/monitoring-evaluation/MomentumMetricList.vue';
+  import MomentumMetricForm from '@/components/monitoring-evaluation/MomentumMetricForm.vue';
+  import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore';
+  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+  import MaturityReportsTab from '@/components/monitoring-evaluation/MaturityReportsTab.vue';
 
   const route = useRoute()
   const router = useRouter()
   const { t } = useI18n()
   const toast = useToast()
-  const { showConfirmation } = useConfirmation()
+  const { showConfirmation, confirmDelete } = useConfirmation()
 
   const businessStore = useBusinessStore()
   const entrepreneurStore = useEntrepreneurStore()
   const supportStore = useSupportStore();
   const indicatorStore = useIndicatorStore();
   const quickWinStore = useQuickWinStore();
+  const momentumMetricStore = useMomentumMetricStore();
 
   const businessId = route.params.id as string
   const activeTabIndex = ref('0')
@@ -63,6 +73,12 @@
   const isMeasurementEditMode = ref(false);
   const activeGoalId = ref<string | null>(null);
 
+  // Momentum Metrics State
+  const momentumMetrics = ref<MomentumMetric[]>([]);
+  const isMomentumFormVisible = ref(false);
+  const selectedMetric = ref<MomentumMetric | undefined>(undefined);
+  const selectedQuickWinId = ref<string | undefined>(undefined);
+
   // Data Fetching
   onMounted(async () => {
     await businessStore.fetchAll() // Ideally fetchOne(id)
@@ -71,6 +87,7 @@
     }
     businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
     businessQuickWins.value = await quickWinStore.getQuickWinsByBusinessId(businessId);
+    momentumMetrics.value = await momentumMetricStore.getMetricsByBusinessId(businessId);
     await fetchGoalsAndMeasurements();
   })
 
@@ -109,38 +126,24 @@
     if (action === 'edit') {
       router.push(`/businesses/${businessId}/edit`)
     } else if (action === 'delete') {
-      confirmDelete()
+
+      if (!business.value) return;
+      confirmDelete(business.value.name, async () => {
+        try {
+          await businessStore.remove(business.value!.id);
+          router.push('/businesses');
+        } catch (error) {
+          console.error(error);
+          toast.add({ severity: 'error', summary: 'Error', detail: t('pages.businesses.deleteError'), life: 3000 });
+        }
+      });
     } else if (action === 'log_intervention') {
       openSupportForm();
     } else if (action === 'log_quick_win') { // Added
       openQuickWinForm(); // Added
+    } else if (action === 'track_performance') {
+      openMomentumForm();
     }
-  }
-
-  const confirmDelete = () => {
-    showConfirmation(
-      t('pages.businesses.deleteConfirmation'),
-      t('pages.businesses.deleteTitle'),
-      async () => {
-        try {
-          await businessStore.remove(businessId)
-          toast.add({
-            severity: 'success',
-            summary: t('common.success'),
-            detail: t('pages.businesses.deleteSuccess'),
-            life: 3000
-          })
-          router.push('/businesses')
-        } catch {
-          toast.add({
-            severity: 'error',
-            summary: t('common.error'),
-            detail: t('pages.businesses.deleteError'),
-            life: 3000
-          })
-        }
-      }
-    )
   }
 
   const openSupportForm = (id?: string) => { // Modified to accept id
@@ -181,24 +184,47 @@
   };
 
   const deleteSupport = (support: Support) => { // Kept for OverviewTab compatibility if needed
-    showConfirmation(
-      'Are you sure you want to delete this support boost?',
-      'Confirm Deletion',
-      async () => {
-        try {
-          await supportStore.deleteSupport(support.id);
-          businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
-          toast.add({ severity: 'success', summary: 'Success', detail: 'Support boost deleted successfully', life: 3000 });
-        } catch {
-          toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete support boost', life: 3000 });
-        }
+    confirmDelete(support.title || 'Support Boost', async () => {
+      try {
+        await supportStore.deleteSupport(support.id);
+        businessSupports.value = await supportStore.getSupportsByBusinessId(businessId);
+      } catch (error) {
+        console.error(error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete support boost', life: 3000 });
       }
-    );
+    });
   };
 
   // Quick Win Handlers (Added)
-  const openQuickWinForm = () => {
-    router.push(`/quick-wins/new?businessId=${businessId}`);
+  const openQuickWinForm = (supportId?: string) => {
+    const query: any = { businessId };
+    if (supportId) query.supportBoostId = supportId;
+    router.push({ path: '/quick-wins/new', query });
+  };
+
+  const deleteQuickWin = async (id: string) => {
+    // Check for linked Momentum Metrics
+    const quickWin = businessQuickWins.value.find((qw) => qw.id === id);
+    if (quickWin?.indicatorValues?.length) { // Assuming indicatorValues is the property for linked performance reports
+      toast.add({
+        severity: 'warn',
+        summary: 'Cannot Delete',
+        detail: 'This Quick Win has linked Performance Reports. Please delete them first.',
+        life: 5000,
+      });
+      return;
+    }
+
+    const name = quickWin?.title || 'Quick Win';
+    confirmDelete(name, async () => {
+      try {
+        await quickWinStore.deleteQuickWin(id);
+        businessQuickWins.value = await quickWinStore.getQuickWinsByBusinessId(businessId);
+      } catch (error) {
+        console.error(error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete Quick Win', life: 3000 });
+      }
+    });
   };
 
   // Goal & Measurement Handlers
@@ -279,6 +305,52 @@
     }
   };
 
+  // Momentum Metrics Handlers
+  const openMomentumForm = (quickWinId?: string) => {
+    selectedMetric.value = undefined;
+    selectedQuickWinId.value = quickWinId;
+    isMomentumFormVisible.value = true;
+  };
+
+  const editMetric = (metric: MomentumMetric) => {
+    selectedMetric.value = metric;
+    isMomentumFormVisible.value = true;
+  };
+
+  const handleMomentumSubmit = async (data: any) => {
+    try {
+      if (selectedMetric.value) {
+        await momentumMetricStore.updateMetric(selectedMetric.value.momentumMetricId, data);
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Outcome metric updated successfully', life: 3000 });
+      } else {
+        await momentumMetricStore.addMetric(data);
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Outcome metric created successfully', life: 3000 });
+      }
+      isMomentumFormVisible.value = false;
+      momentumMetrics.value = await momentumMetricStore.getMetricsByBusinessId(businessId);
+    } catch (error) {
+      console.error(error);
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save outcome metric', life: 3000 });
+    }
+  };
+
+</script>
+
+import BusinessAdvisoryPanel from '@/components/common/BusinessAdvisoryPanel.vue';
+import { usePortfolioActions } from '@/composables/usePortfolioActions';
+
+// ... (existing imports)
+
+// Generate actions for this specific business
+const { urgentActions, opportunities } = usePortfolioActions(
+    () => business.value ? [business.value] : [],
+    () => businessSupports.value,
+    () => businessQuickWins.value
+);
+
+const businessActions = computed(() => [...urgentActions.value, ...opportunities.value]);
+
+// ... (rest of script)
 </script>
 
 <template>
@@ -288,7 +360,18 @@
         :business="business"
         :entrepreneur="associatedEntrepreneur"
         @action="handleAction"
-      />
+      >
+        <template #actions>
+            <div class="flex gap-2">
+                <Button label="Log Support" icon="pi pi-heart" size="small" outlined @click="handleAction('log_intervention')" />
+                <Button label="Add Quick Win" icon="pi pi-check-circle" size="small" outlined @click="handleAction('log_quick_win')" />
+                <Button label="Track Performance" icon="pi pi-chart-line" size="small" @click="handleAction('track_performance')" />
+            </div>
+        </template>
+      </BusinessIdentityHeader>
+
+      <!-- Advisory Panel -->
+      <BusinessAdvisoryPanel :actions="businessActions" />
 
       <div
         class="card bg-surface-0 dark:bg-surface-900 border-round-xl shadow-1 border-1 border-200 dark:border-700"
@@ -301,22 +384,34 @@
                 <span class="font-semibold">Overview</span>
               </div>
             </Tab>
+            <Tab value="reports">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-chart-bar"></i>
+                <span class="font-semibold">Reports</span>
+              </div>
+            </Tab>
             <Tab value="1">
               <div class="flex align-items-center gap-2">
-                <i class="pi pi-chart-line"></i>
-                <span class="font-semibold">Performance</span>
+                <i class="pi pi-heart"></i>
+                <span class="font-semibold">Supports</span>
               </div>
             </Tab>
             <Tab value="2">
               <div class="flex align-items-center gap-2">
-                <i class="pi pi-bullseye"></i>
-                <span class="font-semibold">Goals</span>
+                <i class="pi pi-check-circle"></i>
+                <span class="font-semibold">Quick Wins</span>
               </div>
             </Tab>
             <Tab value="3">
               <div class="flex align-items-center gap-2">
-                <i class="pi pi-history"></i>
-                <span class="font-semibold">Support Timeline</span>
+                <i class="pi pi-chart-line"></i>
+                <span class="font-semibold">Outcomes</span>
+              </div>
+            </Tab>
+            <Tab value="4">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-bullseye"></i>
+                <span class="font-semibold">Goals</span>
               </div>
             </Tab>
           </TabList>
@@ -330,12 +425,80 @@
               </div>
             </TabPanel>
 
+            <TabPanel value="reports">
+              <MaturityReportsTab :business-id="businessId" />
+            </TabPanel>
+
             <TabPanel value="1">
+              <div class="p-4">
+                <div class="flex justify-content-between align-items-center mb-4">
+                  <div>
+                    <h2 class="m-0 text-xl font-bold">{{ $t('support.titlePlural', 'Supports Provided') }}</h2>
+                    <p class="text-600 m-0 text-sm">Interventions and assistance provided to the business.</p>
+                  </div>
+                  <Button :label="$t('support.add', 'Log Support')" icon="pi pi-plus" @click="openSupportForm()" />
+                </div>
+                <SupportBoostList 
+                  :data="businessSupports" 
+                  @edit="editSupport"
+                  @delete="deleteSupport"
+                >
+                  <template #append-actions="{ data }">
+                    <Button 
+                      icon="pi pi-check-circle" 
+                      class="p-button-rounded p-button-text p-button-success" 
+                      v-tooltip.top="'Add Quick Win'"
+                      @click="openQuickWinForm(data.id)"
+                    />
+                  </template>
+                </SupportBoostList>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="2">
+              <div class="p-4">
+                <div class="flex justify-content-between align-items-center mb-4">
+                  <div>
+                    <h2 class="m-0 text-xl font-bold">{{ $t('quickWin.titlePlural', 'Quick Wins') }}</h2>
+                    <p class="text-600 m-0 text-sm">Immediate results and outputs achieved.</p>
+                  </div>
+                  <Button :label="$t('quickWin.add', 'Add Quick Win')" icon="pi pi-plus" @click="openQuickWinForm()" />
+                </div>
+                <QuickWinList 
+                  :data="businessQuickWins" 
+                  @edit="(id) => router.push(`/quick-wins/${id}/edit`)"
+                  @delete="deleteQuickWin"
+                >
+                  <template #append-actions="{ data }">
+                    <Button 
+                      icon="pi pi-chart-line" 
+                      class="p-button-rounded p-button-text p-button-help" 
+                      v-tooltip.top="'Add Performance Report'"
+                      @click="openMomentumForm(data.id)"
+                    />
+                  </template>
+                </QuickWinList>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="3">
                 <div class="p-4">
-                  <p>Performance tab content pending migration to new M&E module.</p>
+                  <div class="flex justify-content-between align-items-center mb-4">
+                    <div>
+                      <h2 class="m-0 text-xl font-bold">{{ $t('momentumMetric.titlePlural', 'Outcome Metrics') }}</h2>
+                      <p class="text-600 m-0 text-sm">{{ $t('momentumMetric.description', 'Track medium-term outcomes and performance indicators.') }}</p>
+                    </div>
+                    <Button :label="$t('momentumMetric.add', 'Add Outcome')" icon="pi pi-plus" @click="openMomentumForm()" />
+                  </div>
+                  
+                  <MomentumMetricList 
+                    :metrics="momentumMetrics" 
+                    @edit="editMetric"
+                  />
                 </div>
             </TabPanel>
-            <TabPanel value="2">
+
+            <TabPanel value="4">
               <div class="p-4">
                  <div class="flex justify-content-between align-items-center mb-4">
                    <h2>Goals & Measurements</h2>
@@ -393,20 +556,6 @@
                  </div>
               </div>
             </TabPanel>
-            <TabPanel value="3">
-              <div class="p-4">
-                <ActivityTimeline
-                  :supports="businessSupports"
-                  :quick-wins="businessQuickWins"
-                  @add-support="openSupportForm()"
-                  @add-quick-win="openQuickWinForm()"
-                  @view-support="(id: string) => router.push(`/supports/${id}`)"
-                  @view-quick-win="(id: string) => router.push(`/quick-wins/${id}`)"
-                  @edit-support="openSupportForm"
-                  @edit-quick-win="(id: string) => router.push(`/quick-wins/${id}/edit`)"
-                />
-              </div>
-            </TabPanel>
           </TabPanels>
         </Tabs>
       </div>
@@ -441,6 +590,16 @@
         :initial-values="selectedMeasurement || {}"
         @success="handleMeasurementSuccess"
         @cancel="isMeasurementFormVisible = false"
+      />
+    </Dialog>
+
+    <Dialog v-model:visible="isMomentumFormVisible" modal :header="selectedMetric ? $t('momentumMetric.edit', 'Edit Outcome Metric') : $t('momentumMetric.new', 'New Outcome Metric')" :style="{ width: '60vw' }" :breakpoints="{ '960px': '80vw', '640px': '95vw' }">
+      <MomentumMetricForm
+        :business-id="businessId"
+        :quick-win-id="selectedQuickWinId"
+        :initial-data="selectedMetric || {}"
+        @submit="handleMomentumSubmit"
+        @cancel="isMomentumFormVisible = false"
       />
     </Dialog>
 

@@ -17,4 +17,6 @@ export const LocationSchema = z.object({
 		.min(-90, { message: t('validation.latitudeRange') })
 		.max(90, { message: t('validation.latitudeRange') })
 		.nullable(),
+
+    address: z.string().optional(),
 });

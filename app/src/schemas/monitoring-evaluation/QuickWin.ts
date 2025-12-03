@@ -26,6 +26,20 @@ export const QuickWinSchema = z.object({
 
     // Core fields (required)
     title: z.string().min(2).max(140).describe("Short, descriptive title of the output (e.g., 'Digital storefront launched')"),
+    category: z.enum([
+        'digital_adoption',
+        'finance_access',
+        'market_integration',
+        'innovation',
+        'performance',
+        'employment_inclusion',
+        'resilience',
+        'sustainability'
+    ]).describe("Category of the quick win"),
+    dimension: z.enum(["Digital", "Finance", "Market", "Green", "Formalization"]).optional()
+        .describe("Maturity dimension achieved"),
+    milestone: z.number().min(1).max(4).optional()
+        .describe("Maturity milestone level (1-4)"),
     resultSummary: z.string().min(10).max(500).describe("What changed? What was achieved?"),
     achievedOn: z.string().date().describe("Date when this output was achieved (YYYY-MM-DD)"),
 

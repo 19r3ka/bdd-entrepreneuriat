@@ -11,7 +11,7 @@
     @add="handleAddBusiness"
     @view="handleViewBusiness"
     @edit="handleEditBusiness"
-    @delete="confirmDelete"
+    @delete="handleDelete"
     @delete-selected="confirmDeleteSelected"
     @export-csv="exportCSV"
   >
@@ -45,8 +45,10 @@
     <template #col-primaryBusinessArea="{ data }">
       <Tag
         v-if="data.primaryBusinessArea"
-        :value="getBusinessAreaLabel(data.primaryBusinessArea)"
+        :value="truncateBusinessArea(getBusinessAreaLabel(data.primaryBusinessArea))"
         severity="info"
+        :title="getBusinessAreaLabel(data.primaryBusinessArea)"
+        class="business-area-tag"
       />
       <span v-else class="text-500">{{ $t('common.notSpecified') }}</span>
     </template>
@@ -158,6 +160,11 @@ function openSupportDialog(businessId: string) {
   showSupportDialog.value = true;
 }
 
+function truncateBusinessArea(label: string, maxLength: number = 40): string {
+  if (!label || label.length <= maxLength) return label;
+  return label.substring(0, maxLength) + '...';
+}
+
 const handleSupportSubmit = async (data: Support) => {
   try {
     await supportStore.addSupport(data);
@@ -248,6 +255,15 @@ function handleEditBusiness(id: string) {
 	if (id) router.push(`/businesses/${id}/edit`);
 }
 
+function handleDelete(id: string) {
+    const business = businesses.value.find(b => b.id === id);
+    const name = business?.name || t('common.business');
+    
+    confirmDelete(name, async () => {
+        await store.remove(id);
+    });
+}
+
 /** CSV export */
 const exportCSV = (dataToExport: Business[]) => {
   if (!dataToExport.length) return;
@@ -272,5 +288,13 @@ onMounted(() => store.fetchAll());
 }
 .owner-link:hover {
   text-decoration: underline;
+}
+
+.business-area-tag {
+  max-width: 300px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

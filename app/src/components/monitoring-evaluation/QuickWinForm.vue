@@ -38,7 +38,7 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <DatePicker
                   :model-value="modelValue ? new Date(modelValue) : null"
-                  @update:model-value="(date) => updateModelValue(date ? date.toISOString().split('T')[0] : '')"
+                  @update:model-value="(date) => updateModelValue(date instanceof Date ? date.toISOString().split('T')[0] : '')"
                   showIcon
                   dateFormat="yy-mm-dd"
                   :class="['w-full', { 'p-invalid': hasError }]"
@@ -66,6 +66,26 @@
                 />
               </template>
             </FormField>
+            <FormField
+              name="category"
+              :label="$t('momentumMetric.category', 'Category')"
+              v-bind="defineField('category')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  @update:model-value="(val) => { updateModelValue(val); updateSuggestions(val); }"
+                  :options="QuickWinCategories"
+                  optionLabel="label"
+                  optionValue="value"
+                  :placeholder="$t('momentumMetric.placeholders.category', 'Select category')"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
           </div>
         </FormSection>
 
@@ -77,6 +97,23 @@
               @select="(indicator) => addIndicator(indicator, values.indicatorValues, setFieldValue)"
               :placeholder="$t('quickWin.addIndicator')"
             />
+          </div>
+
+          <!-- Suggestions -->
+          <div v-if="suggestedIndicators.length > 0" class="mb-4">
+            <div class="text-sm font-semibold text-700 mb-2">Suggested Indicators:</div>
+            <div class="flex flex-wrap gap-2">
+              <Button
+                v-for="suggestion in suggestedIndicators"
+                :key="suggestion.name"
+                :label="suggestion.name"
+                icon="pi pi-plus"
+                size="small"
+                outlined
+                severity="secondary"
+                @click="addSuggestedIndicator(suggestion, values.indicatorValues, setFieldValue)"
+              />
+            </div>
           </div>
 
           <div v-if="values.indicatorValues && values.indicatorValues.length > 0" class="flex flex-column gap-3">
@@ -278,7 +315,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseForm from '@/components/common/BaseForm.vue';
 import FormField from '@/components/common/FormField.vue';
@@ -298,6 +335,8 @@ import type { OutputIndicator } from '@/types/monitoring-evaluation/OutputIndica
 import { useOutputIndicatorStore } from '@/stores/useOutputIndicatorStore';
 import type { Support } from '@/types/monitoring-evaluation/Support';
 import { db } from '@/services/local-db';
+import { IndicatorCatalog, QuickWinCategories } from '@/constants/indicatorCatalog';
+import { MaturityDimensions, MaturityCatalog } from '@/constants/maturityCatalog';
 
 const props = defineProps<{
   initialData?: Partial<QuickWin>;
@@ -315,6 +354,7 @@ const indicatorStore = useOutputIndicatorStore();
 
 const businessSupports = ref<Support[]>([]);
 const indicatorsMap = ref<Record<string, OutputIndicator>>({});
+const suggestedIndicators = ref<any[]>([]);
 
 const validationSchema = QuickWinSchema.omit({
   id: true,
@@ -328,6 +368,10 @@ const initialValues = computed(() => ({
   title: '',
   businessId: props.businessId || '',
   supportBoostId: props.supportBoostId || undefined,
+  supportBoostId: props.supportBoostId || undefined,
+  category: undefined,
+  dimension: undefined,
+  milestone: undefined,
   achievedOn: new Date().toISOString().split('T')[0],
   resultSummary: '',
   indicatorValues: [],
@@ -376,8 +420,10 @@ const removeIndicator = (index: number, currentList: QuickWinIndicatorValue[], s
 
 const updateIndicatorValue = (index: number, field: keyof QuickWinIndicatorValue, value: any, currentList: QuickWinIndicatorValue[], setFieldValue: any) => {
   const newList = [...currentList];
-  newList[index] = { ...newList[index], [field]: value };
-  setFieldValue('indicatorValues', newList);
+  if (newList[index]) {
+    newList[index] = { ...newList[index], [field]: value };
+    setFieldValue('indicatorValues', newList);
+  }
 };
 
 const getIndicatorName = (id: string) => indicatorsMap.value[id]?.name || 'Unknown Indicator';
@@ -389,6 +435,53 @@ const isNumericUnit = (id: string) => {
 };
 
 const isBooleanUnit = (id: string) => getIndicatorUnit(id) === 'boolean';
+
+// Suggestions Logic
+const updateSuggestions = (category: string) => {
+  const categoryData = IndicatorCatalog.find(c => c.category === category);
+  suggestedIndicators.value = categoryData ? categoryData.indicators : [];
+};
+
+const milestoneOptions = ref<{label: string, value: number}[]>([]);
+
+const updateMilestoneSuggestions = (dimension: string) => {
+    if (dimension && MaturityCatalog[dimension as keyof typeof MaturityCatalog]) {
+        milestoneOptions.value = MaturityCatalog[dimension as keyof typeof MaturityCatalog].map(m => ({
+            label: `Level ${m.level}: ${m.name}`,
+            value: m.level
+        }));
+    } else {
+        milestoneOptions.value = [];
+    }
+};
+
+const updateIndicatorSuggestionsFromMilestone = (dimension: string, milestoneLevel: number) => {
+    if (dimension && milestoneLevel && MaturityCatalog[dimension as keyof typeof MaturityCatalog]) {
+        const milestone = MaturityCatalog[dimension as keyof typeof MaturityCatalog].find(m => m.level === milestoneLevel);
+        if (milestone) {
+            suggestedIndicators.value = milestone.requiredIndicators;
+        }
+    }
+};
+
+const addSuggestedIndicator = async (suggestion: any, currentList: QuickWinIndicatorValue[], setFieldValue: any) => {
+  // Check if indicator already exists in store
+  let indicator = await indicatorStore.findIndicatorByName(suggestion.name);
+  
+  if (!indicator) {
+    // Create new indicator if not found
+    indicator = await indicatorStore.addIndicator({
+      name: suggestion.name,
+      unit: suggestion.unit,
+      category: suggestion.category || 'capacity_development', // Default or map category
+      description: `Auto-created from ${suggestion.category} suggestion`
+    });
+  }
+  
+  if (indicator) {
+    addIndicator(indicator, currentList, setFieldValue);
+  }
+};
 
 // Fetch data on mount
 onMounted(async () => {
@@ -407,7 +500,24 @@ onMounted(async () => {
       }
     }
   }
+
+  if (initialValues.value.category) {
+    updateSuggestions(initialValues.value.category);
+  }
+
+  if (initialValues.value.dimension) {
+      updateMilestoneSuggestions(initialValues.value.dimension);
+      if (initialValues.value.milestone) {
+          updateIndicatorSuggestionsFromMilestone(initialValues.value.dimension, initialValues.value.milestone);
+      }
+  }
 });
+
+// Watch for category changes to update suggestions
+// Note: We need access to 'values' from the form context, but here we only have initialValues.
+// BaseForm doesn't expose values to parent scope easily unless we use a ref or watch inside the slot.
+// Since we are inside the script setup, we can't easily watch the form values directly without binding.
+// However, we can use the 'change' event on the dropdown in the template to trigger updateSuggestions.
 
 const onSubmit = (values: any) => {
   emit('submit', values);

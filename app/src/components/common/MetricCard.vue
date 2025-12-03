@@ -48,7 +48,7 @@
 
           <span
             v-else-if="data.sdgTag"
-            class="bg-primary-50 text-primary-700 px-2 py-1 border-round-2xl text-xs font-medium"
+            class="bg-primary-50 text-primary-700 px-2 border-round-2xl text-xs font-medium"
           >
             {{ data.sdgTag }}
           </span>

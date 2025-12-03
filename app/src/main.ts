@@ -29,9 +29,14 @@ app.use(PrimeVue, {
 	},
 });
 
+import Tooltip from 'primevue/tooltip';
+
 // Register toast notifications
 app.use(ToastService);
 app.use(ConfirmationService);
+
+// Register Tooltip directive
+app.directive('tooltip', Tooltip);
 
 // Register i18n
 app.use(i18n);

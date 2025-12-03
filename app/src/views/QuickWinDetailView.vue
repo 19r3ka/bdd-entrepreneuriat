@@ -14,24 +14,34 @@
       />
 
       <!-- Business and Support Links Row -->
-      <div class="flex align-items-center gap-3 flex-wrap mb-4">
-        <div 
-          v-if="business"
-          class="surface-card px-3 py-2 border-round-lg flex align-items-center gap-2 shadow-1 cursor-pointer hover:surface-100"
-          @click="goToBusiness"
-        >
-          <i class="pi pi-building text-primary"></i>
-          <span class="text-sm font-medium">{{ business.name }}</span>
+      <div class="flex align-items-center justify-content-between flex-wrap mb-4">
+        <div class="flex align-items-center gap-3">
+          <div 
+            v-if="business"
+            class="surface-card px-3 py-2 border-round-lg flex align-items-center gap-2 shadow-1 cursor-pointer hover:surface-100"
+            @click="goToBusiness"
+          >
+            <i class="pi pi-building text-primary"></i>
+            <span class="text-sm font-medium">{{ business.name }}</span>
+          </div>
+          
+          <div 
+            v-if="quickWin.supportBoostId && support"
+            class="surface-card px-3 py-2 border-round-lg flex align-items-center gap-2 shadow-1 cursor-pointer hover:surface-100"
+            @click="goToSupport"
+          >
+            <i class="pi pi-heart text-purple-600"></i>
+            <span class="text-sm font-medium">{{ support.title || $t('quickWin.supportBoost') }}</span>
+          </div>
         </div>
-        
-        <div 
-          v-if="quickWin.supportBoostId && support"
-          class="surface-card px-3 py-2 border-round-lg flex align-items-center gap-2 shadow-1 cursor-pointer hover:surface-100"
-          @click="goToSupport"
-        >
-          <i class="pi pi-heart text-purple-600"></i>
-          <span class="text-sm font-medium">{{ support.title || $t('quickWin.supportBoost') }}</span>
-        </div>
+
+        <Button 
+          :label="$t('momentumMetric.trackOutcome', 'Track Outcome')" 
+          icon="pi pi-chart-line" 
+          severity="help" 
+          outlined
+          @click="openMomentumForm"
+        />
       </div>
 
       <!-- Tabs -->
@@ -219,6 +229,16 @@
       <div class="text-xl text-900 mb-2">Quick Win Not Found</div>
       <Button label="Go Back" @click="goBack" />
     </div>
+
+    <Dialog v-model:visible="isMomentumFormVisible" modal :header="$t('momentumMetric.new', 'New Outcome Metric')" :style="{ width: '60vw' }" :breakpoints="{ '960px': '80vw', '640px': '95vw' }">
+      <MomentumMetricForm
+        v-if="quickWin"
+        :business-id="quickWin.businessId"
+        :quick-win-id="quickWin.id"
+        @submit="handleMomentumSubmit"
+        @cancel="isMomentumFormVisible = false"
+      />
+    </Dialog>
   </div>
 </template>
 
@@ -244,10 +264,17 @@ import { db } from '@/services/local-db';
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 import type { OutputIndicator } from '@/types/monitoring-evaluation/OutputIndicator';
 
+import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore';
+import MomentumMetricForm from '@/components/monitoring-evaluation/MomentumMetricForm.vue';
+import Dialog from 'primevue/dialog';
+import { useToast } from 'primevue/usetoast';
+
 const route = useRoute();
 const router = useRouter();
 const store = useQuickWinStore();
 const indicatorStore = useOutputIndicatorStore();
+const momentumMetricStore = useMomentumMetricStore();
+const toast = useToast();
 
 const quickWinId = route.params.id as string;
 const quickWin = ref<QuickWin | undefined>(undefined);
@@ -256,6 +283,9 @@ const support = ref<any>(undefined);
 const loading = ref(true);
 const indicatorsMap = ref<Record<string, OutputIndicator>>({});
 const fileInput = ref<HTMLInputElement | null>(null);
+
+// Momentum Metrics State
+const isMomentumFormVisible = ref(false);
 
 // Mock evidence list (placeholder for future implementation)
 const evidenceList = ref<any[]>([]);
@@ -361,6 +391,23 @@ const handleDownloadEvidence = (evidence: any) => {
   // Placeholder for download logic
   console.log('Download evidence:', evidence);
   // TODO: Implement actual download logic
+};
+
+// Momentum Metrics Handlers
+const openMomentumForm = () => {
+  isMomentumFormVisible.value = true;
+};
+
+const handleMomentumSubmit = async (data: any) => {
+  try {
+    await momentumMetricStore.addMetric(data);
+    toast.add({ severity: 'success', summary: 'Success', detail: 'Outcome metric created successfully', life: 3000 });
+    isMomentumFormVisible.value = false;
+    // Optionally refresh or navigate
+  } catch (error) {
+    console.error(error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save outcome metric', life: 3000 });
+  }
 };
 </script>
 

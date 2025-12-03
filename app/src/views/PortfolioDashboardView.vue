@@ -1,132 +1,203 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import PortfolioHeader from '@/components/common/PortfolioViewHeader.vue'
-  import MetricCard from '@/components/common/MetricCard.vue'
-  import RecentActivityWidget from '@/components/common/RecentActivityWidget.vue'
-  import SectorBreakdownWidget from '@/components/common/PerformanceBusinessAreaBreakdownWidget.vue'
-  import type { PortfolioMetric, RecentActivity, SectorData } from '@/types/portfolio'
+import { onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore';
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
+import { useSupportStore } from '@/stores/useSupportStore';
+import { useActivityLogStore } from '@/stores/useActivityLogStore';
+import { useRouter } from 'vue-router';
 
-  // --- Mock Data (Replace with Pinia Stores) ---
+import PortfolioHealthSummary from '@/components/dashboard/PortfolioHealthSummary.vue';
+import MaturityPortfolioView from '@/components/dashboard/MaturityPortfolioView.vue';
+import AggregatedKPICards from '@/components/dashboard/AggregatedKPICards.vue';
+import ActivityAlertsWidget from '@/components/dashboard/ActivityAlertsWidget.vue';
+import RegionalDistributionWithList from '@/components/dashboard/RegionalDistributionWithList.vue';
+import ExecutiveSummaryBar from '@/components/dashboard/ExecutiveSummaryBar.vue';
+import SupportPipelineFunnel from '@/components/dashboard/SupportPipelineFunnel.vue';
+import ImpactTrendsChart from '@/components/dashboard/ImpactTrendsChart.vue';
+import ActionListWidget from '@/components/dashboard/ActionListWidget.vue';
+import { usePortfolioMetrics } from '@/composables/usePortfolioMetrics';
+import { usePortfolioActions } from '@/composables/usePortfolioActions';
 
-  const metrics = ref<PortfolioMetric[]>([
-    {
-      id: '1',
-      label: 'Total Entrepreneurs',
-      value: 142,
-      subtext: '128 Active Businesses',
-      icon: 'groups',
-      iconColorClass: 'text-primary'
-    },
-    {
-      id: '2',
-      label: 'Profile Completeness',
-      value: '88%',
-      subtext: '14 Needs Attention',
-      icon: 'error',
-      iconColorClass: 'text-orange-500'
-    },
-    {
-      id: '3',
-      label: 'Total Jobs Supported',
-      value: 340,
-      subtext: '45% Women / 30% Youth',
-      icon: 'work',
-      iconColorClass: 'text-green-500'
-    },
-    {
-      id: '4',
-      label: 'Finance Unlocked',
-      value: '$45,000',
-      subtext: 'Across 22 Grants/Loans',
-      icon: 'account_balance_wallet',
-      iconColorClass: 'text-primary'
+import Button from 'primevue/button';
+
+const router = useRouter();
+const businessStore = useBusinessStore();
+const entrepreneurStore = useEntrepreneurStore();
+const metricStore = useMomentumMetricStore();
+const quickWinStore = useQuickWinStore();
+const supportStore = useSupportStore();
+const activityLogStore = useActivityLogStore();
+
+const { businesses } = storeToRefs(businessStore);
+const { entrepreneurs } = storeToRefs(entrepreneurStore);
+const { metrics } = storeToRefs(metricStore);
+const { quickWins } = storeToRefs(quickWinStore);
+const { supports } = storeToRefs(supportStore);
+const { logs } = storeToRefs(activityLogStore);
+
+// Use the new composable for metrics
+const { pipelineStages, impactTrends } = usePortfolioMetrics(
+  () => businesses.value,
+  () => supports.value,
+  () => quickWins.value,
+  () => metrics.value
+);
+
+// Use the new composable for actions
+const { urgentActions, opportunities } = usePortfolioActions(
+  () => businesses.value,
+  () => supports.value,
+  () => quickWins.value
+);
+
+const handleActionClick = (action: ActionItem) => {
+    if (action.entityType === 'business' && action.entityId) {
+        router.push({
+            path: `/businesses/${action.entityId}`,
+            query: { 
+                actionId: action.id,
+                actionType: action.type,
+                actionTitle: action.title // Optional: for displaying the specific advice title
+            }
+        });
     }
-  ])
+    // Add other handlers as needed
+};
 
-  const activities = ref<RecentActivity[]>([
-    {
-      id: '1',
-      name: 'Ama Koffi',
-      type: 'Entrepreneur',
-      date: 'Added 2 days ago',
-      status: 'VERIFIED',
-      statusLabel: 'Verified',
-      avatarUrl: '/avatars/ama.jpg'
-    },
-    {
-      id: '2',
-      name: 'Bio Moussa',
-      type: 'Agri-Business',
-      date: 'Updated 5 days ago',
-      status: 'MISSING_INFO',
-      statusLabel: 'Missing Tax ID',
-      avatarUrl: '/avatars/bio.jpg'
-    },
-    {
-      id: '3',
-      name: 'Chantal Akou',
-      type: 'Tech Startup',
-      date: 'Added 1 week ago',
-      status: 'VERIFIED',
-      statusLabel: 'Verified',
-      avatarUrl: '/avatars/chantal.jpg'
+const exportCSV = () => {
+    const headers = ['Name', 'Registration Number', 'Primary Sector', 'Registration Date', 'Support Start Date', 'Status'];
+    const rows = businesses.value.map(b => [
+        b.name,
+        b.registrationNumber || '',
+        b.primaryBusinessArea || '',
+        b.registrationDate ? new Date(b.registrationDate).toLocaleDateString() : '',
+        b.supportStartDate ? new Date(b.supportStartDate).toLocaleDateString() : '',
+        'Active' // Placeholder
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(r => r.map(c => `"${c}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `portfolio_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
-  ])
+};
 
-  const sectors = ref<SectorData[]>([
-    { label: 'Agri-Business', value: 45, color: '#3c8939' },
-    { label: 'Tech', value: 25, color: '#187db3' },
-    { label: 'Services', value: 15, color: '#f36d24' },
-    { label: 'Retail', value: 10, color: '#f99e23' },
-    { label: 'Other', value: 5, color: '#cccccc' }
-  ])
-
-  const incompleteCount = 14 // Derived from store in real app
-
-  // --- Handlers ---
-  const handleExport = () => console.log('Exporting...')
-  const handleAdd = () => console.log('Open Add Dialog')
+onMounted(async () => {
+    await Promise.all([
+        businessStore.fetchAll(),
+        // entrepreneurStore.fetchAll(), // Handled by businessStore.fetchAll()
+        metricStore.fetchAll(),
+        quickWinStore.fetchAll(),
+        supportStore.fetchAll(),
+        activityLogStore.fetchAll()
+    ]);
+});
 </script>
 
 <template>
-  <div
-    class="flex flex-column min-h-screen bg-background-light dark:bg-background-dark p-4 md:p-6 lg:p-8"
-  >
-    <div class="max-w-7xl w-full mx-auto flex-grow-1 flex flex-column">
-      <PortfolioHeader
-        region-name="Maritime, Togo"
-        @export="handleExport"
-        @add-entrepreneur="handleAdd"
-      />
-
-      <div class="grid mb-6">
-        <div v-for="metric in metrics" :key="metric.id" class="col-12 sm:col-6 lg:col-3">
-          <MetricCard :data="metric" />
-        </div>
-      </div>
-
-      <div
-        class="mb-6 border-round-xl overflow-hidden shadow-1 border-1 border-200 dark:border-700 bg-white"
-      >
-        <div class="p-4 border-bottom-1 border-200 dark:border-700">
-          <h2 class="text-lg font-bold m-0">Regional Distribution</h2>
-        </div>
-        <div class="h-20rem w-full relative">
-          <div class="absolute inset-0 bg-gray-100 flex align-items-center justify-content-center">
-            <span class="text-gray-500">Leaflet Map Component would render here</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="col-12 lg:col-8">
-          <RecentActivityWidget :activities="activities" :incomplete-count="incompleteCount" />
+    <div class="layout-dashboard p-4">
+        <!-- Header -->
+        <div class="flex flex-wrap justify-content-between align-items-center gap-4 mb-6">
+            <div class="flex flex-column gap-1">
+                <h1 class="text-900 dark:text-white text-4xl font-black m-0">Portfolio Overview</h1>
+                <p class="text-500 dark:text-400 text-base font-normal m-0">Maritime, Togo</p>
+            </div>
+            <div>
+                <Button label="Export Data" icon="pi pi-download" severity="secondary" outlined @click="exportCSV" />
+            </div>
         </div>
 
-        <div class="col-12 lg:col-4">
-          <SectorBreakdownWidget :sectors="sectors" />
+        <!-- Executive Summary -->
+        <div class="mb-6">
+            <ExecutiveSummaryBar 
+                :businesses="businesses"
+                :supports="supports"
+                :quick-wins="quickWins"
+                :metrics="metrics"
+            />
         </div>
-      </div>
+
+        <!-- Regional Distribution (Map & List) -->
+        <div class="mb-6">
+            <RegionalDistributionWithList :businesses="businesses" />
+        </div>
+
+        <!-- Maturity Matrix Portfolio View -->
+        <div class="mb-6">
+            <MaturityPortfolioView :businesses="businesses" />
+        </div>
+
+        <!-- Phase 2: Support Pipeline & Impact Trends -->
+        <div class="grid mb-6">
+            <div class="col-12 lg:col-4 h-full">
+                <SupportPipelineFunnel :stages="pipelineStages" />
+            </div>
+            <div class="col-12 lg:col-8 h-full">
+                <ImpactTrendsChart :chart-data="impactTrends" />
+            </div>
+        </div>
+
+        <!-- Phase 3: Action Center -->
+        <div class="grid mb-6">
+            <div class="col-12 lg:col-6 h-full">
+                <ActionListWidget 
+                    title="Urgent Actions"
+                    icon="pi-exclamation-triangle"
+                    color="red"
+                    :actions="urgentActions"
+                    empty-title="All caught up!"
+                    empty-message="No urgent actions required."
+                    empty-icon="pi-check-circle"
+                    @action-click="handleActionClick"
+                />
+            </div>
+            <div class="col-12 lg:col-6 h-full">
+                <ActionListWidget 
+                    title="Opportunities"
+                    icon="pi-sparkles"
+                    color="blue"
+                    :actions="opportunities"
+                    empty-title="No new opportunities"
+                    empty-message="Check back later for recommendations."
+                    empty-icon="pi-info-circle"
+                    @action-click="handleActionClick"
+                />
+            </div>
+        </div>
+
+        <!-- 4. Activity Log -->
+        <div class="grid">
+            <div class="col-12 h-full">
+                <ActivityAlertsWidget 
+                    :businesses="businesses" 
+                    :entrepreneurs="entrepreneurs" 
+                    :supports="supports"
+                    :quick-wins="quickWins"
+                    :metrics="metrics"
+                    :logs="logs"
+                />
+            </div>
+        </div>
     </div>
-  </div>
 </template>
+
+<style scoped>
+/* Add any specific layout styles if PrimeFlex isn't enough */
+.layout-dashboard {
+    padding-bottom: 2rem;
+}
+</style>

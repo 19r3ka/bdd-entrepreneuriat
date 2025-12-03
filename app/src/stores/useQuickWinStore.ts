@@ -13,8 +13,11 @@ export const useQuickWinStore = defineStore('quickWin', () => {
      * Create a new quick win
      */
     async function createQuickWin(quickWin: Omit<QuickWin, 'id' | 'createdAt' | 'updatedAt'>) {
+        // Deep clone to remove Vue proxies which cause DataCloneError in IndexedDB
+        const rawQuickWin = JSON.parse(JSON.stringify(quickWin));
+
         const newQuickWin: QuickWin = {
-            ...quickWin,
+            ...rawQuickWin,
             id: uuidv4(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -46,7 +49,7 @@ export const useQuickWinStore = defineStore('quickWin', () => {
     /**
      * Get all quick wins
      */
-    async function getAllQuickWins(): Promise<QuickWin[]> {
+    async function fetchAll(): Promise<QuickWin[]> {
         const allQuickWins = await db.quickWins.toArray();
         quickWins.value = allQuickWins;
         return allQuickWins;
@@ -78,7 +81,7 @@ export const useQuickWinStore = defineStore('quickWin', () => {
         // Update local state
         const index = quickWins.value.findIndex((qw) => qw.id === id);
         if (index !== -1) {
-            quickWins.value[index] = { ...quickWins.value[index], ...updates };
+            quickWins.value[index] = { ...quickWins.value[index], ...updates, id };
         }
     }
 
@@ -115,7 +118,7 @@ export const useQuickWinStore = defineStore('quickWin', () => {
         quickWins,
         createQuickWin,
         getQuickWinById,
-        getAllQuickWins,
+        fetchAll,
         getQuickWinsByBusinessId,
         getQuickWinsBySupportId,
         updateQuickWin,
