@@ -1,50 +1,118 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version: 0.0.0 -> 1.0.0 (Initial Ratification)
+- Adopted "Coding Constitution" with 8 key sections.
+- Added Principles: Foundational, Architecture, Naming, Implementation, Documentation, Error Prevention.
+- Added Sections: Execution Protocols, Guiding Philosophy.
+- Templates Checked:
+    - plan-template.md: Compatible (delegates to constitution).
+    - spec-template.md: Compatible (focuses on requirements/tests).
+    - tasks-template.md: Compatible (workflow agnostic).
+-->
+# Entrepreneurs Registry App Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Foundational Principles
+**KISS (Keep It Simple, Stupid):** Code must be simple, direct, and free of unnecessary complexity. Prefer clarity over cleverness.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+**DRY (Don’t Repeat Yourself):** No duplication of logic, markup, or styles. Extract shared logic into composables, helpers, or base components.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Object Calisthenics:** Follow rules that encourage small, focused classes/components, clear responsibilities, and minimal side effects.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Vue Style Guide:** Always adhere to the official Vue 3 style guide for naming, structure, and conventions unless explicitly overridden.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### II. Architecture & Structure
+**Single File Components (SFCs):** Each `.vue` file defines one component, self-contained with template, script, and style.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Directory Responsibilities:**
+- Shared logic → `composables/`
+- Shared markup/styles → `components/base/` or `components/common/`
+- Helpers & Utils → `utils/` or `helpers/` (non-Vue logic)
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**Schemas & Types:**
+- Schemas, inferred types, and interfaces are the single source of truth.
+- No `any` or `unknown` types allowed.
+- Types must cascade through props, composables, API calls, and tests.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### III. Naming & Readability
+**Conventions:**
+- Components → `PascalCase`
+- Variables → `camelCase`
+- Constants → `SCREAMING_SNAKE_CASE`
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Readability First:**
+- No cryptic abbreviations.
+- Limit nesting depth (max 3). Prefer early returns over imbricated `if/else`.
+- Code for humans, optimized for machines: Clear, predictable, and self-explanatory.
+
+### IV. Implementation Rules
+**Avoid Ad Hoc Implementations:**
+- No magic strings. Use constants or enums.
+- Defaults must be explicit and documented.
+
+**Determinism & Testability:**
+- Same inputs → same outputs.
+- Favor pure functions.
+- Every unit must be testable in isolation.
+
+**Third-Party Libraries:**
+- Built-in features first.
+- Use libraries (e.g., `vueuse`) only if they reduce complexity more than they increase bundle size.
+- Always weigh bundle size vs maintainability.
+
+### V. Documentation & Self-Explanation
+**Self-Documenting Code:** Structure, naming, and contracts must explain intent.
+
+**JSDoc:** Anything not obvious must be documented with JSDoc for IntelliSense support.
+
+**README Style Guides:** Each module or feature should include usage examples, architectural rationale, and developer notes.
+
+### VI. Error Prevention & Safety
+**Type Safety:**
+- Use `?? undefined` for nullable props.
+- Use optional chaining (`?.`) or non-null assertions (`!`) for array/object access.
+
+**Boolean Hygiene:**
+- `.value` only on `Ref<boolean>`.
+- Plain booleans must not use `.value`.
+
+**Tests & Mocks:**
+- All composables and helpers must expose clear contracts.
+- Mocks must include all expected methods.
+- Global references → `globalThis`.
+
+## Execution Protocols
+
+### VII. Execution Order for Fixes
+When errors occur, fixes must follow this order:
+
+1. **Schema/Type Exports:** Verify the source of truth.
+2. **Dependencies:** Install missing packages or create missing files.
+3. **Boolean Hygiene:** Check for incorrect `.value` usage.
+4. **Type Mismatches:** Align contracts.
+5. **Undefined Checks:** Add optional chaining or assertions.
+6. **Miscellaneous:** Fix naming, duplication, or missing props.
+
+## Guiding Philosophy
+
+### VIII. Core Philosophy
+- **Clarity over cleverness.**
+- **Contracts over assumptions.**
+- **Predictability over improvisation.**
+- **Maintainability over shortcuts.**
+- **Empower future contributors.**
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**Supremacy:** This Constitution supersedes all other project documentation and practices. In cases of conflict, this document prevails.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendments:** Changes to this Constitution require a Pull Request with:
+1. Explicit justification for the change.
+2. Assessment of impact on existing code and templates.
+3. Migration plan for non-compliant legacy code.
+4. Approval from project maintainers.
+
+**Compliance:** All Pull Requests must be verified against these principles. Code reviews are the primary enforcement mechanism. Complexity must be explicitly justified.
+
+**Version**: 1.0.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-04
