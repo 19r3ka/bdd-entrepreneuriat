@@ -1,3 +1,3 @@
-import type { MomentumMetric } from '../../schemas/monitoring-evaluation/MomentumMetric';
+import type { MomentumMetric } from '../../schemas/monitoring-evaluation/MomentumMetric'
 
-export type { MomentumMetric };
+export type { MomentumMetric }

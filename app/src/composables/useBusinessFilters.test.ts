@@ -1,28 +1,28 @@
-import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { reactive } from 'vue';
-import { useBusinessFilters } from './useBusinessFilters';
-import { useBusinessStore } from '@/stores/useBusinessStore';
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { reactive } from 'vue'
+import { useBusinessFilters } from './useBusinessFilters'
+import { useBusinessStore } from '@/stores/useBusinessStore'
 
 // Mock the useBusinessStore
 vi.mock('@/stores/useBusinessStore', () => ({
   useBusinessStore: vi.fn(() => ({
-    businesses: [],
-  })),
-}));
+    businesses: []
+  }))
+}))
 
 // Mock useBusinessAreas composable
 vi.mock('./useBusinessAreas', () => ({
   useBusinessAreas: vi.fn(() => ({
-    getBusinessAreaLabel: vi.fn((code: string) => `Area: ${code}`),
+    getBusinessAreaLabel: vi.fn((code: string) => `Area: ${code}`)
   }))
-}));
+}))
 
 describe('useBusinessFilters', () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-    vi.clearAllMocks();
-  });
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
 
   it('ownerOptions returns unique, sorted owner names (excludes null)', () => {
     // Mock business store with businesses
@@ -31,19 +31,19 @@ describe('useBusinessFilters', () => {
         { ownerName: 'John Doe' },
         { ownerName: 'Jane Smith' },
         { ownerName: 'John Doe' }, // duplicate
-        { ownerName: null },       // should be excluded
+        { ownerName: null }, // should be excluded
         { ownerName: 'Bob Johnson' },
-        { ownerName: undefined },  // should be excluded
+        { ownerName: undefined } // should be excluded
       ]
-    };
+    }
 
-    vi.mocked(useBusinessStore).mockReturnValue(mockBusinessStore as any);
+    vi.mocked(useBusinessStore).mockReturnValue(mockBusinessStore as any)
 
-    const { ownerOptions } = useBusinessFilters();
+    const { ownerOptions } = useBusinessFilters()
 
     // Should return unique, sorted names, excluding null/undefined
-    expect(ownerOptions.value).toEqual(['Bob Johnson', 'Jane Smith', 'John Doe']);
-  });
+    expect(ownerOptions.value).toEqual(['Bob Johnson', 'Jane Smith', 'John Doe'])
+  })
 
   it('businessAreaOptions returns unique primaryBusinessArea codes with correct labels', () => {
     // Mock business store with businesses
@@ -52,56 +52,56 @@ describe('useBusinessFilters', () => {
         { primaryBusinessArea: 'IT' },
         { primaryBusinessArea: 'FIN' },
         { primaryBusinessArea: 'IT' }, // duplicate
-        { primaryBusinessArea: 'MFG' },
+        { primaryBusinessArea: 'MFG' }
       ]
-    };
+    }
 
-    vi.mocked(useBusinessStore).mockReturnValue(mockBusinessStore as any);
+    vi.mocked(useBusinessStore).mockReturnValue(mockBusinessStore as any)
 
-    const { businessAreaOptions } = useBusinessFilters();
+    const { businessAreaOptions } = useBusinessFilters()
 
-    const options = businessAreaOptions.value;
+    const options = businessAreaOptions.value
 
     // Should return unique business areas with proper structure
-    expect(options.length).toBe(3); // unique values only
+    expect(options.length).toBe(3) // unique values only
 
     // Check that each option has label and value
-    const labels = options.map(opt => opt.label);
-    const values = options.map(opt => opt.value);
+    const labels = options.map((opt) => opt.label)
+    const values = options.map((opt) => opt.value)
 
-    expect(labels).toContain('Area: IT');
-    expect(labels).toContain('Area: FIN');
-    expect(labels).toContain('Area: MFG');
+    expect(labels).toContain('Area: IT')
+    expect(labels).toContain('Area: FIN')
+    expect(labels).toContain('Area: MFG')
 
-    expect(values).toContain('IT');
-    expect(values).toContain('FIN');
-    expect(values).toContain('MFG');
-  });
+    expect(values).toContain('IT')
+    expect(values).toContain('FIN')
+    expect(values).toContain('MFG')
+  })
 
   it('handles reactivity: adding/removing businesses recomputes options', () => {
     const businessStore: any = {
       businesses: reactive([])
-    };
+    }
 
-    vi.mocked(useBusinessStore).mockReturnValue(businessStore);
+    vi.mocked(useBusinessStore).mockReturnValue(businessStore)
 
-    const { ownerOptions } = useBusinessFilters();
+    const { ownerOptions } = useBusinessFilters()
 
     // Initially empty
-    expect(ownerOptions.value).toEqual([]);
+    expect(ownerOptions.value).toEqual([])
 
     // Add a business
-    businessStore.businesses.push({ ownerName: 'John Doe' });
+    businessStore.businesses.push({ ownerName: 'John Doe' })
 
     // Options should update
-    expect(ownerOptions.value).toEqual(['John Doe']);
+    expect(ownerOptions.value).toEqual(['John Doe'])
 
     // Add another business with same name (should remain unique)
-    businessStore.businesses.push({ ownerName: 'John Doe' });
-    expect(ownerOptions.value).toEqual(['John Doe']);
+    businessStore.businesses.push({ ownerName: 'John Doe' })
+    expect(ownerOptions.value).toEqual(['John Doe'])
 
     // Add different name
-    businessStore.businesses.push({ ownerName: 'Jane Smith' });
-    expect(ownerOptions.value.sort()).toEqual(['Jane Smith', 'John Doe']); // Check they're both there
-  });
-});
+    businessStore.businesses.push({ ownerName: 'Jane Smith' })
+    expect(ownerOptions.value.sort()).toEqual(['Jane Smith', 'John Doe']) // Check they're both there
+  })
+})

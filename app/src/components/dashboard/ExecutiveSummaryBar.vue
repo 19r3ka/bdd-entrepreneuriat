@@ -1,62 +1,60 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import KPIMetricCard from './KPIMetricCard.vue';
+  import { computed } from 'vue'
+  import KPIMetricCard from './KPIMetricCard.vue'
 
-interface Props {
-  businesses: any[];
-  supports: any[];
-  quickWins: any[];
-  metrics: any[];
-}
+  interface Props {
+    businesses: any[]
+    supports: any[]
+    quickWins: any[]
+    metrics: any[]
+  }
 
-const props = defineProps<Props>();
+  const props = defineProps<Props>()
 
-// Calculate KPIs
-const totalBusinesses = computed(() => props.businesses.length);
-const totalSupports = computed(() => props.supports.length);
-const totalQuickWins = computed(() => props.quickWins.length);
+  // Calculate KPIs
+  const totalBusinesses = computed(() => props.businesses.length)
+  const totalSupports = computed(() => props.supports.length)
+  const totalQuickWins = computed(() => props.quickWins.length)
 
-// Mock trend data (will be replaced with real calculations)
-const businessTrend = computed(() => {
-  // TODO: Calculate actual trend from activity logs
-  return Math.floor(Math.random() * 15) + 5; // Placeholder
-});
+  // Mock trend data (will be replaced with real calculations)
+  const businessTrend = computed(() => {
+    // TODO: Calculate actual trend from activity logs
+    return Math.floor(Math.random() * 15) + 5 // Placeholder
+  })
 
-const supportTrend = computed(() => {
-  return Math.floor(Math.random() * 25) + 10;
-});
+  const supportTrend = computed(() => {
+    return Math.floor(Math.random() * 25) + 10
+  })
 
-const quickWinTrend = computed(() => {
-  return Math.floor(Math.random() * 12) + 3;
-});
+  const quickWinTrend = computed(() => {
+    return Math.floor(Math.random() * 12) + 3
+  })
 
-// Calculate maturity score (average across all businesses)
-const portfolioHealth = computed(() => {
-  if (props.businesses.length === 0) return 0;
-  
-  const totalMaturity = props.businesses.reduce((sum, business) => {
-    if (!business.maturityLevels) return sum;
-    const levels = Object.values(business.maturityLevels) as number[];
-    const avg = levels.length > 0 
-      ? levels.reduce((a, b) => a + b, 0) / levels.length 
-      : 0;
-    return sum + avg;
-  }, 0);
-  
-  return Math.round((totalMaturity / props.businesses.length) * 100) / 100;
-});
+  // Calculate maturity score (average across all businesses)
+  const portfolioHealth = computed(() => {
+    if (props.businesses.length === 0) return 0
 
-const healthPercentage = computed(() => {
-  return Math.round(portfolioHealth.value * 20); // Convert 0-5 scale to 0-100%
-});
+    const totalMaturity = props.businesses.reduce((sum, business) => {
+      if (!business.maturityLevels) return sum
+      const levels = Object.values(business.maturityLevels) as number[]
+      const avg = levels.length > 0 ? levels.reduce((a, b) => a + b, 0) / levels.length : 0
+      return sum + avg
+    }, 0)
 
-const healthSeverity = computed(() => {
-  const pct = healthPercentage.value;
-  if (pct >= 70) return 'success';
-  if (pct >= 50) return 'info';
-  if (pct >= 30) return 'warning';
-  return 'danger';
-});
+    return Math.round((totalMaturity / props.businesses.length) * 100) / 100
+  })
+
+  const healthPercentage = computed(() => {
+    return Math.round(portfolioHealth.value * 20) // Convert 0-5 scale to 0-100%
+  })
+
+  const healthSeverity = computed(() => {
+    const pct = healthPercentage.value
+    if (pct >= 70) return 'success'
+    if (pct >= 50) return 'info'
+    if (pct >= 30) return 'warning'
+    return 'danger'
+  })
 </script>
 
 <template>
@@ -131,5 +129,5 @@ const healthSeverity = computed(() => {
 </template>
 
 <style scoped>
-/* Additional styling if needed */
+  /* Additional styling if needed */
 </style>

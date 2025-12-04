@@ -1,5 +1,6 @@
-import { EntrepreneurSchema } from './entrepreneur';
-import { describe, it, expect } from 'vitest';
+import { EntrepreneurSchema } from './entrepreneur'
+import { describe, it, expect } from 'vitest'
+import { z } from 'zod'
 
 describe('EntrepreneurSchema', () => {
   it('accepts valid entrepreneur data', () => {
@@ -11,10 +12,13 @@ describe('EntrepreneurSchema', () => {
         email: 'john@example.com'
       },
       gender: 'Man',
-      dateOfBirth: new Date('1990-01-01')
-    });
-    expect(result.success).toBe(true);
-  });
+      dateOfBirth: '1990-01-01', // Date string should be preprocessed to Date object
+      personalWebsite: 'https://johndoe.com'
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.dateOfBirth).toBeInstanceOf(Date)
+    expect(result.data?.personalWebsite).toBe('https://johndoe.com')
+  })
 
   it('rejects invalid data', () => {
     const result = EntrepreneurSchema.safeParse({
@@ -24,87 +28,78 @@ describe('EntrepreneurSchema', () => {
       contact: {
         email: 'john@example.com'
       }
-    });
-    expect(result.success).toBe(false);
-  });
+    })
+    expect(result.success).toBe(false)
+    expect(result.error!.issues[0]!.message).toContain('validation.required')
+  })
 
   it('validates avatar can be string, File, or null', () => {
-    const mockFile = new File([], 'avatar.jpg');
-    
-    // Test with string avatar
-    let result = EntrepreneurSchema.safeParse({
+    const common = {
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
-      contact: {
-        email: 'john@example.com'
-      },
+      contact: { email: 'john@example.com' }
+    }
+    const mockFile = new File([], 'avatar.jpg')
+
+    // Test with string avatar
+    let result = EntrepreneurSchema.safeParse({
+      ...common,
       avatar: 'https://example.com/avatar.jpg'
-    });
-    expect(result.success).toBe(true);
+    })
+    expect(result.success).toBe(true)
 
     // Test with File avatar
     result = EntrepreneurSchema.safeParse({
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: {
-        email: 'john@example.com'
-      },
+      ...common,
       avatar: mockFile
-    });
-    expect(result.success).toBe(true);
+    })
+    expect(result.success).toBe(true)
 
     // Test with null avatar
     result = EntrepreneurSchema.safeParse({
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: {
-        email: 'john@example.com'
-      },
+      ...common,
       avatar: null
-    });
-    expect(result.success).toBe(true);
-  });
+    })
+    expect(result.success).toBe(true)
+  })
 
   it('validates slug format', () => {
-    // Valid slug
-    let result = EntrepreneurSchema.safeParse({
+    const common = {
       firstName: 'John',
       lastName: 'Doe',
-      slug: 'john-doe-123',
-      contact: {
-        email: 'john@example.com'
-      }
-    });
-    expect(result.success).toBe(true);
+      contact: { email: 'john@example.com' }
+    }
+
+    // Valid slug
+    let result = EntrepreneurSchema.safeParse({
+      ...common,
+      slug: 'john-doe-123'
+    })
+    expect(result.success).toBe(true)
 
     // Invalid slug with uppercase
     result = EntrepreneurSchema.safeParse({
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'John-Doe', // contains uppercase
-      contact: {
-        email: 'john@example.com'
-      }
-    });
-    expect(result.success).toBe(false);
-  });
+      ...common,
+      slug: 'John-Doe' // contains uppercase
+    })
+    expect(result.success).toBe(false)
+    expect(result.error!.issues[0]!.message).toContain('validation.invalidSlug')
+  })
 
   it('validates gender field with allowed values', () => {
-    const validGenders = ['Woman', 'Man', 'Non-binary', 'Prefer not to say', ''];
-    validGenders.forEach(gender => {
-      const result = EntrepreneurSchema.safeParse({
-        firstName: 'Jane',
-        lastName: 'Doe',
-        slug: 'jane-doe',
-        contact: { email: 'jane@example.com' },
-        gender: gender
-      });
-      expect(result.success).toBe(true, `Should accept gender: ${gender}`);
-    });
-  });
+    const common = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      slug: 'jane-doe',
+      contact: { email: 'jane@example.com' }
+    }
+    const validGenders = ['Woman', 'Man', 'Non-binary', 'Prefer not to say', '']
+    validGenders.forEach((gender) => {
+      const result = EntrepreneurSchema.safeParse({ ...common, gender: gender })
+      expect(result.success).toBe(true)
+    })
+  })
 
   it('rejects invalid gender value', () => {
     const result = EntrepreneurSchema.safeParse({
@@ -113,34 +108,23 @@ describe('EntrepreneurSchema', () => {
       slug: 'jane-doe',
       contact: { email: 'jane@example.com' },
       gender: 'Alien' // Invalid gender
-    });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toContain("Invalid enum value");
-  });
+    })
+    expect(result.success).toBe(false)
+    expect(result.error!.issues[0]!.message).toContain('Invalid enum value')
+  })
 
-  it('validates dateOfBirth field with a valid date string', () => {
+  it('validates dateOfBirth field with a valid date string and preprocesses to Date object', () => {
     const result = EntrepreneurSchema.safeParse({
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
       dateOfBirth: '1985-11-20' // Valid date string
-    });
-    expect(result.success).toBe(true);
-    expect(result.data?.dateOfBirth).toBeInstanceOf(Date);
-  });
-
-  it('validates dateOfBirth field with a valid Date object', () => {
-    const result = EntrepreneurSchema.safeParse({
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: { email: 'john@example.com' },
-      dateOfBirth: new Date('1985-11-20') // Valid Date object
-    });
-    expect(result.success).toBe(true);
-    expect(result.data?.dateOfBirth).toBeInstanceOf(Date);
-  });
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.dateOfBirth).toBeInstanceOf(Date)
+    expect(result.data!.dateOfBirth?.toISOString().startsWith('1985-11-20')).toBe(true)
+  })
 
   it('allows dateOfBirth to be undefined', () => {
     const result = EntrepreneurSchema.safeParse({
@@ -149,10 +133,10 @@ describe('EntrepreneurSchema', () => {
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
       dateOfBirth: undefined
-    });
-    expect(result.success).toBe(true);
-    expect(result.data?.dateOfBirth).toBeUndefined();
-  });
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.dateOfBirth).toBeUndefined()
+  })
 
   it('rejects invalid dateOfBirth value', () => {
     const result = EntrepreneurSchema.safeParse({
@@ -161,8 +145,41 @@ describe('EntrepreneurSchema', () => {
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
       dateOfBirth: 'not-a-date' // Invalid date string
-    });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toContain("Invalid date");
-  });
-});
+    })
+    expect(result.success).toBe(false)
+    expect(result.error!.issues[0]!.message).toContain('Invalid date')
+  })
+
+  it('validates personalWebsite with optionalString behavior', () => {
+    const common = {
+      firstName: 'John',
+      lastName: 'Doe',
+      slug: 'john-doe',
+      contact: { email: 'john@example.com' }
+    }
+
+    // Valid URL
+    let result = EntrepreneurSchema.safeParse({
+      ...common,
+      personalWebsite: 'https://example.com'
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.personalWebsite).toBe('https://example.com')
+
+    // Empty string becomes undefined
+    result = EntrepreneurSchema.safeParse({
+      ...common,
+      personalWebsite: ''
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.personalWebsite).toBeUndefined()
+
+    // Invalid URL is rejected
+    result = EntrepreneurSchema.safeParse({
+      ...common,
+      personalWebsite: 'not-a-url'
+    })
+    expect(result.success).toBe(false)
+    expect(result.error!.issues[0]!.message).toContain('validation.url')
+  })
+})

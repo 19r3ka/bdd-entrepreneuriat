@@ -1,15 +1,15 @@
-import { defineStore } from 'pinia';
-import { db } from '@/services/local-db';
-import type { ActivityLog } from '@/types/ActivityLog';
-import { v4 as uuidv4 } from 'uuid';
+import { defineStore } from 'pinia'
+import { db } from '@/services/local-db'
+import type { ActivityLog } from '@/types/ActivityLog'
+import { v4 as uuidv4 } from 'uuid'
 
 interface ActivityLogState {
-  logs: ActivityLog[];
+  logs: ActivityLog[]
 }
 
 export const useActivityLogStore = defineStore('activityLog', {
   state: (): ActivityLogState => ({
-    logs: [],
+    logs: []
   }),
   actions: {
     async logAction(
@@ -29,16 +29,16 @@ export const useActivityLogStore = defineStore('activityLog', {
         details,
         timestamp: new Date().toISOString(),
         meta
-      };
+      }
 
-      await db.activityLogs.add(log);
-      this.logs.unshift(log); // Add to beginning
+      await db.activityLogs.add(log)
+      this.logs.unshift(log) // Add to beginning
     },
 
     async fetchAll(): Promise<ActivityLog[]> {
-      const logs = await db.activityLogs.orderBy('timestamp').reverse().toArray();
-      this.logs = logs;
-      return logs;
+      const logs = await db.activityLogs.orderBy('timestamp').reverse().toArray()
+      this.logs = logs
+      return logs
     }
   }
-});
+})

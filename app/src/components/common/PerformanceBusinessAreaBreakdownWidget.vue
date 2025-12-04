@@ -45,7 +45,7 @@
         class="absolute top-0 left-0 w-full h-full flex flex-column align-items-center justify-content-center pointer-events-none"
       >
         <span class="text-500 text-sm">Top Sector</span>
-        <span class="text-xl font-bold text-900">{{ topSector.label }}</span>
+        <span class="text-xl font-bold text-900">{{ topSector?.label || 'N/A' }}</span>
       </div>
 
       <Chart type="doughnut" :data="chartData" :options="chartOptions" class="w-16rem" />

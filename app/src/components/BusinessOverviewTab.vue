@@ -4,7 +4,7 @@
   import Card from 'primevue/card'
   import ContactInfos from '@/components/common/ContactDetailsCard.vue'
   import SocialMediaCard from '@/components/common/SocialMediaCard.vue'
-  import MapComponent from '@/components/MapComponent.vue'
+  import InteractiveMap from '@/components/InteractiveMap.vue'
   import type { Business } from '@/types/business'
   import { businessAreaOptions as BUSINESS_AREA_MAP } from '@/constants/businessAreas'
 
@@ -20,11 +20,11 @@
   // Helper functions internal to this display component
   function getBusinessAreaName(code?: string) {
     if (!code) return t('common.notAvailable')
-    const area = BUSINESS_AREA_MAP.find(a => a.code === code)
+    const area = BUSINESS_AREA_MAP.find((a) => a.code === code)
     return area ? area.name : code
   }
 
-  function formatDate(date: string | Date | undefined): string {
+  function formatDate(date: string | Date | null | undefined): string {
     if (!date) return t('common.notAvailable')
     return new Date(date).toLocaleDateString(undefined, {
       year: 'numeric',
@@ -107,7 +107,7 @@
           <span class="text-xl font-bold">{{ $t('common.location') }}</span>
         </template>
         <template #content>
-          <MapComponent
+          <InteractiveMap
             :locations="mapLocations"
             :is-editable="false"
             style="height: 300px; width: 100%; border-radius: 8px"
@@ -131,4 +131,3 @@
     </div>
   </div>
 </template>
-

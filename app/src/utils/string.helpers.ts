@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 /**
  * Creates a truly optional Zod string schema that treats an empty string as `undefined`.
@@ -23,24 +23,24 @@ import { z } from 'zod';
  * schema.parse({ homepage: 'https://example.com' }); // Result: { homepage: 'https://example.com' }
  */
 export const optionalString = <T extends z.ZodType<string>>(constraintSchema: T) =>
-	z.preprocess((val) => (val === '' ? undefined : val), constraintSchema.optional());
+  z.preprocess((val) => (val === '' ? undefined : val), constraintSchema.optional())
 
-export const capitalize = (word: string) => word.replace(/\b\w/g, (c) => c.toUpperCase());
+export const capitalize = (word: string) => word.replace(/\b\w/g, (c) => c.toUpperCase())
 
 export const generateInitials = (name: string): string => {
   if (!name) {
-    return '';
+    return ''
   }
-  const nameParts = name.trim().split(/\s+/);
+  const nameParts = name.trim().split(/\s+/)
   if (nameParts.length === 1) {
-    return nameParts[0].substring(0, 2).toUpperCase();
+    return (nameParts[0] || '').substring(0, 2).toUpperCase()
   }
   return nameParts
     .slice(0, 2)
     .map((part) => part[0])
     .join('')
-    .toUpperCase();
-};
+    .toUpperCase()
+}
 
 const COLOR_CLASSES = [
   'bg-blue-500',
@@ -51,17 +51,17 @@ const COLOR_CLASSES = [
   'bg-indigo-500',
   'bg-teal-500',
   'bg-orange-500',
-  'bg-purple-500',
-];
+  'bg-purple-500'
+]
 
 export const getRandomColorClass = (str: string): string => {
   if (!str) {
-    return 'bg-gray-500';
+    return 'bg-gray-500'
   }
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
-  const index = Math.abs(hash) % COLOR_CLASSES.length;
-  return COLOR_CLASSES[index];
-};
+  const index = Math.abs(hash) % COLOR_CLASSES.length
+  return COLOR_CLASSES[index] || 'bg-gray-500'
+}

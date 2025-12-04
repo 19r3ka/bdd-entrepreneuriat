@@ -1,128 +1,140 @@
-import { setActivePinia, createPinia } from 'pinia';
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { useMaturityStore } from './useMaturityStore';
-import { db } from '@/services/local-db';
-import type { MaturityAssessment } from '@/types/monitoring-evaluation/Maturity';
+import { setActivePinia, createPinia } from 'pinia'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { useMaturityStore } from './useMaturityStore'
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import { useQuickWinStore } from './useQuickWinStore'
 
-// Mock the local-db Dexie instance
-vi.mock('@/services/local-db', () => {
-  const assessments: MaturityAssessment[] = [];
-  return {
-    db: {
-      maturityAssessments: {
-        add: vi.fn(async (assessment: MaturityAssessment) => {
-          assessments.push(assessment);
-          return assessment.id;
-        }),
-        get: vi.fn(async (id: string) => assessments.find(a => a.id === id)),
-        toArray: vi.fn(async () => assessments),
-        where: vi.fn((criteria: { businessId?: string }) => ({
-          toArray: vi.fn(async () => assessments.filter(a => a.businessId === criteria.businessId)),
-        })),
-        update: vi.fn(async (id: string, changes: Partial<MaturityAssessment>) => {
-          const index = assessments.findIndex(a => a.id === id);
-          if (index !== -1) {
-            Object.assign(assessments[index], changes);
-            return 1;
-          }
-          return 0;
-        }),
-        delete: vi.fn(async (id: string) => {
-            const index = assessments.findIndex(a => a.id === id);
-            if (index !== -1) {
-                assessments.splice(index, 1);
-                return 1;
-            }
-            return 0;
-        }),
-      },
-    },
-  };
-});
+vi.mock('./useQuickWinStore', () => ({
+  useQuickWinStore: vi.fn(() => ({
+    // Mock any necessary state or actions from useQuickWinStore if needed
+  }))
+}))
 
 describe('useMaturityStore', () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-    // Reset the mock db before each test
-    db.maturityAssessments.toArray = vi.fn(async () => []);
-    db.maturityAssessments.add = vi.fn(async (assessment: MaturityAssessment) => {
-        const assessments = await db.maturityAssessments.toArray();
-        assessments.push(assessment);
-        return assessment.id;
-    });
-  });
+    setActivePinia(createPinia())
+  })
 
-  const mockAssessment: Omit<MaturityAssessment, 'id' | 'createdAt' | 'updatedAt'> = {
-    businessId: 'business-123',
-    achievedMilestoneIds: ['FORM_1'],
-    computedScores: { FORMALIZATION: 20 },
-    notes: 'Test assessment',
-  };
+  const mockQuickWins: QuickWin[] = [
+    {
+      id: 'qw1',
+      businessId: 'b1',
+      title: 'Digital Presence',
+      category: 'digital_adoption',
+      dimension: 'Digital',
+      milestone: 1,
+      resultSummary: 'Website launched',
+      achievedOn: '2025-01-01',
+      rbmLevel: 'output',
+      indicatorValues: [],
+      evidenceIds: [],
+      tags: []
+    },
+    {
+      id: 'qw2',
+      businessId: 'b1',
+      title: 'Advanced Digital Tools',
+      category: 'digital_adoption',
+      dimension: 'Digital',
+      milestone: 2,
+      resultSummary: 'CRM implemented',
+      achievedOn: '2025-02-01',
+      rbmLevel: 'output',
+      indicatorValues: [],
+      evidenceIds: [],
+      tags: []
+    },
+    {
+      id: 'qw3',
+      businessId: 'b1',
+      title: 'Business Registration',
+      category: 'finance_access',
+      dimension: 'Formalization',
+      milestone: 1,
+      resultSummary: 'Registered the business',
+      achievedOn: '2025-03-01',
+      rbmLevel: 'output',
+      indicatorValues: [],
+      evidenceIds: [],
+      tags: []
+    },
+    {
+      id: 'qw4',
+      businessId: 'b1',
+      title: 'Opened Bank Account',
+      category: 'finance_access',
+      dimension: 'Finance',
+      milestone: 1,
+      resultSummary: 'Opened a corporate bank account',
+      achievedOn: '2025-04-01',
+      rbmLevel: 'output',
+      indicatorValues: [],
+      evidenceIds: [],
+      tags: []
+    }
+  ]
 
-  it('should add a new maturity assessment', async () => {
-    const store = useMaturityStore();
-    const addedAssessment = await store.addMaturityAssessment(mockAssessment);
+  it('getMaturityLevels should calculate the highest milestone for each dimension', () => {
+    const store = useMaturityStore()
+    const levels = store.getMaturityLevels(mockQuickWins)
 
-    expect(addedAssessment).toHaveProperty('id');
-    expect(addedAssessment.businessId).toBe('business-123');
-    expect(store.assessments).toContainEqual(addedAssessment);
-    expect(db.maturityAssessments.add).toHaveBeenCalled();
-  });
+    expect(levels.Digital).toBe(2)
+    expect(levels.Formalization).toBe(1)
+    expect(levels.Finance).toBe(1)
+    expect(levels.Market).toBe(0)
+    expect(levels.Green).toBe(0)
+  })
 
-  it('should get a maturity assessment by id', async () => {
-    const store = useMaturityStore();
-    const addedAssessment = await store.addMaturityAssessment(mockAssessment);
-    
-    // Adjust mock for get
-    db.maturityAssessments.get = vi.fn(async (id: string) => {
-        if (id === addedAssessment.id) {
-            return addedAssessment;
-        }
-        return undefined;
-    });
+  it('getNextMilestones should suggest the next steps', () => {
+    const store = useMaturityStore()
+    const nextMilestones = store.getNextMilestones(mockQuickWins)
 
-    const fetched = await store.getMaturityAssessmentById(addedAssessment.id);
-    expect(fetched).toEqual(addedAssessment);
-  });
+    const digitalSuggestion = nextMilestones.find((m) => m.dimension === 'Digital')
+    const formalizationSuggestion = nextMilestones.find((m) => m.dimension === 'Formalization')
+    const financeSuggestion = nextMilestones.find((m) => m.dimension === 'Finance')
+    const marketSuggestion = nextMilestones.find((m) => m.dimension === 'Market')
+    const greenSuggestion = nextMilestones.find((m) => m.dimension === 'Green')
 
-  it('should get a maturity assessment by business id', async () => {
-    const store = useMaturityStore();
-    const addedAssessment = await store.addMaturityAssessment(mockAssessment);
-    
-    // Adjust mock for where
-    db.maturityAssessments.where = vi.fn((criteria: { businessId?: string }) => ({
-      toArray: vi.fn(async () => {
-        if (criteria.businessId === addedAssessment.businessId) {
-            return [addedAssessment];
-        }
-        return [];
-      }),
-    }));
+    expect(digitalSuggestion?.milestone.level).toBe(3)
+    expect(formalizationSuggestion?.milestone.level).toBe(2)
+    expect(financeSuggestion?.milestone.level).toBe(2)
+    expect(marketSuggestion?.milestone.level).toBe(1)
+    expect(greenSuggestion?.milestone.level).toBe(1)
+  })
 
-    const fetched = await store.getMaturityAssessmentByBusinessId(addedAssessment.businessId);
-    expect(fetched).toEqual(addedAssessment);
-  });
+  it('getOverallMaturityScore should calculate the correct percentage', () => {
+    const store = useMaturityStore()
+    const score = store.getOverallMaturityScore(mockQuickWins)
 
-  it('should update a maturity assessment', async () => {
-    const store = useMaturityStore();
-    const addedAssessment = await store.addMaturityAssessment(mockAssessment);
-    const updates: Partial<MaturityAssessment> = { notes: 'Updated notes' };
-    
-    db.maturityAssessments.update = vi.fn().mockResolvedValue(1);
+    // Digital: 2, Formalization: 1, Finance: 1, Market: 0, Green: 0
+    // Total score = 2 + 1 + 1 + 0 + 0 = 4
+    // Max score = 5 dimensions * 4 levels = 20
+    // Percentage = (4 / 20) * 100 = 20
+    expect(score).toBe(20)
+  })
 
-    await store.updateMaturityAssessment(addedAssessment.id, updates);
-    expect(db.maturityAssessments.update).toHaveBeenCalledWith(addedAssessment.id, expect.objectContaining(updates));
-  });
+  it('getMaturityLevels should return all zeros for no quick wins', () => {
+    const store = useMaturityStore()
+    const levels = store.getMaturityLevels([])
 
-  it('should delete a maturity assessment', async () => {
-    const store = useMaturityStore();
-    const addedAssessment = await store.addMaturityAssessment(mockAssessment);
-    
-    db.maturityAssessments.delete = vi.fn().mockResolvedValue(1);
-    store.assessments = [addedAssessment]; // Manually set store state for test
+    expect(levels.Digital).toBe(0)
+    expect(levels.Formalization).toBe(0)
+    expect(levels.Finance).toBe(0)
+    expect(levels.Market).toBe(0)
+    expect(levels.Green).toBe(0)
+  })
 
-    await store.deleteMaturityAssessment(addedAssessment.id);
-    expect(db.maturityAssessments.delete).toHaveBeenCalledWith(addedAssessment.id);
-    expect(store.assessments).not.toContainEqual(addedAssessment);
-  });
-});
+  it('getNextMilestones should suggest level 1 for all dimensions for no quick wins', () => {
+    const store = useMaturityStore()
+    const nextMilestones = store.getNextMilestones([])
+
+    expect(nextMilestones.length).toBe(5)
+    expect(nextMilestones.every((m) => m.milestone.level === 1)).toBe(true)
+  })
+
+  it('getOverallMaturityScore should be 0 for no quick wins', () => {
+    const store = useMaturityStore()
+    const score = store.getOverallMaturityScore([])
+    expect(score).toBe(0)
+  })
+})

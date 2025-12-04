@@ -32,28 +32,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import Card from 'primevue/card';
+  import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import Card from 'primevue/card'
 
-export interface SocialPlatform {
-  name: string;      // e.g. "LinkedIn"
-  url: string;       // full profile URL
-  icon: string;      // PrimeIcon class, e.g. "pi-linkedin"
-  username?: string; // optional handle to display
-}
-
-const props = withDefaults(
-  defineProps<{
-    title?: string;
-    socials?: SocialPlatform[];
-  }>(),
-  {
-    title: undefined,
-    socials: () => [],
+  export interface SocialPlatform {
+    name: string // e.g. "LinkedIn"
+    url: string // full profile URL
+    icon: string // PrimeIcon class, e.g. "pi-linkedin"
+    username?: string // optional handle to display
   }
-);
 
-const { t } = useI18n();
-const computedTitle = computed(() => props.title ?? t('common.onlinePresence'));
+  const props = withDefaults(
+    defineProps<{
+      title?: string
+      socials?: SocialPlatform[]
+    }>(),
+    {
+      title: undefined,
+      socials: () => []
+    }
+  )
+
+  const { t } = useI18n()
+  const computedTitle = computed(() => props.title ?? t('common.onlinePresence'))
 </script>

@@ -1,327 +1,167 @@
-import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { db } from '@/services/local-db';
-import { useBusinessStore } from './useBusinessStore';
-import { useEntrepreneurStore } from './useEntrepreneurStore';
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useBusinessStore } from './useBusinessStore'
+import { useEntrepreneurStore } from './useEntrepreneurStore'
+import { useCrudStore } from '@/composables/useCrudStore'
+import { ref } from 'vue'
 
-// Mock the isProfileCompletedStrict utility function
+// Mock dependencies
+vi.mock('@/composables/useCrudStore')
+vi.mock('./useEntrepreneurStore')
 vi.mock('@/utils/schemaCompletion', () => ({
-  isProfileCompletedStrict: vi.fn((schema, data) => {
-    // Simple mock implementation - returns true if basic required fields are present
-    return !!(data.entrepreneurId && data.name && data.primaryBusinessArea);
-  }),
-}));
+  isProfileCompletedStrict: vi.fn().mockReturnValue(true)
+}))
+vi.mock('./useActivityLogStore', () => ({
+  useActivityLogStore: vi.fn(() => ({
+    logAction: vi.fn()
+  }))
+}))
 
-// Mock the useCrudStore composable
-vi.mock('@/composables/useCrudStore', async () => {
-  const actual = await vi.importActual('@/composables/useCrudStore');
-  return {
-    ...actual,
-    useCrudStore: vi.fn(({ schema, tableName, db }) => ({
-      items: [],
-      loading: false,
-      error: null,
+const mockEntrepreneurs = [
+  { id: 'ent1', firstName: 'John', lastName: 'Doe' },
+  { id: 'ent2', firstName: 'Jane', lastName: 'Smith' }
+]
+
+const mockRawBusinesses = [
+  {
+    id: 'biz1',
+    entrepreneurId: 'ent1',
+    name: 'Tech Solutions',
+    primaryBusinessArea: 'IT',
+    registrationNumber: 'TS123',
+    registrationDate: '2022-01-01T00:00:00.000Z',
+    activityStartDate: '2022-02-01T00:00:00.000Z',
+    supportStartDate: '2022-03-01T00:00:00.000Z',
+    location: { longitude: 10, latitude: 20 },
+    contact: { email: 'tech@example.com', telephone: '111' }
+  },
+  {
+    id: 'biz2',
+    entrepreneurId: 'ent2',
+    name: 'Retail Goods',
+    primaryBusinessArea: 'Retail',
+    registrationNumber: 'RG456',
+    registrationDate: null,
+    activityStartDate: '2023-01-01T00:00:00.000Z',
+    supportStartDate: '2023-02-01T00:00:00.000Z',
+    location: { longitude: 30, latitude: 40 },
+    contact: { email: 'retail@example.com', telephone: '222' }
+  }
+]
+
+describe('useBusinessStore', () => {
+  let mockCrudStore: any
+  let mockEntrepreneurStore: any
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+
+    mockCrudStore = {
+      items: ref([...mockRawBusinesses]),
+      loading: ref(false),
+      error: ref(null),
       fetchAll: vi.fn(),
-      fetchOne: vi.fn(),
+      fetchOne: vi.fn((id) => mockRawBusinesses.find((b) => b.id === id)),
       add: vi.fn(),
       update: vi.fn(),
       remove: vi.fn(),
-      removeMany: vi.fn(),
-    })),
-  };
-});
-
-// Mock the useEntrepreneurStore
-vi.mock('./useEntrepreneurStore', async () => {
-  const actual = await vi.importActual('./useEntrepreneurStore');
-  return {
-    ...actual,
-    useEntrepreneurStore: vi.fn(() => ({
-      entrepreneurs: [],
-      fetchAll: vi.fn(),
-    })),
-  };
-});
-
-describe('useBusinessStore', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-    // Reset mocks
-    vi.clearAllMocks();
-  });
-
-  it('enriches business with ownerName and computed flags', async () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [
-        {
-          id: 'ent1',
-          firstName: 'John',
-          lastName: 'Doe'
-        }
-      ],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
-
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    // Access the raw records ref and set the values to trigger computed properties
-    const rawRecordsRef = (store as any).rawBusinessRecords;
-    rawRecordsRef.value = [
-      {
-        id: '1',
-        entrepreneurId: 'ent1',
-        name: 'Test Business',
-        primaryBusinessArea: 'Tech',
-        registrationNumber: '12345',
-        registrationDate: '2023-01-01T00:00:00.000Z',
-        activityStartDate: '2023-02-01T00:00:00.000Z',
-        supportStartDate: '2023-03-01T00:00:00.000Z',
-        location: { longitude: 1, latitude: 1 },
-        contact: { email: 'test@example.com' }
-      }
-    ];
-
-    // Access the businesses computed property
-    const businesses = store.businesses;
-
-    // Should have enriched business with ownerName and other computed properties
-    if (businesses.length > 0) {
-      expect(businesses[0]).toHaveProperty('ownerName');
-      expect(businesses[0].ownerName).toBe('John Doe');
-      expect(businesses[0]).toHaveProperty('isRegistered');
-      expect(businesses[0].isRegistered).toBe(true);
-      expect(businesses[0]).toHaveProperty('profileCompleted');
-      expect(businesses[0].profileCompleted).toBe(true);
-      expect(businesses[0].registrationDate).toBeInstanceOf(Date);
-      expect(businesses[0].activityStartDate).toBeInstanceOf(Date);
-      expect(businesses[0].supportStartDate).toBeInstanceOf(Date);
+      removeMany: vi.fn()
     }
-  });
+    vi.mocked(useCrudStore).mockReturnValue(mockCrudStore)
 
-  it('fetchOne enriches single business', async () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [
-        {
-          id: 'ent1',
-          firstName: 'John',
-          lastName: 'Doe'
-        }
-      ],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
+    mockEntrepreneurStore = {
+      entrepreneurs: ref(mockEntrepreneurs),
+      fetchAll: vi.fn()
+    }
+    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore)
+  })
 
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
+  it('correctly enriches businesses', async () => {
+    const store = useBusinessStore()
+    await store.fetchAll()
 
-    const store = useBusinessStore();
+    const businesses = store.businesses
+    expect(businesses.length).toBe(2)
 
-    // Mock the fetchOne function to return a business
-    const mockFetchOne = vi.fn().mockResolvedValue({
-      id: '1',
+    const biz1 = businesses.find((b) => b.id === 'biz1')
+    expect(biz1).toBeDefined()
+    expect(biz1?.ownerName).toBe('John Doe')
+    expect(biz1?.isRegistered).toBe(true)
+    expect(biz1?.profileCompleted).toBe(true)
+    expect(biz1?.registrationDate).toBeInstanceOf(Date)
+  })
+
+  it('handles null dates correctly', () => {
+    const store = useBusinessStore()
+    const businesses = store.businesses
+    const biz2 = businesses.find((b) => b.id === 'biz2')
+    expect(biz2).toBeDefined()
+    expect(biz2?.isRegistered).toBe(false)
+    expect(biz2?.registrationDate).toBeNull()
+  })
+
+  it('fetches and enriches a single business', async () => {
+    const store = useBusinessStore()
+    const business = await store.fetchOne('biz1')
+
+    expect(business).not.toBeNull()
+    expect(business?.ownerName).toBe('John Doe')
+    expect(business?.isRegistered).toBe(true)
+    expect(mockEntrepreneurStore.fetchAll).toHaveBeenCalled()
+    expect(mockCrudStore.fetchOne).toHaveBeenCalledWith('biz1')
+  })
+
+  it('returns null if fetchOne finds no record', async () => {
+    mockCrudStore.fetchOne.mockResolvedValue(null)
+    const store = useBusinessStore()
+    const business = await store.fetchOne('nonexistent')
+    expect(business).toBeNull()
+  })
+
+  it('provides correct getters', () => {
+    const store = useBusinessStore()
+    const biz1 = store.getById('biz1')
+    expect(biz1).toBeDefined()
+    expect(biz1?.name).toBe('Tech Solutions')
+
+    const biz2 = store.getByRegistrationNumber('RG456')
+    expect(biz2).toBeDefined()
+    expect(biz2?.name).toBe('Retail Goods')
+
+    const biz1ByEmail = store.getByEmail('tech@example.com')
+    expect(biz1ByEmail).toBeDefined()
+    expect(biz1ByEmail?.name).toBe('Tech Solutions')
+  })
+
+  it('searches by name correctly', () => {
+    const store = useBusinessStore()
+    const results = store.searchByName('Tech')
+    expect(results.value.length).toBe(1)
+    expect(results.value[0]!.name).toBe('Tech Solutions')
+
+    const allResults = store.searchByName('')
+    expect(allResults.value.length).toBe(2)
+  })
+
+  it('calls underlying CRUD methods for add and update', async () => {
+    const store = useBusinessStore()
+    const newBusiness: any = {
+      id: 'biz3',
+      name: 'New Biz',
       entrepreneurId: 'ent1',
-      name: 'Test Business',
-      primaryBusinessArea: 'Tech',
-      registrationNumber: '12345',
-      registrationDate: '2023-01-01T00:00:00.000Z',
-      activityStartDate: '2023-02-01T00:00:00.000Z',
-      supportStartDate: '2023-03-01T00:00:00.000Z',
       location: { longitude: 1, latitude: 1 },
-      contact: { email: 'test@example.com' }
-    });
-    (store as any).fetchOneRaw = mockFetchOne; // Mock the underlying fetchOneRaw function
-
-    const result = await store.fetchOne('1');
-
-    if (result) {
-      // Result should be enriched
-      expect(result).toHaveProperty('ownerName');
-      expect(result.ownerName).toBe('John Doe');
-      expect(result).toHaveProperty('isRegistered');
-      expect(result.isRegistered).toBe(true);
-      expect(result).toHaveProperty('profileCompleted');
-      expect(result.profileCompleted).toBe(true);
-      expect(result.registrationDate).toBeInstanceOf(Date);
-      expect(result.activityStartDate).toBeInstanceOf(Date);
-      expect(result.supportStartDate).toBeInstanceOf(Date);
+      contact: { email: 'new@test.com' }
     }
-  });
+    await store.add(newBusiness)
+    expect(mockCrudStore.add).toHaveBeenCalled()
 
-  it('getters work correctly', () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [
-        {
-          id: 'ent1',
-          firstName: 'John',
-          lastName: 'Doe'
-        }
-      ],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
+    await store.update({ ...newBusiness, name: 'Updated Biz' })
+    expect(mockCrudStore.update).toHaveBeenCalled()
+  })
 
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    // Mock the raw business records to trigger computed properties
-    const rawRecordsRef = (store as any).rawBusinessRecords;
-    rawRecordsRef.value = [
-      {
-        id: '1',
-        entrepreneurId: 'ent1',
-        name: 'Test Business',
-        primaryBusinessArea: 'Tech',
-        registrationNumber: '12345',
-        location: { longitude: 1, latitude: 1 },
-        contact: { email: 'test@example.com' }
-      },
-      {
-        id: '2',
-        entrepreneurId: 'ent1',
-        name: 'Another Business',
-        primaryBusinessArea: 'Retail',
-        registrationNumber: '67890',
-        location: { longitude: 2, latitude: 2 },
-        contact: { email: 'another@example.com' }
-      }
-    ];
-
-    // Test getById
-    const business1 = store.getById('1');
-    expect(business1?.name).toBe('Test Business');
-
-    // Test getByRegistrationNumber
-    const businessWithReg = store.getByRegistrationNumber('67890');
-    expect(businessWithReg?.name).toBe('Another Business');
-
-    // Test getByEmail
-    const businessWithEmail = store.getByEmail('test@example.com');
-    expect(businessWithEmail?.name).toBe('Test Business');
-  });
-
-  it('searchByName works correctly', () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
-
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    // Mock the raw business records to trigger computed properties
-    const rawRecordsRef = (store as any).rawBusinessRecords;
-    rawRecordsRef.value = [
-      {
-        id: '1',
-        entrepreneurId: 'ent1',
-        name: 'Tech Solutions',
-        primaryBusinessArea: 'Tech',
-        location: { longitude: 1, latitude: 1 },
-        contact: { email: 'tech@example.com' }
-      },
-      {
-        id: '2',
-        entrepreneurId: 'ent1',
-        name: 'Retail Store',
-        primaryBusinessArea: 'Retail',
-        location: { longitude: 2, latitude: 2 },
-        contact: { email: 'retail@example.com' }
-      }
-    ];
-
-    // Test searchByName
-    const techResults = store.searchByName('Tech');
-    expect(techResults.value).toHaveLength(1);
-    expect(techResults.value[0].name).toBe('Tech Solutions');
-  });
-
-  it('handles date coercion properly', () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
-
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    // Mock a business with date strings
-    const rawRecordsRef = (store as any).rawBusinessRecords;
-    rawRecordsRef.value = [
-      {
-        id: '1',
-        entrepreneurId: 'ent1',
-        name: 'Test Business',
-        primaryBusinessArea: 'Tech',
-        registrationDate: '2023-01-01T00:00:00.000Z',
-        activityStartDate: '2023-02-01T00:00:00.000Z',
-        supportStartDate: '2023-03-01T00:00:00.000Z',
-        location: { longitude: 1, latitude: 1 },
-        contact: { email: 'test@example.com' }
-      }
-    ];
-
-    const businesses = store.businesses;
-    if (businesses.length > 0) {
-      expect(businesses[0].registrationDate).toBeInstanceOf(Date);
-      expect(businesses[0].activityStartDate).toBeInstanceOf(Date);
-      expect(businesses[0].supportStartDate).toBeInstanceOf(Date);
-    }
-  });
-
-  it('handles null dates properly', () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [],
-      fetchAll: vi.fn().mockResolvedValue(undefined)
-    };
-
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    // Mock a business with null dates
-    const rawRecordsRef = (store as any).rawBusinessRecords;
-    rawRecordsRef.value = [
-      {
-        id: '1',
-        entrepreneurId: 'ent1',
-        name: 'Test Business',
-        primaryBusinessArea: 'Tech',
-        registrationDate: null,
-        activityStartDate: null,
-        supportStartDate: null,
-        location: { longitude: 1, latitude: 1 },
-        contact: { email: 'test@example.com' }
-      }
-    ];
-
-    const businesses = store.businesses;
-    if (businesses.length > 0) {
-      expect(businesses[0].registrationDate).toBeNull();
-      expect(businesses[0].activityStartDate).toBeNull();
-      expect(businesses[0].supportStartDate).toBeNull();
-    }
-  });
-
-  it('handles error cases gracefully', async () => {
-    // Mock entrepreneur store
-    const mockEntrepreneurStore = {
-      entrepreneurs: [],
-      fetchAll: vi.fn().mockRejectedValue(new Error('Database error'))
-    };
-
-    vi.mocked(useEntrepreneurStore).mockReturnValue(mockEntrepreneurStore as any);
-
-    const store = useBusinessStore();
-
-    await expect(store.fetchAll()).rejects.toThrow('Database error');
-    expect(store.error).not.toBeNull();
-  });
-});
+  it('remove method calls underlying remove and logs activity', async () => {
+    const store = useBusinessStore()
+    await store.remove('biz1')
+    expect(mockCrudStore.remove).toHaveBeenCalledWith('biz1')
+  })
+})

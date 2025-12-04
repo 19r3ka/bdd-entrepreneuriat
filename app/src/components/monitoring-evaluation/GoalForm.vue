@@ -77,7 +77,7 @@
             required
             field-class="col-12 md:col-6"
           >
-             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
                 @update:model-value="updateModelValue"
@@ -113,7 +113,7 @@
             required
             field-class="col-12 md:col-6"
           >
-             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
                 @update:model-value="updateModelValue"
@@ -155,8 +155,8 @@
         <Button
           type="submit"
           :label="isEdit ? $t('common.update') : $t('common.submit')"
-          :disabled="!canSubmit.value"
-          :loading="isSubmitting.value"
+          :disabled="!canSubmit"
+          :loading="isSubmitting"
         />
       </div>
     </BaseForm>
@@ -164,77 +164,86 @@
 </template>
 
 <script setup lang="ts">
-/**
- * GoalForm Component
- * 
- * Form for creating and editing Indicator Definitions (Goals).
- * 
- * @component
- * @example
- * <GoalForm
- *   :business-id="businessId"
- *   :is-edit="false"
- *   :initial-values="{}"
- *   @success="handleSuccess"
- *   @cancel="handleCancel"
- * />
- */
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useToast } from 'primevue/usetoast';
-import BaseForm from '@/components/common/BaseForm.vue';
-import FormField from '@/components/common/FormField.vue';
-import Section from '@/components/common/FormSection.vue';
-import Button from 'primevue/button';
-import Select from 'primevue/select';
-import InputNumber from 'primevue/inputnumber';
-import Calendar from 'primevue/calendar';
-import Toast from 'primevue/toast';
-import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue';
-import { useIndicatorStore } from '@/stores/useIndicatorStore';
-import { IndicatorDefinitionSchema, IndicatorTypeEnum } from '@/schemas/monitoring-evaluation/Indicator';
-import type { IndicatorDefinition } from '@/types/monitoring-evaluation/Indicator';
-import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
+  /**
+   * GoalForm Component
+   *
+   * Form for creating and editing Indicator Definitions (Goals).
+   *
+   * @component
+   * @example
+   * <GoalForm
+   *   :business-id="businessId"
+   *   :is-edit="false"
+   *   :initial-values="{}"
+   *   @success="handleSuccess"
+   *   @cancel="handleCancel"
+   * />
+   */
+  import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { useToast } from 'primevue/usetoast'
+  import BaseForm from '@/components/common/BaseForm.vue'
+  import FormField from '@/components/common/FormField.vue'
+  import Section from '@/components/common/FormSection.vue'
+  import Button from 'primevue/button'
+  import Select from 'primevue/select'
+  import InputNumber from 'primevue/inputnumber'
+  import Calendar from 'primevue/calendar'
+  import Toast from 'primevue/toast'
+  import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
+  import { useIndicatorStore } from '@/stores/useIndicatorStore'
+  import {
+    IndicatorDefinitionSchema,
+    IndicatorTypeEnum
+  } from '@/schemas/monitoring-evaluation/Indicator'
+  import type { IndicatorDefinition } from '@/types/monitoring-evaluation/Indicator'
+  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
 
-const props = defineProps<{
-  isEdit: boolean;
-  initialValues: Partial<IndicatorDefinition>;
-  businessId?: string;
-}>();
+  const props = defineProps<{
+    isEdit: boolean
+    initialValues: Partial<IndicatorDefinition>
+    businessId?: string
+  }>()
 
-const emit = defineEmits(['success', 'cancel']);
+  const emit = defineEmits(['success', 'cancel'])
 
-const { t } = useI18n();
-const toast = useToast();
-const indicatorStore = useIndicatorStore();
-const { handleApiError } = useErrorHandler();
+  const { t } = useI18n()
+  const toast = useToast()
+  const indicatorStore = useIndicatorStore()
+  const { handleApiError } = useErrorHandler()
 
-const indicatorTypeOptions = computed(() =>
-  Object.values(IndicatorTypeEnum.enum).map(value => ({ label: t(`indicatorType.${value}`), value }))
-);
+  const indicatorTypeOptions = computed(() =>
+    Object.values(IndicatorTypeEnum.enum).map((value) => ({
+      label: t(`indicatorType.${value}`),
+      value
+    }))
+  )
 
-async function handleSubmit(data: any) {
-  try {
-    if (props.isEdit) {
-      await indicatorStore.updateIndicator(props.initialValues.id!, data);
-      toast.add({
-        severity: 'success',
-        summary: t('common.success'),
-        detail: t('goalForm.updateSuccess', 'Goal updated successfully'),
-        life: 3000,
-      });
-    } else {
-      await indicatorStore.addIndicator({ ...data, businessId: data.businessId || props.businessId });
-      toast.add({
-        severity: 'success',
-        summary: t('common.success'),
-        detail: t('goalForm.createSuccess', 'Goal created successfully'),
-        life: 3000,
-      });
+  async function handleSubmit(data: any) {
+    try {
+      if (props.isEdit) {
+        await indicatorStore.updateIndicator(props.initialValues.id!, data)
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('goalForm.updateSuccess', 'Goal updated successfully'),
+          life: 3000
+        })
+      } else {
+        await indicatorStore.addIndicator({
+          ...data,
+          businessId: data.businessId || props.businessId
+        })
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('goalForm.createSuccess', 'Goal created successfully'),
+          life: 3000
+        })
+      }
+      emit('success')
+    } catch (error) {
+      handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} goal`)
     }
-    emit('success');
-  } catch (error) {
-    handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} goal`);
   }
-}
 </script>

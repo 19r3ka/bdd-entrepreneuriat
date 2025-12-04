@@ -131,7 +131,7 @@
             <!-- Geolocation Map with Address -->
             <Section :title="$t('common.location')" class="mt-4">
               <p class="text-sm text-600 mb-3">{{ $t('forms.entrepreneur.locationHelp') }}</p>
-              <MapComponent
+              <InteractiveMap
                 :locations="mapLocations"
                 :is-editable="true"
                 @update:location="handleLocationUpdate"
@@ -171,8 +171,8 @@
               type="submit"
               :label="isEdit ? $t('common.update') : $t('common.submit')"
               class="p-3"
-              :disabled="!canSubmit.value"
-              :loading="isSubmitting.value"
+              :disabled="!canSubmit"
+              :loading="isSubmitting"
             />
           </div>
         </BaseForm>
@@ -182,118 +182,117 @@
 </template>
 
 <script setup lang="ts">
-import Button from 'primevue/button';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import AvatarUpload from '@/components/common/AvatarUpload.vue';
-import BaseForm from '@/components/common/BaseForm.vue';
-import FormField from '@/components/common/FormField.vue';
-import Section from '@/components/common/FormSection.vue';
-import { useSlugLogic } from '@/composables/useSlugLogic';
-import { useErrorHandler } from '@/composables/useErrorHandler';
-import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
-import type { Entrepreneur } from '@/types/entrepreneur';
-import type { ZodSchema } from 'zod';
-import Select from 'primevue/select'; // Import Select
-import DatePicker from 'primevue/datepicker'; // Import DatePicker
-import MapComponent from '@/components/MapComponent.vue'; // Import MapComponent
+  import Button from 'primevue/button'
+  import Toast from 'primevue/toast'
+  import { useToast } from 'primevue/usetoast'
+  import { ref, computed } from 'vue'
+  import { useRouter } from 'vue-router'
+  import AvatarUpload from '@/components/common/AvatarUpload.vue'
+  import BaseForm from '@/components/common/BaseForm.vue'
+  import FormField from '@/components/common/FormField.vue'
+  import Section from '@/components/common/FormSection.vue'
+  import { useSlugLogic } from '@/composables/useSlugLogic'
+  import { useErrorHandler } from '@/composables/useErrorHandler'
+  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
+  import type { Entrepreneur } from '@/types/entrepreneur'
+  import type { ZodSchema } from 'zod'
+  import Select from 'primevue/select' // Import Select
+  import DatePicker from 'primevue/datepicker' // Import DatePicker
+  import InteractiveMap from '@/components/InteractiveMap.vue' // Import InteractiveMap
 
-// Helper function to set field values in the form
-const setFieldValue = (path: string, value: any) => {
-  if (formRef.value) {
-    formRef.value.setFieldValue(path, value);
+  // Helper function to set field values in the form
+  const setFieldValue = (path: string, value: any) => {
+    if (formRef.value) {
+      formRef.value.setFieldValue(path, value)
+    }
   }
-};
 
-const props = defineProps<{
-  isEdit: boolean;
-  initialValues: Entrepreneur;
-  schema: ZodSchema;
-  uniqueChecks?: Record<string, (value: any) => Promise<boolean>>;
-}>();
+  const props = defineProps<{
+    isEdit: boolean
+    initialValues: Entrepreneur
+    schema: ZodSchema
+    uniqueChecks?: Record<string, (value: any) => Promise<boolean>>
+  }>()
 
-const router = useRouter();
-const store = useEntrepreneurStore();
-const toast = useToast();
-const { handleApiError } = useErrorHandler();
+  const router = useRouter()
+  const store = useEntrepreneurStore()
+  const toast = useToast()
+  const { handleApiError } = useErrorHandler()
 
-// Access exposed form for slug generation
-const formRef = ref<any>(null);
+  // Access exposed form for slug generation
+  const formRef = ref<any>(null)
 
-const maxDate = new Date(); // For DatePicker max date
+  const maxDate = new Date() // For DatePicker max date
 
-const mapLocations = computed(() => {
-  if (props.initialValues.location?.latitude && props.initialValues.location?.longitude) {
-    return [{
-      lat: props.initialValues.location.latitude,
-      lng: props.initialValues.location.longitude,
-      name: `${props.initialValues.firstName} ${props.initialValues.lastName}` || 'Entrepreneur Location'
-    }];
+  const mapLocations = computed(() => {
+    if (props.initialValues.location?.latitude && props.initialValues.location?.longitude) {
+      return [
+        {
+          lat: props.initialValues.location.latitude,
+          lng: props.initialValues.location.longitude,
+          name:
+            `${props.initialValues.firstName} ${props.initialValues.lastName}` ||
+            'Entrepreneur Location'
+        }
+      ]
+    }
+    return []
+  })
+
+  const genderOptions = [
+    { label: 'Woman', value: 'Woman' },
+    { label: 'Man', value: 'Man' },
+    { label: 'Non-binary', value: 'Non-binary' },
+    { label: 'Prefer not to say', value: 'Prefer not to say' },
+    { label: 'Not specified', value: '' } // Add an option for empty/not specified
+  ]
+
+  // markSlugAsManual comes from slug logic (function), not a ref
+  const markSlugAsManual = (val: string) => {
+    if (formRef.value?.values) {
+      const { markSlugAsManual: markManual } = useSlugLogic(formRef.value.values)
+      markManual()
+    }
   }
-  return [];
-});
 
-const genderOptions = [
-  { label: 'Woman', value: 'Woman' },
-  { label: 'Man', value: 'Man' },
-  { label: 'Non-binary', value: 'Non-binary' },
-  { label: 'Prefer not to say', value: 'Prefer not to say' },
-  { label: 'Not specified', value: '' }, // Add an option for empty/not specified
-];
-
-
-// markSlugAsManual comes from slug logic (function), not a ref
-const markSlugAsManual = (val: string) => {
-	if (formRef.value?.values) {
-		const { markSlugAsManual: markManual } = useSlugLogic(formRef.value.values);
-		markManual();
-	}
-};
-
-// Handle location update from map
-const handleLocationUpdate = (coords: { lat: number; lng: number }) => {
-  if (formRef.value) {
-    formRef.value.setFieldValue('location.latitude', coords.lat);
-    formRef.value.setFieldValue('location.longitude', coords.lng);
+  // Handle location update from map
+  const handleLocationUpdate = (coords: { lat: number; lng: number }) => {
+    if (formRef.value) {
+      formRef.value.setFieldValue('location.latitude', coords.lat)
+      formRef.value.setFieldValue('location.longitude', coords.lng)
+    }
   }
-};
 
-// Handle address update from map (reverse geocoding)
-const handleAddressUpdate = (address: string) => {
-  if (formRef.value) {
-    formRef.value.setFieldValue('address', address);
+  // Handle address update from map (reverse geocoding)
+  const handleAddressUpdate = (address: string) => {
+    if (formRef.value) {
+      formRef.value.setFieldValue('address', address)
+    }
   }
-};
 
-async function handleSubmit(data: any) {
-	try {
-		if (props.isEdit) {
-			await store.update(data);
-			toast.add({
-				severity: 'success',
-				summary: 'Success',
-				detail: 'Entrepreneur updated successfully',
-				life: 3000,
-			});
-		} else {
-			await store.add(data);
-			toast.add({
-				severity: 'success',
-				summary: 'Success',
-				detail: 'Entrepreneur created successfully',
-				life: 3000,
-			});
-		}
-		formRef.value?.resetForm();
-		router.push('/entrepreneurs');
-	} catch (error) {
-		handleApiError(
-			error as any,
-			`Failed to ${props.isEdit ? 'update' : 'create'} entrepreneur`,
-		);
-	}
-}
+  async function handleSubmit(data: any) {
+    try {
+      if (props.isEdit) {
+        await store.update(data)
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Entrepreneur updated successfully',
+          life: 3000
+        })
+      } else {
+        await store.add(data)
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Entrepreneur created successfully',
+          life: 3000
+        })
+      }
+      formRef.value?.resetForm()
+      router.push('/entrepreneurs')
+    } catch (error) {
+      handleApiError(error as any, `Failed to ${props.isEdit ? 'update' : 'create'} entrepreneur`)
+    }
+  }
 </script>
-

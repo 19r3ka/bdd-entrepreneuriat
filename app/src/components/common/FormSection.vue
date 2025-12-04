@@ -1,9 +1,5 @@
 <template>
-  <Panel
-    toggleable
-    :collapsed="initiallyCollapsed"
-    class="mb-6"
-  >
+  <Panel toggleable :collapsed="initiallyCollapsed" class="mb-6">
     <template #header>
       <div class="flex justify-content-between align-items-center w-full">
         <h2 class="text-900 font-bold text-xl m-0">{{ title }}</h2>
@@ -17,14 +13,14 @@
 </template>
 
 <script setup lang="ts">
-import Panel from "primevue/panel";
+  import Panel from 'primevue/panel'
 
-interface Props {
-	title: string;
-	initiallyCollapsed?: boolean;
-}
+  interface Props {
+    title: string
+    initiallyCollapsed?: boolean
+  }
 
-const props = withDefaults(defineProps<Props>(), {
-	initiallyCollapsed: false,
-});
+  const props = withDefaults(defineProps<Props>(), {
+    initiallyCollapsed: false
+  })
 </script>

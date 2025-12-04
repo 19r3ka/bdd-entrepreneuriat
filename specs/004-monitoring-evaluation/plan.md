@@ -1,104 +1,62 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Monitoring & Evaluation (M&E) Module
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Branch**: `004-monitoring-evaluation` | **Date**: 2025-12-03 | **Spec**: [spec.md](./spec.md)
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+This document outlines the technical implementation of the Monitoring & Evaluation (M&E) module. The codebase reveals a comprehensive system that goes beyond the initial "Support Boosts" feature specified in `spec.md`. The module allows program managers to track a variety of metrics for businesses, including:
+
+- **Support Boosts**: Logging detailed support interventions (e.g., grants, training).
+- **Indicators**: Defining and measuring specific goals or targets.
+- **Maturity**: Assessing business maturity across different dimensions.
+- **Momentum Metrics**: Tracking progress and performance indicators over time.
+- **Quick Wins**: Recording short-term, impactful achievements.
+- **Output Indicators**: Measuring the direct results of support activities.
+
+The architecture is built on a modern Vue.js frontend stack, emphasizing a structured, schema-driven approach to data management and state.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
-
-## Constitution Check
-
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on constitution file]
+**Language/Version**: TypeScript (~5.9.0)
+**Primary Dependencies**: Vue.js (v3.5), Pinia (v3.0), Zod (v4.1), Vite (v7.1), PrimeVue (v4.4), Dexie.js (v4.2) for local database.
+**Storage**: Client-side storage via IndexedDB, managed by the `Dexie.js` wrapper. All data is stored locally on the user's device.
+**Testing**: Unit and composable testing are conducted with Vitest.
+**Target Platform**: Modern web browsers.
+**Project Type**: Single Page Application (SPA).
+**Constraints**: Operates fully offline on the client-side; no server-side authentication or database.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/004-monitoring-evaluation/
+├── plan.md              # This file
+├── spec.md              # Feature specification (to be updated)
+└── checklists/
+    └── requirements.md  # Spec quality checklist
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+
+The project follows a standard structure for a Vue.js application, located within the `/app` directory.
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+app/
+└── src/
+    ├── assets/         # Static assets (CSS, images)
+    ├── components/     # Reusable Vue components
+    │   └── monitoring-evaluation/ # UI components for the M&E module
+    ├── composables/    # Reusable composition functions (hooks)
+    ├── constants/      # Application-wide constants
+    ├── router/         # Vue Router configuration
+    ├── schemas/        # Zod schemas for data validation
+    │   └── monitoring-evaluation/ # Zod schemas for M&E data types
+    ├── services/       # Core services (DB, API clients)
+    ├── stores/         # Pinia stores for state management
+    ├── types/          # TypeScript type definitions
+    │   └── monitoring-evaluation/ # TypeScript types for M&E data
+    └── views/          # Top-level page components
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
-
-## Complexity Tracking
-
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+**Structure Decision**: The project is a self-contained Vue.js Single Page Application. The structure is well-organized around features and functions (e.g., separating `stores`, `schemas`, and `components`), which is a scalable approach for a frontend application. The M&E module is not isolated but is integrated into this structure, with its own dedicated subdirectories within `components`, `schemas`, and `types`.

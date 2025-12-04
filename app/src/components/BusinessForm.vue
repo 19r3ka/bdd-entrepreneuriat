@@ -11,22 +11,39 @@
           :on-submit="handleSubmit"
           :unique-checks="uniqueChecks"
           validate-on-blur
-          v-slot="{ defineField, canSubmit, isSubmitting, isValid, isDirty, errors, rawErrors, setFieldValue }"
+          v-slot="{
+            defineField,
+            canSubmit,
+            isSubmitting,
+            isValid,
+            isDirty,
+            errors,
+            rawErrors,
+            setFieldValue
+          }"
         >
-
-
-          <Message v-if="Array.isArray(rawErrors.value) && rawErrors.value.length > 0" severity="error" class="mb-3" :closable="false">
+          <Message
+            v-if="Array.isArray(rawErrors.value) && rawErrors.value.length > 0"
+            severity="error"
+            class="mb-3"
+            :closable="false"
+          >
             <template #icon>
               <i class="pi pi-exclamation-triangle"></i>
             </template>
             <strong>Validation issues:</strong>
             <ul class="mt-2 ml-3">
-              <li v-for="issue in rawErrors.value.filter((e): e is import('zod').ZodIssue => typeof e === 'object' && e !== null && 'path' in e)" :key="issue.path.join('.')">
+              <li
+                v-for="issue in rawErrors.value.filter(
+                  (e): e is import('zod').ZodIssue =>
+                    typeof e === 'object' && e !== null && 'path' in e
+                )"
+                :key="issue.path.join('.')"
+              >
                 <span class="font-bold">{{ issue.path.join('.') }}</span> — {{ issue.message }}
               </li>
             </ul>
           </Message>
-
 
           <!-- General Information -->
           <Section :title="$t('common.generalInformation')">
@@ -118,17 +135,21 @@
 
           <!-- Geolocation -->
           <Section :title="$t('common.location')">
-            <MapComponent
+            <InteractiveMap
               :locations="mapLocations"
               :is-editable="true"
               height="350px"
-              @update:location="(newCoords) => {
-                setFieldValue('location.latitude', newCoords.lat);
-                setFieldValue('location.longitude', newCoords.lng);
-              }"
-              @update:address="(address) => {
-                setFieldValue('location.address', address);
-              }"
+              @update:location="
+                (newCoords) => {
+                  setFieldValue('location.latitude', newCoords.lat)
+                  setFieldValue('location.longitude', newCoords.lng)
+                }
+              "
+              @update:address="
+                (address) => {
+                  setFieldValue('location.address', address)
+                }
+              "
             />
           </Section>
 
@@ -268,8 +289,8 @@
               type="submit"
               :label="isEdit ? $t('common.update') : $t('common.submit')"
               class="p-3"
-              :disabled="!canSubmit.value"
-              :loading="isSubmitting.value"
+              :disabled="!canSubmit"
+              :loading="isSubmitting"
             />
           </div>
         </BaseForm>
@@ -279,90 +300,91 @@
 </template>
 
 <script setup lang="ts">
-import Button from 'primevue/button';
-import DatePicker from 'primevue/datepicker';
-import InputText from 'primevue/inputtext';
-import Message from 'primevue/message';
-import Select from 'primevue/select';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
-import { useRouter } from 'vue-router';
-import type { ZodSchema } from 'zod';
-import { computed } from 'vue';
+  import Button from 'primevue/button'
+  import DatePicker from 'primevue/datepicker'
+  import InputText from 'primevue/inputtext'
+  import Message from 'primevue/message'
+  import Select from 'primevue/select'
+  import Toast from 'primevue/toast'
+  import { useToast } from 'primevue/usetoast'
+  import { useRouter } from 'vue-router'
+  import type { ZodSchema } from 'zod'
+  import { computed } from 'vue'
 
-import AvatarUpload from '@/components/common/AvatarUpload.vue';
-import BaseForm from '@/components/common/BaseForm.vue';
-import EntrepreneurAutoComplete from '@/components/common/EntrepreneurAutoComplete.vue';
-import FormField from '@/components/common/FormField.vue';
-import Section from '@/components/common/FormSection.vue';
-import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
-import type { UniqueChecks } from '@/composables/useValidationForm';
-import { businessAreaOptions } from '@/constants/businessAreas';
-import { useBusinessStore } from '@/stores/useBusinessStore';
-import type { Business } from '@/types/business';
-import MapComponent from '@/components/MapComponent.vue'; // Import MapComponent
+  import AvatarUpload from '@/components/common/AvatarUpload.vue'
+  import BaseForm from '@/components/common/BaseForm.vue'
+  import EntrepreneurAutoComplete from '@/components/common/EntrepreneurAutoComplete.vue'
+  import FormField from '@/components/common/FormField.vue'
+  import Section from '@/components/common/FormSection.vue'
+  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
+  import type { UniqueChecks } from '@/composables/useValidationForm'
+  import { businessAreaOptions } from '@/constants/businessAreas'
+  import { useBusinessStore } from '@/stores/useBusinessStore'
+  import type { Business } from '@/types/business'
+  import InteractiveMap from '@/components/InteractiveMap.vue' // Import InteractiveMap
 
-const props = defineProps<{
-	isEdit: boolean;
-	initialValues: Business;
-	schema: ZodSchema;
-	uniqueChecks?: UniqueChecks;
-}>();
+  const props = defineProps<{
+    isEdit: boolean
+    initialValues: Business
+    schema: ZodSchema
+    uniqueChecks?: UniqueChecks
+  }>()
 
-const router = useRouter();
-const businessStore = useBusinessStore();
-const toast = useToast();
-const { handleApiError } = useErrorHandler();
+  const router = useRouter()
+  const businessStore = useBusinessStore()
+  const toast = useToast()
+  const { handleApiError } = useErrorHandler()
 
-const maxDate = new Date();
+  const maxDate = new Date()
 
-const mapLocations = computed(() => {
-  if (props.initialValues.location?.latitude && props.initialValues.location?.longitude) {
-    return [{
-      lat: props.initialValues.location.latitude,
-      lng: props.initialValues.location.longitude,
-      name: props.initialValues.name || 'Business Location'
-    }];
+  const mapLocations = computed(() => {
+    if (props.initialValues.location?.latitude && props.initialValues.location?.longitude) {
+      return [
+        {
+          lat: props.initialValues.location.latitude,
+          lng: props.initialValues.location.longitude,
+          name: props.initialValues.name || 'Business Location'
+        }
+      ]
+    }
+    return []
+  })
+
+  async function handleSubmit(data: any) {
+    if (!data.socialMedia.linkedin) {
+      data.socialMedia.linkedin = null
+    }
+    try {
+      if (props.isEdit) {
+        await businessStore.update(data)
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Business updated successfully',
+          life: 3000
+        })
+      } else {
+        await businessStore.add(data)
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Business created successfully',
+          life: 3000
+        })
+      }
+      router.push('/businesses')
+    } catch (error) {
+      handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} business`)
+    }
   }
-  return [];
-});
-
-
-async function handleSubmit(data: any) {
-	if (!data.socialMedia.linkedin) {
-		data.socialMedia.linkedin = null;
-	}
-	try {
-		if (props.isEdit) {
-			await businessStore.update(data);
-			toast.add({
-				severity: 'success',
-				summary: 'Success',
-				detail: 'Business updated successfully',
-				life: 3000,
-			});
-		} else {
-			await businessStore.add(data);
-			toast.add({
-				severity: 'success',
-				summary: 'Success',
-				detail: 'Business created successfully',
-				life: 3000,
-			});
-		}
-		router.push('/businesses');
-	} catch (error) {
-		handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} business`);
-	}
-}
 </script>
 
 <style scoped>
-/* Ensure DatePicker fills available width */
-.p-datepicker {
-  width: 100% !important;
-}
-.p-datepicker .p-inputtext {
-  width: 100% !important;
-}
+  /* Ensure DatePicker fills available width */
+  .p-datepicker {
+    width: 100% !important;
+  }
+  .p-datepicker .p-inputtext {
+    width: 100% !important;
+  }
 </style>

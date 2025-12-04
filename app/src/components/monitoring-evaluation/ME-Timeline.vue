@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <h2 class="mb-4">{{ $t('meTimeline.title') }}</h2>
-    
+
     <div v-if="loading" class="flex justify-content-center p-4">
       <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
     </div>
@@ -12,7 +12,10 @@
 
     <Timeline v-else :value="events" align="alternate" class="customized-timeline">
       <template #marker="slotProps">
-        <span class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1" :class="slotProps.item.color">
+        <span
+          class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+          :class="slotProps.item.color"
+        >
           <i :class="slotProps.item.icon"></i>
         </span>
       </template>
@@ -40,101 +43,96 @@
 </template>
 
 <script setup lang="ts">
-/**
- * ME-Timeline Component
- * 
- * Displays a chronological timeline of Support Interventions and Outcome Measurements
- * for a specific business.
- * 
- * @component
- * @example
- * <METimeline :business-id="businessId" />
- */
-import { ref, onMounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import Timeline from 'primevue/timeline';
-import Card from 'primevue/card';
-import { useSupportStore } from '@/stores/useSupportStore';
-import { useIndicatorStore } from '@/stores/useIndicatorStore';
+  import { ref, onMounted } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import Timeline from 'primevue/timeline'
+  import Card from 'primevue/card'
+  import { useSupportStore } from '@/stores/useSupportStore'
+  import { useIndicatorStore } from '@/stores/useIndicatorStore'
+  import type { Support } from '@/types/monitoring-evaluation/Support'
+  import type { IndicatorDefinition, Measurement } from '@/types/monitoring-evaluation/Indicator'
 
-const props = defineProps<{
-  businessId: string;
-}>();
+  const props = defineProps<{
+    businessId: string
+  }>()
 
-const { t } = useI18n();
-const supportStore = useSupportStore();
-const indicatorStore = useIndicatorStore();
+  const { t } = useI18n()
+  const supportStore = useSupportStore()
+  const indicatorStore = useIndicatorStore()
 
-const loading = ref(true);
+  const loading = ref(true)
 
-interface TimelineEvent {
-  id: string;
-  date: string;
-  rawDate: Date;
-  title: string;
-  typeLabel: string;
-  description: string;
-  details?: string;
-  icon: string;
-  color: string;
-}
-
-const events = ref<TimelineEvent[]>([]);
-
-onMounted(async () => {
-  loading.value = true;
-  try {
-    const supports = await supportStore.getSupportsByBusinessId(props.businessId);
-    const indicators = await indicatorStore.getIndicatorsByBusinessId(props.businessId);
-    
-    const timelineEvents: TimelineEvent[] = [];
-
-    // Process Supports
-    supports.forEach(s => {
-      timelineEvents.push({
-        id: s.id,
-        date: new Date(s.date).toLocaleDateString(),
-        rawDate: new Date(s.date),
-        title: s.modality, // e.g., Training, Grant
-        typeLabel: t('meTimeline.support'),
-        description: s.description,
-        icon: 'pi pi-gift',
-        color: 'bg-blue-500'
-      });
-    });
-
-    // Process Measurements
-    for (const ind of indicators) {
-      const measurements = await indicatorStore.getMeasurementsByIndicatorId(ind.id);
-      measurements.forEach(m => {
-        timelineEvents.push({
-          id: m.id,
-          date: new Date(m.dateRecorded).toLocaleDateString(),
-          rawDate: new Date(m.dateRecorded),
-          title: ind.name,
-          typeLabel: t('meTimeline.measurement'),
-          description: m.contributionNarrative,
-          details: `${t('measurementForm.currentValue')}: ${m.currentValue}`,
-          icon: 'pi pi-chart-line',
-          color: 'bg-green-500'
-        });
-      });
-    }
-
-    // Sort by date descending
-    events.value = timelineEvents.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
-
-  } finally {
-    loading.value = false;
+  interface TimelineEvent {
+    id: string
+    date: string // Formatted date string
+    rawDate: Date // For sorting
+    title: string // Main title for the event (e.g., support title, indicator name)
+    typeLabel: string // Label for the type of event (e.g., "Support", "Measurement")
+    description: string // Main description for the event (e.g., support notes, measurement narrative)
+    details?: string // Optional additional details (e.g., current value for measurement)
+    icon: string
+    color: string
   }
-});
+
+  const events = ref<TimelineEvent[]>([])
+
+  onMounted(async () => {
+    loading.value = true
+    try {
+      const supports: Support[] = await supportStore.getSupportsByBusinessId(props.businessId)
+      const indicators: IndicatorDefinition[] = await indicatorStore.getIndicatorsByBusinessId(
+        props.businessId
+      )
+
+      const timelineEvents: TimelineEvent[] = []
+
+      // Process Supports
+      supports.forEach((s: Support) => {
+        timelineEvents.push({
+          id: s.id,
+          date: new Date(s.startDate).toLocaleDateString(),
+          rawDate: new Date(s.startDate),
+          title: t(`supportBoost.boostType.${s.boostType}`), // Translate boostType for title
+          typeLabel: t('meTimeline.support'),
+          description: s.notes || s.title, // Use notes or title as description
+          icon: 'pi pi-gift',
+          color: 'bg-blue-500'
+        })
+      })
+
+      // Process Measurements
+      for (const ind of indicators) {
+        const measurements: Measurement[] = await indicatorStore.getMeasurementsByIndicatorId(
+          ind.id
+        )
+        measurements.forEach((m: Measurement) => {
+          timelineEvents.push({
+            id: m.id,
+            date: new Date(m.dateRecorded).toLocaleDateString(),
+            rawDate: new Date(m.dateRecorded),
+            title: ind.name,
+            typeLabel: t('meTimeline.measurement'),
+            description: m.contributionNarrative || '', // Use narrative or empty string
+            details: `${t('measurementForm.currentValue')}: ${m.currentValue}`,
+            icon: 'pi pi-chart-line',
+            color: 'bg-green-500'
+          })
+        })
+      }
+
+      // Sort by date descending
+      events.value = timelineEvents.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime())
+    } finally {
+      loading.value = false
+    }
+  })
 </script>
 
 <style scoped>
-.customized-timeline :deep(.p-timeline-event-opposite) {
-  flex: 0.2;
-}
-.customized-timeline :deep(.p-timeline-event-content) {
-  flex: 0.8;
-}
+  .customized-timeline :deep(.p-timeline-event-opposite) {
+    flex: 0.2;
+  }
+  .customized-timeline :deep(.p-timeline-event-content) {
+    flex: 0.8;
+  }
 </style>

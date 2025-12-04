@@ -6,7 +6,7 @@
           :value="data"
           paginator
           :rows="10"
-          v-model:filters="filters"
+          v-model:filters="filters as any"
           :filterDisplay="filterMode === 'advanced' ? 'menu' : 'row'"
           :dataKey="dataKey"
           :globalFilterFields="globalFilterFields"
@@ -28,10 +28,14 @@
               </div>
 
               <div class="flex justify-content-between align-items-center">
-                <IconField v-if="filters && (filters as Record<string, unknown>).global" iconPosition="left" class="w-full md:w-20rem">
+                <IconField
+                  v-if="filters && filters.global"
+                  iconPosition="left"
+                  class="w-full md:w-20rem"
+                >
                   <InputIcon class="pi pi-search" />
                   <InputText
-                    v-model="(filters as Record<string, { value: unknown }>).global.value"
+                    v-model="filters.global.value as any"
                     :placeholder="$t('placeholders.searchAll')"
                     class="w-full"
                   />
@@ -85,16 +89,23 @@
             :field="col.field"
             :header="col.header"
             :sortable="col.sortable"
-            :showFilterMenu="Boolean(filters && (filters as Record<string, unknown>)[col.filterField || col.field])"
+            :showFilterMenu="Boolean(filters && filters[col.filterField || col.field])"
             :filterField="col.filterField || col.field"
           >
             <template #body="slotProps">
               <slot :name="`col-${col.field}`" :data="slotProps.data">
                 <template v-if="col.dataType === 'date'">
-                  {{ resolveFieldData(slotProps.data, col.field) ? new Date(resolveFieldData(slotProps.data, col.field) as string).toLocaleDateString() : '-' }}
+                  {{
+                    resolveFieldData(slotProps.data, col.field)
+                      ? new Date(resolveFieldData(slotProps.data, col.field) as string).toLocaleDateString()
+                      : '-'
+                  }}
                 </template>
                 <template v-else-if="col.dataType === 'boolean'">
-                  <i v-if="resolveFieldData(slotProps.data, col.field)" class="pi pi-check text-green-500"></i>
+                  <i
+                    v-if="resolveFieldData(slotProps.data, col.field)"
+                    class="pi pi-check text-green-500"
+                  ></i>
                   <i v-else class="pi pi-times text-red-500"></i>
                 </template>
                 <template v-else>
@@ -104,10 +115,7 @@
             </template>
 
             <!-- Default filter input, overridable -->
-            <template
-              v-if="filterMode === 'basic'"
-              #filter="{ filterModel, filterCallback }"
-            >
+            <template v-if="filterMode === 'basic'" #filter="{ filterModel, filterCallback }">
               <slot
                 :name="`filter-${col.filterField || col.field}`"
                 :filterModel="filterModel"
@@ -117,7 +125,7 @@
                 <SelectFilter
                   v-if="col.selectOptions && col.selectOptions.length > 0"
                   v-model="filterModel.value"
-                  :options="col.selectOptions"
+                  :options="col.selectOptions as any"
                   @change="filterCallback()"
                 />
 
@@ -132,15 +140,17 @@
                   v-else-if="col.dataType === 'boolean'"
                   v-model="filterModel.value"
                   :indeterminate="filterModel.value === null"
+                  :label="col.header"
                   @change="filterCallback()"
                 />
 
-                <DatePicker
+                <Calendar
                   v-else-if="col.dataType === 'date'"
-                  v-model="filterModel.value"
+                  v-model="filterModel.value as any"
                   dateFormat="mm/dd/yy"
                   placeholder="mm/dd/yyyy"
-                  @change="filterCallback()"
+                  @date-select="filterCallback()"
+                  @input="filterCallback()"
                 />
 
                 <InputNumber
@@ -151,8 +161,6 @@
                 />
               </slot>
             </template>
-
-
           </Column>
 
           <!-- Actions column -->
@@ -190,93 +198,103 @@
 </template>
 
 <script setup lang="ts">
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import DatePicker from 'primevue/datepicker';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import BooleanFilter from '@/components/common/BooleanFilter.vue';
-import SelectFilter from '@/components/common/SelectFilter.vue';
-import TextFilter from '@/components/common/TextFilter.vue';
-import { useConfirmation } from '@/composables/useConfirmation';
-import { resolveField } from '@/utils/resolveField';
+  import Button from 'primevue/button'
+  import Column from 'primevue/column'
+  import DataTable from 'primevue/datatable'
+  import Calendar from 'primevue/calendar' // Corrected import
+  import IconField from 'primevue/iconfield'
+  import InputIcon from 'primevue/inputicon'
+  import InputNumber from 'primevue/inputnumber'
+  import InputText from 'primevue/inputtext'
+  import { computed, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import BooleanFilter from '@/components/common/BooleanFilter.vue'
+  import SelectFilter from '@/components/common/SelectFilter.vue'
+  import TextFilter from '@/components/common/TextFilter.vue'
+  import { useConfirmation } from '@/composables/useConfirmation'
+  import { resolveField } from '@/utils/resolveField'
 
-interface SelectOption {
-	label: string;
-	value: unknown;
-}
+  interface SelectOption {
+    label: string
+    value: unknown
+  }
 
-interface ColumnDefinition {
-	field: string;
-	header: string;
-	sortable?: boolean;
-	filterField?: string;
-	dataType?: 'text' | 'date' | 'boolean' | 'numeric';
-	selectOptions?: SelectOption[]; // optional default select options for basic mode
-}
+  interface ColumnDefinition {
+    field: string
+    header: string
+    sortable?: boolean
+    filterField?: string
+    dataType?: 'text' | 'date' | 'boolean' | 'numeric'
+    selectOptions?: SelectOption[] // optional default select options for basic mode
+  }
 
-const props = defineProps({
-	data: { type: Array as () => unknown[], required: true },
-	columns: { type: Array as () => ColumnDefinition[], required: true },
-	dataKey: { type: String, required: true },
-	resourceName: { type: String, required: true },
-	title: { type: String, required: true },
-	globalFilterFields: { type: Array as () => string[], default: () => [] },
-	filterMode: { type: String as () => 'basic' | 'advanced', default: 'basic' },
-});
+  interface FilterValue {
+    value: string | number | boolean | Date | null
+    matchMode?: string
+  }
 
-const filters = defineModel<unknown>('filters');
-const emit = defineEmits(['add', 'view', 'edit', 'delete', 'delete-selected', 'export-csv']);
-const { showConfirmation } = useConfirmation();
-const { t } = useI18n();
+  interface FilterState {
+    global?: FilterValue
+    [key: string]: FilterValue | undefined // For dynamic filter fields
+  }
 
-/* Selection and actions */
-const isMultiSelect = ref(false);
-const selectedItems = ref<unknown[]>([]);
-const selectedIds = computed(() => {
-	const ids = selectedItems.value
-		.map((item) => (item as Record<string, unknown>)[props.dataKey] as string | undefined)
-		.filter((id): id is string => typeof id === 'string');
-	return new Set(ids);
-});
+  const props = defineProps({
+    data: { type: Array as () => unknown[], required: true },
+    columns: { type: Array as () => ColumnDefinition[], required: true },
+    dataKey: { type: String, required: true },
+    resourceName: { type: String, required: true },
+    globalFilterFields: { type: Array as () => string[], default: () => [] },
+    filterMode: { type: String as () => 'basic' | 'advanced', default: 'basic' }
+  })
 
-const resolveFieldData = (data: unknown, field: string): unknown =>
-	resolveField(data as Record<string, unknown>, field, '');
+  const filters = defineModel<FilterState>('filters')
+  const emit = defineEmits(['add', 'view', 'edit', 'delete', 'delete-selected', 'export-csv'])
+  const { showConfirmation } = useConfirmation()
+  const { t } = useI18n()
 
-const confirmDeleteSelected = () => {
-	showConfirmation(
-		t(`pages.${props.resourceName}.deleteSelectedConfirmation`, { count: selectedIds.value.size }),
-		t(`pages.${props.resourceName}.deleteTitle`),
-		() => {
-			emit('delete-selected', [...selectedIds.value]);
-			cancelMultiSelect();
-		},
-	);
-};
+  /* Selection and actions */
+  const isMultiSelect = ref(false)
+  const selectedItems = ref<unknown[]>([])
+  const selectedIds = computed(() => {
+    const ids = selectedItems.value
+      .map((item) => (item as Record<string, unknown>)[props.dataKey] as string | undefined)
+      .filter((id): id is string => typeof id === 'string')
+    return new Set(ids)
+  })
 
-const exportCSV = () => {
-	const dataToExport = selectedItems.value.length > 0 ? selectedItems.value : props.data;
-	emit('export-csv', dataToExport);
-};
+  const resolveFieldData = (data: unknown, field: string): unknown =>
+    resolveField(data as Record<string, unknown>, field)
 
-const cancelMultiSelect = () => {
-	isMultiSelect.value = false;
-	selectedItems.value = [];
-};
+  const confirmDeleteSelected = () => {
+    showConfirmation(
+      t(`pages.${props.resourceName}.deleteSelectedConfirmation`, {
+        count: selectedIds.value.size
+      }),
+      t(`pages.${props.resourceName}.deleteTitle`),
+      () => {
+        emit('delete-selected', [...selectedIds.value])
+        cancelMultiSelect()
+      }
+    )
+  }
+
+  const exportCSV = () => {
+    const dataToExport = selectedItems.value.length > 0 ? selectedItems.value : props.data
+    emit('export-csv', dataToExport)
+  }
+
+  const cancelMultiSelect = () => {
+    isMultiSelect.value = false
+    selectedItems.value = []
+  }
 </script>
 
 <style scoped>
-.card {
-  background: var(--surface-card);
-  padding: 2rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-}
+  .card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  }
 </style>

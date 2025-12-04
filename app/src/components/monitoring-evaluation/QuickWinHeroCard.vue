@@ -9,16 +9,16 @@
         </div>
 
         <div class="flex gap-2">
-          <Button 
-            icon="pi pi-pencil" 
-            :label="$t('common.edit')" 
+          <Button
+            icon="pi pi-pencil"
+            :label="$t('common.edit')"
             outlined
             size="small"
             @click="$emit('edit')"
           />
-          <Button 
-            icon="pi pi-trash" 
-            :label="$t('common.delete')" 
+          <Button
+            icon="pi pi-trash"
+            :label="$t('common.delete')"
             outlined
             severity="danger"
             size="small"
@@ -29,7 +29,7 @@
 
       <!-- Row 2: Title -->
       <h2 class="text-3xl font-bold text-900 m-0">{{ quickWin.title }}</h2>
-      
+
       <!-- Row 3: Description/Result Summary -->
       <p class="text-700 text-base line-height-3 m-0">
         {{ quickWin.resultSummary }}
@@ -52,23 +52,23 @@
 </template>
 
 <script setup lang="ts">
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+  import Tag from 'primevue/tag'
+  import Button from 'primevue/button'
+  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
 
-interface Props {
-  quickWin: QuickWin;
-}
+  interface Props {
+    quickWin: QuickWin
+  }
 
-defineProps<Props>();
+  defineProps<Props>()
 
-const emit = defineEmits<{
-  (e: 'edit'): void;
-  (e: 'delete'): void;
-}>();
+  const emit = defineEmits<{
+    (e: 'edit'): void
+    (e: 'delete'): void
+  }>()
 
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString();
-};
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString()
+  }
 </script>

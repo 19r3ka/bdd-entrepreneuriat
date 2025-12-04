@@ -1,214 +1,148 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ref } from 'vue';
-import { useStorage } from './useStorage';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useStorage } from './useStorage'
+import { db } from '@/services/local-db'
 
-// Mock the local-db service
-vi.mock('@/services/local-db', async () => {
-  const actual = await vi.importActual('@/services/local-db');
-  return {
-    ...actual,
-    db: {
-      avatars: {
-        put: vi.fn(),
-        get: vi.fn(),
-        delete: vi.fn(),
-      }
+// Mock the entire local-db service
+vi.mock('@/services/local-db', () => ({
+  db: {
+    avatars: {
+      put: vi.fn(),
+      get: vi.fn(),
+      delete: vi.fn()
     }
-  };
-});
-
-// Import the actual db after mocking
-import { db } from '@/services/local-db';
+  }
+}))
 
 describe('useStorage', () => {
-  const bucket = 'avatars';
+  const bucket = 'avatars'
+  const mockDb = db as any // Use 'any' for easier mock access
 
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    vi.clearAllMocks()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+  })
 
-  it('initializes with correct state', () => {
-    const { loading, error } = useStorage(bucket);
+  it('uploads a file to Dexie and returns a dexie reference', async () => {
+    const { uploadFile, loading, error } = useStorage(bucket)
+    const file = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const path = 'test/foo.txt'
 
-    expect(loading.value).toBe(false);
-    expect(error.value).toBeNull();
-  });
+    // Simulate FileReader
+    const readerResult = 'data:text/plain;base64,Zm9v'
+    const fileReaderSpy = vi.spyOn(window, 'FileReader').mockImplementation(() => {
+      const fr = new EventTarget() as any
+      fr.readAsDataURL = () => {
+        fr.result = readerResult
+        fr.dispatchEvent(new Event('load'))
+      }
+      return fr
+    })
 
-  it('uploads a file successfully to Dexie', async () => {
-    // Mock FileReader
-    const mockFileReader = {
-      onload: null as Function | null,
-      onerror: null as Function | null,
-      readAsDataURL: vi.fn((file: File) => {
-        // Simulate the load event with a base64 result
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload({
-              target: { result: 'data:image/jpeg;base64,testdata' }
-            });
-          }
-        }, 0);
-      }),
-    };
-    
-    vi.stubGlobal('FileReader', vi.fn(() => mockFileReader));
-    vi.stubGlobal('crypto', {
-      randomUUID: vi.fn(() => 'test-uuid')
-    });
+    mockDb.avatars.put.mockResolvedValue(path)
 
-    const mockFile = new File(['test'], 'avatar.jpg', { type: 'image/jpeg' });
-    const path = 'avatar.jpg';
+    const result = await uploadFile(file, path)
 
-    // Mock the Dexie put operation
-    db.avatars.put.mockResolvedValue(undefined);
+    expect(loading.value).toBe(false)
+    expect(error.value).toBeNull()
+    expect(mockDb.avatars.put).toHaveBeenCalledWith({ id: path, data: readerResult })
+    expect(result).toBe(`dexie://${bucket}/${path}`)
 
-    const { uploadFile } = useStorage(bucket);
-    const result = await uploadFile(mockFile, path);
+    fileReaderSpy.mockRestore()
+  })
 
-    expect(db.avatars.put).toHaveBeenCalledWith({
-      id: path,
-      data: 'data:image/jpeg;base64,testdata'
-    });
-    expect(result).toBe(`dexie://${bucket}/${path}`);
-  });
+  it('handles upload failure', async () => {
+    const { uploadFile, loading, error } = useStorage(bucket)
+    const file = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const path = 'test/foo.txt'
 
-  it('handles upload error gracefully', async () => {
-    // Mock FileReader with error
-    const mockFileReader = {
-      onload: null as Function | null,
-      onerror: vi.fn(),
-      readAsDataURL: vi.fn((file: File) => {
-        // Simulate the error event
-        setTimeout(() => {
-          if (mockFileReader.onerror) {
-            mockFileReader.onerror(new Error('File read error'));
-          }
-        }, 0);
-      }),
-    };
-    
-    vi.stubGlobal('FileReader', vi.fn(() => mockFileReader));
+    vi.spyOn(window, 'FileReader').mockImplementation(() => {
+      const fr = new EventTarget() as any
+      fr.readAsDataURL = () => fr.dispatchEvent(new Event('error'))
+      return fr
+    })
 
-    const mockFile = new File(['test'], 'avatar.jpg', { type: 'image/jpeg' });
-    const path = 'avatar.jpg';
+    const result = await uploadFile(file, path)
 
-    const { uploadFile, error } = useStorage(bucket);
-    const result = await uploadFile(mockFile, path);
-
-    expect(result).toBeNull();
-    expect(error.value).toBeInstanceOf(Error);
-  });
-
-  it('updates a file by deleting old reference and uploading new one', async () => {
-    // Mock FileReader
-    const mockFileReader = {
-      onload: null as Function | null,
-      onerror: null as Function | null,
-      readAsDataURL: vi.fn((file: File) => {
-        setTimeout(() => {
-          if (mockFileReader.onload) {
-            mockFileReader.onload({
-              target: { result: 'data:image/jpeg;base64,newtestdata' }
-            });
-          }
-        }, 0);
-      }),
-    };
-    
-    vi.stubGlobal('FileReader', vi.fn(() => mockFileReader));
-
-    const oldRef = `dexie://${bucket}/old-avatar.jpg`;
-    const newPath = 'new-avatar.jpg';
-    const newFile = new File(['test'], 'new-avatar.jpg', { type: 'image/jpeg' });
-
-    // Mock the Dexie operations
-    db.avatars.delete.mockResolvedValue(undefined);
-    db.avatars.put.mockResolvedValue(undefined);
-
-    const { updateFile } = useStorage(bucket);
-    const result = await updateFile(newFile, newPath, oldRef);
-
-    expect(db.avatars.delete).toHaveBeenCalledWith('old-avatar.jpg');
-    expect(db.avatars.put).toHaveBeenCalledWith({
-      id: newPath,
-      data: 'data:image/jpeg;base64,newtestdata'
-    });
-    expect(result).toBe(`dexie://${bucket}/${newPath}`);
-  });
+    expect(loading.value).toBe(false)
+    expect(error.value).not.toBeNull()
+    expect(result).toBeNull()
+  })
 
   it('deletes a file from Dexie', async () => {
-    const ref = `dexie://${bucket}/path/to/file.jpg`;
+    const { deleteFile } = useStorage(bucket)
+    const ref = `dexie://${bucket}/test/foo.txt`
+    mockDb.avatars.delete.mockResolvedValue(1)
 
-    db.avatars.delete.mockResolvedValue(undefined);
+    await deleteFile(ref)
+    expect(mockDb.avatars.delete).toHaveBeenCalledWith('test/foo.txt')
+  })
 
-    const { deleteFile } = useStorage(bucket);
-    await deleteFile(ref);
+  it('handles deletion failure gracefully', async () => {
+    const { deleteFile } = useStorage(bucket)
+    const ref = `dexie://${bucket}/test/foo.txt`
+    mockDb.avatars.delete.mockRejectedValue(new Error('DB error'))
 
-    expect(db.avatars.delete).toHaveBeenCalledWith('path/to/file.jpg');
-  });
+    await deleteFile(ref)
+    expect(console.warn).toHaveBeenCalled()
+  })
 
-  it('handles deletion error gracefully', async () => {
-    const ref = `dexie://${bucket}/path/to/file.jpg`;
+  it('updates a file by deleting old and uploading new', async () => {
+    const { updateFile } = useStorage(bucket)
+    const oldRef = `dexie://${bucket}/old.txt`
+    const newFile = new File(['bar'], 'new.txt', { type: 'text/plain' })
+    const newPath = 'new.txt'
 
-    // Mock an error during deletion
-    db.avatars.delete.mockRejectedValue(new Error('Deletion failed'));
+    // Mock delete and upload sequence
+    mockDb.avatars.delete.mockResolvedValue(1)
+    const readerResult = 'data:text/plain;base64,YmFy'
+    vi.spyOn(window, 'FileReader').mockImplementation(() => {
+      const fr = new EventTarget() as any
+      fr.readAsDataURL = () => {
+        fr.result = readerResult
+        fr.dispatchEvent(new Event('load'))
+      }
+      return fr
+    })
+    mockDb.avatars.put.mockResolvedValue(newPath)
 
-    const { deleteFile } = useStorage(bucket);
-    
-    // Capture console.warn calls
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    
-    await deleteFile(ref);
+    const result = await updateFile(newFile, newPath, oldRef)
 
-    expect(consoleWarnSpy).toHaveBeenCalled();
-    expect(db.avatars.delete).toHaveBeenCalledWith('path/to/file.jpg');
-    
-    consoleWarnSpy.mockRestore();
-  });
+    expect(mockDb.avatars.delete).toHaveBeenCalledWith('old.txt')
+    expect(mockDb.avatars.put).toHaveBeenCalledWith({ id: newPath, data: readerResult })
+    expect(result).toBe(`dexie://${bucket}/${newPath}`)
+  })
 
-  it('gets file URL from Dexie', async () => {
-    const ref = `dexie://${bucket}/path/to/file.jpg`;
-    const mockBase64 = 'data:image/jpeg;base64,existingdata';
-    const mockBlob = new Blob(['test'], { type: 'image/jpeg' });
+  it('gets a blob URL for a dexie reference', async () => {
+    const { getFileUrl } = useStorage(bucket)
+    const ref = `dexie://${bucket}/foo.txt`
+    const base64Data = 'data:text/plain;base64,Zm9v'
+    mockDb.avatars.get.mockResolvedValue({ id: 'foo.txt', data: base64Data })
 
-    db.avatars.get.mockResolvedValue({ id: 'path/to/file.jpg', data: mockBase64 });
-
-    // Mock fetch and URL.createObjectURL
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
+    const mockBlob = new Blob(['foo'])
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       blob: () => Promise.resolve(mockBlob)
-    })));
+    } as any)
+    const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url')
 
-    const mockObjectUrl = 'blob:mock-url';
-    const createObjectURLMock = vi.fn(() => mockObjectUrl);
-    vi.stubGlobal('URL', {
-      ...URL,
-      createObjectURL: createObjectURLMock,
-      revokeObjectURL: vi.fn(),
-    });
+    const url = await getFileUrl(ref)
 
-    const { getFileUrl } = useStorage(bucket);
-    const result = await getFileUrl(ref);
+    expect(mockDb.avatars.get).toHaveBeenCalledWith('foo.txt')
+    expect(fetchSpy).toHaveBeenCalledWith(base64Data)
+    expect(createObjectURLSpy).toHaveBeenCalledWith(mockBlob)
+    expect(url).toBe('blob:mock-url')
+  })
 
-    expect(db.avatars.get).toHaveBeenCalledWith('path/to/file.jpg');
-    expect(fetch).toHaveBeenCalledWith(mockBase64);
-    expect(createObjectURLMock).toHaveBeenCalledWith(mockBlob);
-    expect(result).toBe(mockObjectUrl);
-  });
+  it('returns http(s) URLs directly', async () => {
+    const { getFileUrl } = useStorage(bucket)
+    const url = 'https://example.com/image.png'
+    const result = await getFileUrl(url)
+    expect(result).toBe(url)
+  })
 
-  it('returns null for invalid references', async () => {
-    const { getFileUrl } = useStorage(bucket);
-    const result = await getFileUrl('');
-    expect(result).toBeNull();
-  });
-
-  it('returns the same URL for HTTP references', async () => {
-    const httpUrl = 'https://example.com/image.jpg';
-    const { getFileUrl } = useStorage(bucket);
-    const result = await getFileUrl(httpUrl);
-    expect(result).toBe(httpUrl);
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-});
+  it('returns null for empty, null, or invalid references', async () => {
+    const { getFileUrl } = useStorage(bucket)
+    expect(await getFileUrl('')).toBeNull()
+    expect(await getFileUrl(null as any)).toBeNull()
+    expect(await getFileUrl('invalid-ref')).toBeNull()
+  })
+})

@@ -24,45 +24,47 @@
 </template>
 
 <script setup lang="ts">
-import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import { computed } from 'vue';
+  import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete'
+  import { computed } from 'vue'
 
-interface Props {
-  modelValue: any;
-  suggestions: any[];
-  label?: string;
-  placeholder?: string;
-  error?: { _errors: string[] };
-  fieldClass?: string;
-  optionLabel?: string;
-  forceSelection?: boolean;
-  id?: string;
-  dropdown?: boolean;
-  inputClass?: string;
-}
+  interface Props {
+    modelValue: any
+    suggestions: any[]
+    label?: string
+    placeholder?: string
+    error?: { _errors: string[] }
+    fieldClass?: string
+    optionLabel?: string
+    forceSelection?: boolean
+    id?: string
+    dropdown?: boolean
+    inputClass?: string
+  }
 
-const props = withDefaults(defineProps<Props>(), {
-  fieldClass: 'col-12',
-  optionLabel: 'name',
-  forceSelection: true,
-  id: 'autocomplete',
-  dropdown: false,
-  inputClass: 'w-full p-3',
-});
+  const props = withDefaults(defineProps<Props>(), {
+    fieldClass: 'col-12',
+    optionLabel: 'name',
+    forceSelection: true,
+    id: 'autocomplete',
+    dropdown: false,
+    inputClass: 'w-full p-3'
+  })
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: any): void;
-  (e: 'complete', event: AutoCompleteCompleteEvent): void;
-}>();
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: any): void
+    (e: 'complete', event: AutoCompleteCompleteEvent): void
+  }>()
 
-const hasError = computed(() => props.error && props.error._errors && props.error._errors.length > 0);
-const errorMessage = computed(() => props.error?._errors?.[0]);
+  const hasError = computed(
+    () => props.error && props.error._errors && props.error._errors.length > 0
+  )
+  const errorMessage = computed(() => props.error?._errors?.[0])
 
-function onUpdate(value: any) {
-  emit('update:modelValue', value);
-}
+  function onUpdate(value: any) {
+    emit('update:modelValue', value)
+  }
 
-function onComplete(event: AutoCompleteCompleteEvent) {
-  emit('complete', event);
-}
+  function onComplete(event: AutoCompleteCompleteEvent) {
+    emit('complete', event)
+  }
 </script>

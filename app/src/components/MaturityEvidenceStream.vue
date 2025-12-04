@@ -82,8 +82,8 @@
           <div
             class="ml-4 mb-8 border-l-4 pl-4 rounded-r-lg py-3 bg-opacity-5"
             :class="[
-              getEventColor(slotProps.item.type).split(' ')[2], // Border color
-              getEventColor(slotProps.item.type).split(' ')[0].replace('bg-', 'bg-opacity-5 bg-') // BG tint
+              getEventColor(slotProps.item.type).split(' ')[2] ?? '', // Border color
+              getEventColor(slotProps.item.type).split(' ')[0]?.replace('bg-', 'bg-opacity-5 bg-') ?? '' // BG tint
             ]"
           >
             <p class="text-sm font-semibold text-text-light dark:text-text-dark">

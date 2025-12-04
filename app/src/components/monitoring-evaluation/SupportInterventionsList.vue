@@ -15,8 +15,16 @@
           </Column>
           <Column header="Actions">
             <template #body="slotProps">
-              <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editSupport(slotProps.data)" />
-              <Button icon="pi pi-trash" class="p-button-rounded p-button-warning" @click="deleteSupport(slotProps.data)" />
+              <Button
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+                @click="editSupport(slotProps.data)"
+              />
+              <Button
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning"
+                @click="deleteSupport(slotProps.data)"
+              />
             </template>
           </Column>
         </DataTable>
@@ -26,23 +34,23 @@
 </template>
 
 <script setup lang="ts">
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import type { Support } from '@/types/monitoring-evaluation/Support';
+  import DataTable from 'primevue/datatable'
+  import Column from 'primevue/column'
+  import Button from 'primevue/button'
+  import Card from 'primevue/card'
+  import type { Support } from '@/types/monitoring-evaluation/Support'
 
-defineProps<{
-  supports: Support[];
-}>();
+  defineProps<{
+    supports: Support[]
+  }>()
 
-const emit = defineEmits(['edit-support', 'delete-support']);
+  const emit = defineEmits(['edit-support', 'delete-support'])
 
-const editSupport = (support: Support) => {
-  emit('edit-support', support);
-};
+  const editSupport = (support: Support) => {
+    emit('edit-support', support)
+  }
 
-const deleteSupport = (support: Support) => {
-  emit('delete-support', support);
-};
+  const deleteSupport = (support: Support) => {
+    emit('delete-support', support)
+  }
 </script>

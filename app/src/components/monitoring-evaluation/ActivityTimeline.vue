@@ -30,15 +30,15 @@
         <TabPanel value="0">
           <Timeline :value="allActivity" align="alternate" class="customized-timeline">
             <template #marker="slotProps">
-              <span 
-                class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1" 
+              <span
+                class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
                 :style="{ backgroundColor: getItemColor(slotProps.item) }"
               >
                 <i :class="getItemIcon(slotProps.item)"></i>
               </span>
             </template>
             <template #content="slotProps">
-              <ActivityCard 
+              <ActivityCard
                 :activity="slotProps.item"
                 @view="handleView(slotProps.item)"
                 @edit="handleEdit(slotProps.item)"
@@ -53,12 +53,15 @@
         <TabPanel value="1">
           <Timeline :value="formattedSupports" align="alternate" class="customized-timeline">
             <template #marker="slotProps">
-              <span class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1" style="background-color: #9C27B0">
+              <span
+                class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+                style="background-color: #9c27b0"
+              >
                 <i class="pi pi-heart"></i>
               </span>
             </template>
             <template #content="slotProps">
-              <ActivityCard 
+              <ActivityCard
                 :activity="slotProps.item"
                 @view="handleView(slotProps.item)"
                 @edit="handleEdit(slotProps.item)"
@@ -73,12 +76,15 @@
         <TabPanel value="2">
           <Timeline :value="formattedQuickWins" align="alternate" class="customized-timeline">
             <template #marker="slotProps">
-              <span class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1" style="background-color: #00BCD4">
+              <span
+                class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+                style="background-color: #00bcd4"
+              >
                 <i class="pi pi-check-circle"></i>
               </span>
             </template>
             <template #content="slotProps">
-              <ActivityCard 
+              <ActivityCard
                 :activity="slotProps.item"
                 @view="handleView(slotProps.item)"
                 @edit="handleEdit(slotProps.item)"
@@ -95,96 +101,106 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import Timeline from 'primevue/timeline';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
-import Button from 'primevue/button';
-import ActivityCard from './ActivityCard.vue';
-import type { Support } from '@/types/monitoring-evaluation/Support';
-import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+  import { computed } from 'vue'
+  import Timeline from 'primevue/timeline'
+  import Tabs from 'primevue/tabs'
+  import TabList from 'primevue/tablist'
+  import Tab from 'primevue/tab'
+  import TabPanels from 'primevue/tabpanels'
+  import TabPanel from 'primevue/tabpanel'
+  import Button from 'primevue/button'
+  import ActivityCard from './ActivityCard.vue'
+  import type { Support } from '@/types/monitoring-evaluation/Support'
+  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
 
-const props = defineProps<{
-  supports: Support[];
-  quickWins: QuickWin[];
-}>();
+  const props = defineProps<{
+    supports: Support[]
+    quickWins: QuickWin[]
+  }>()
 
-const emit = defineEmits<{
-  (e: 'add-support'): void;
-  (e: 'add-quick-win'): void;
-  (e: 'view-support', id: string): void;
-  (e: 'view-quick-win', id: string): void;
-  (e: 'edit-support', id: string): void;
-  (e: 'edit-quick-win', id: string): void;
-}>();
+  const emit = defineEmits<{
+    (e: 'add-support'): void
+    (e: 'add-quick-win'): void
+    (e: 'view-support', id: string): void
+    (e: 'view-quick-win', id: string): void
+    (e: 'edit-support', id: string): void
+    (e: 'edit-quick-win', id: string): void
+  }>()
 
-const formattedSupports = computed(() => {
-  return [...props.supports]
-    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-    .map(s => ({ type: 'support' as const, data: s, date: s.startDate }));
-});
+  const formattedSupports = computed(() => {
+    return [...props.supports]
+      .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+      .map((s) => ({ type: 'support' as const, data: s, date: s.startDate }))
+  })
 
-const formattedQuickWins = computed(() => {
-  return [...props.quickWins]
-    .sort((a, b) => new Date(b.achievedOn).getTime() - new Date(a.achievedOn).getTime())
-    .map(q => ({ type: 'quickWin' as const, data: q, date: q.achievedOn }));
-});
+  const formattedQuickWins = computed(() => {
+    return [...props.quickWins]
+      .sort((a, b) => new Date(b.achievedOn).getTime() - new Date(a.achievedOn).getTime())
+      .map((q) => ({ type: 'quickWin' as const, data: q, date: q.achievedOn }))
+  })
 
-const allActivity = computed(() => {
-  const supports = props.supports.map(s => ({ type: 'support' as const, data: s, date: s.startDate }));
-  const quickWins = props.quickWins.map(q => ({ type: 'quickWin' as const, data: q, date: q.achievedOn }));
-  
-  return [...supports, ...quickWins].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-});
+  const allActivity = computed(() => {
+    const supports = props.supports.map((s) => ({
+      type: 'support' as const,
+      data: s,
+      date: s.startDate
+    }))
+    const quickWins = props.quickWins.map((q) => ({
+      type: 'quickWin' as const,
+      data: q,
+      date: q.achievedOn
+    }))
 
-function getItemColor(item: { type: 'support' | 'quickWin', data: any }) {
-  if (item.type === 'quickWin') return '#00BCD4'; // Cyan
-  // Support colors based on type
-  const type = item.data.boostType;
-  if (type.includes('financial')) return '#9C27B0';
-  if (type.includes('training') || type.includes('mentoring')) return '#673AB7';
-  if (type.includes('equipment') || type.includes('workspace')) return '#FF9800';
-  return '#607D8B';
-}
+    return [...supports, ...quickWins].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+  })
 
-function getItemIcon(item: { type: 'support' | 'quickWin', data: any }) {
-  if (item.type === 'quickWin') return 'pi pi-check-circle';
-  // Support icons
-  const type = item.data.boostType;
-  if (type.includes('financial')) return 'pi pi-dollar';
-  if (type.includes('training')) return 'pi pi-book';
-  if (type.includes('mentoring')) return 'pi pi-users';
-  if (type.includes('equipment')) return 'pi pi-box';
-  if (type.includes('digital')) return 'pi pi-desktop';
-  return 'pi pi-heart';
-}
-
-function handleView(item: { type: 'support' | 'quickWin', data: any }) {
-  if (item.type === 'support') {
-    emit('view-support', item.data.id);
-  } else {
-    emit('view-quick-win', item.data.id);
+  function getItemColor(item: { type: 'support' | 'quickWin'; data: any }) {
+    if (item.type === 'quickWin') return '#00BCD4' // Cyan
+    // Support colors based on type
+    const type = item.data.boostType
+    if (type.includes('financial')) return '#9C27B0'
+    if (type.includes('training') || type.includes('mentoring')) return '#673AB7'
+    if (type.includes('equipment') || type.includes('workspace')) return '#FF9800'
+    return '#607D8B'
   }
-}
 
-function handleEdit(item: { type: 'support' | 'quickWin', data: any }) {
-  if (item.type === 'support') {
-    emit('edit-support', item.data.id);
-  } else {
-    emit('edit-quick-win', item.data.id);
+  function getItemIcon(item: { type: 'support' | 'quickWin'; data: any }) {
+    if (item.type === 'quickWin') return 'pi pi-check-circle'
+    // Support icons
+    const type = item.data.boostType
+    if (type.includes('financial')) return 'pi pi-dollar'
+    if (type.includes('training')) return 'pi pi-book'
+    if (type.includes('mentoring')) return 'pi pi-users'
+    if (type.includes('equipment')) return 'pi pi-box'
+    if (type.includes('digital')) return 'pi pi-desktop'
+    return 'pi pi-heart'
   }
-}
+
+  function handleView(item: { type: 'support' | 'quickWin'; data: any }) {
+    if (item.type === 'support') {
+      emit('view-support', item.data.id)
+    } else {
+      emit('view-quick-win', item.data.id)
+    }
+  }
+
+  function handleEdit(item: { type: 'support' | 'quickWin'; data: any }) {
+    if (item.type === 'support') {
+      emit('edit-support', item.data.id)
+    } else {
+      emit('edit-quick-win', item.data.id)
+    }
+  }
 </script>
 
 <style scoped>
-.customized-timeline :deep(.p-timeline-event-opposite) {
-  flex: 0;
-  padding: 0;
-}
-.customized-timeline :deep(.p-timeline-event-content) {
-  width: 100%;
-}
+  .customized-timeline :deep(.p-timeline-event-opposite) {
+    flex: 0;
+    padding: 0;
+  }
+  .customized-timeline :deep(.p-timeline-event-content) {
+    width: 100%;
+  }
 </style>

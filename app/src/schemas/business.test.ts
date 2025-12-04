@@ -1,5 +1,5 @@
-import { BusinessSchema } from './business';
-import { describe, it, expect } from 'vitest';
+import { BusinessSchema } from './business'
+import { describe, it, expect } from 'vitest'
 
 describe('BusinessSchema', () => {
   // ✅ Requires entrepreneurId, name, location, contact, primaryBusinessArea
@@ -17,9 +17,9 @@ describe('BusinessSchema', () => {
       primaryBusinessArea: 'Technology',
       activityStartDate: new Date(),
       supportStartDate: new Date()
-    });
-    expect(result.success).toBe(true);
-  });
+    })
+    expect(result.success).toBe(true)
+  })
 
   // ❌ Rejects invalid UUID for entrepreneurId
   it('rejects invalid UUID for entrepreneurId', () => {
@@ -36,9 +36,9 @@ describe('BusinessSchema', () => {
       primaryBusinessArea: 'Technology',
       activityStartDate: new Date(),
       supportStartDate: new Date()
-    });
-    expect(result.success).toBe(false);
-  });
+    })
+    expect(result.success).toBe(false)
+  })
 
   // ✅ Accepts optional secondaryBusinessArea, socialMedia, registrationNumber
   it('accepts optional secondaryBusinessArea, socialMedia, registrationNumber', () => {
@@ -60,9 +60,9 @@ describe('BusinessSchema', () => {
       registrationNumber: '12345', // optional field
       activityStartDate: new Date(),
       supportStartDate: new Date()
-    });
-    expect(result.success).toBe(true);
-  });
+    })
+    expect(result.success).toBe(true)
+  })
 
   // ✅ Coerces registrationDate from string → Date
   it('coerces registrationDate from string to Date', () => {
@@ -80,12 +80,12 @@ describe('BusinessSchema', () => {
       registrationDate: '2023-01-01', // string that should be coerced to Date
       activityStartDate: new Date(),
       supportStartDate: new Date()
-    });
-    expect(result.success).toBe(true);
+    })
+    expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.registrationDate).toBeInstanceOf(Date);
+      expect(result.data.registrationDate).toBeInstanceOf(Date)
     }
-  });
+  })
 
   // ❌ Rejects missing activityStartDate or supportStartDate
   it('rejects missing activityStartDate', () => {
@@ -102,9 +102,9 @@ describe('BusinessSchema', () => {
       primaryBusinessArea: 'Technology',
       // activityStartDate: new Date(), // missing required field
       supportStartDate: new Date()
-    });
-    expect(result.success).toBe(false);
-  });
+    })
+    expect(result.success).toBe(false)
+  })
 
   it('rejects missing supportStartDate', () => {
     const result = BusinessSchema.safeParse({
@@ -118,15 +118,15 @@ describe('BusinessSchema', () => {
         email: 'test@example.com'
       },
       primaryBusinessArea: 'Technology',
-      activityStartDate: new Date(),
+      activityStartDate: new Date()
       // supportStartDate: new Date() // missing required field
-    });
-    expect(result.success).toBe(false);
-  });
+    })
+    expect(result.success).toBe(false)
+  })
 
   // ✅ Accepts avatar as string, File, or null
   it('accepts avatar as string, File, or null', () => {
-    const mockFile = new File([], 'avatar.jpg');
+    const mockFile = new File([], 'avatar.jpg')
 
     // Test with string avatar
     let result = BusinessSchema.safeParse({
@@ -143,8 +143,8 @@ describe('BusinessSchema', () => {
       activityStartDate: new Date(),
       supportStartDate: new Date(),
       avatar: 'https://example.com/avatar.jpg'
-    });
-    expect(result.success).toBe(true);
+    })
+    expect(result.success).toBe(true)
 
     // Test with File avatar
     result = BusinessSchema.safeParse({
@@ -161,8 +161,8 @@ describe('BusinessSchema', () => {
       activityStartDate: new Date(),
       supportStartDate: new Date(),
       avatar: mockFile
-    });
-    expect(result.success).toBe(true);
+    })
+    expect(result.success).toBe(true)
 
     // Test with null avatar
     result = BusinessSchema.safeParse({
@@ -179,7 +179,7 @@ describe('BusinessSchema', () => {
       activityStartDate: new Date(),
       supportStartDate: new Date(),
       avatar: null
-    });
-    expect(result.success).toBe(true);
-  });
-});
+    })
+    expect(result.success).toBe(true)
+  })
+})

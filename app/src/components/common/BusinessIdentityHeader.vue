@@ -7,6 +7,8 @@
   import type { Business } from '@/types/business'
   import type { Entrepreneur } from '@/types/entrepreneur'
 
+  import { BUSINESS_ACTIONS, type BusinessAction } from '@/constants/actions'
+
   // STRICT CONTRACT
   interface Props {
     business: Business
@@ -16,7 +18,7 @@
   const props = defineProps<Props>()
 
   const emit = defineEmits<{
-    (e: 'action', actionType: 'log_intervention' | 'edit' | 'delete'): void
+    (e: 'action', actionType: BusinessAction): void
   }>()
 
   const router = useRouter()
@@ -26,14 +28,14 @@
     {
       label: 'Edit Profile',
       icon: 'pi pi-pencil',
-      command: () => emit('action', 'edit')
+      command: () => emit('action', BUSINESS_ACTIONS.EDIT)
     },
     { separator: true },
     {
       label: 'Delete Business',
       icon: 'pi pi-trash',
       class: 'text-red-500',
-      command: () => emit('action', 'delete')
+      command: () => emit('action', BUSINESS_ACTIONS.DELETE)
     }
   ]
 
@@ -88,11 +90,11 @@
           >
             <span class="text-xs text-500 uppercase font-medium">Owned by:</span>
             <div class="flex align-items-center gap-2">
-              <AvatarDisplay 
-                :src="entrepreneur.avatar || undefined" 
+              <AvatarDisplay
+                :src="entrepreneur.avatar || undefined"
                 :label="entrepreneur.firstName + ' ' + entrepreneur.lastName"
-                shape="circle" 
-                size="normal" 
+                shape="circle"
+                size="normal"
               />
               <span class="text-sm font-bold text-800"
                 >{{ entrepreneur.firstName }} {{ entrepreneur.lastName }}</span
@@ -109,7 +111,7 @@
           icon="pi pi-plus"
           :model="actionItems"
           severity="primary"
-          @click="emit('action', 'log_intervention')"
+          @click="emit('action', BUSINESS_ACTIONS.LOG_INTERVENTION)"
         />
       </div>
     </div>

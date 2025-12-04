@@ -57,7 +57,9 @@
     <template #col-registered="{ data }">
       <i
         class="pi"
-        :class="data.isRegistered ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-400'"
+        :class="
+          data.isRegistered ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-400'
+        "
         :title="data.isRegistered ? $t('common.registered') : $t('common.notRegistered')"
       />
     </template>
@@ -93,7 +95,11 @@
     </template>
 
     <template #filter-supportStartDate="{ filterModel }">
-      <DatePicker v-model="filterModel.value" dateFormat="mm/dd/yy" :placeholder="$t('placeholders.selectDate')" />
+      <DatePicker
+        v-model="filterModel.value"
+        dateFormat="mm/dd/yy"
+        :placeholder="$t('placeholders.selectDate')"
+      />
     </template>
     <template #prepend-actions="{ data }">
       <Button
@@ -105,196 +111,213 @@
     </template>
   </ResourceDataTable>
 
-  <Dialog v-model:visible="showSupportDialog" header="Log Support" modal class="p-fluid" :style="{ width: '65vw' }" :breakpoints="{ '960px': '80vw', '640px': '95vw' }">
+  <Dialog
+    v-model:visible="showSupportDialog"
+    header="Log Support"
+    modal
+    class="p-fluid"
+    :style="{ width: '65vw' }"
+    :breakpoints="{ '960px': '80vw', '640px': '95vw' }"
+  >
     <SupportBoostForm :business-id="selectedBusinessId" @submit="handleSupportSubmit" />
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import Tooltip from 'primevue/tooltip';
-import { storeToRefs } from 'pinia';
-import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
-import Button from 'primevue/button';
-import DatePicker from 'primevue/datepicker';
-import Dialog from 'primevue/dialog';
-import Tag from 'primevue/tag';
-import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue';
-import { onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+  import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
+  import Tooltip from 'primevue/tooltip'
+  import { storeToRefs } from 'pinia'
+  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
+  import Button from 'primevue/button'
+  import DatePicker from 'primevue/datepicker'
+  import Dialog from 'primevue/dialog'
+  import Tag from 'primevue/tag'
+  import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
+  import { onMounted, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { useRouter } from 'vue-router'
+  import { useToast } from 'primevue/usetoast'
 
-import BooleanFilter from '@/components/common/BooleanFilter.vue';
-import ResourceDataTable from '@/components/common/ResourceDataTable.vue';
-import SelectFilter from '@/components/common/SelectFilter.vue';
-import TextFilter from '@/components/common/TextFilter.vue';
-import { useBusinessAreas } from '@/composables/useBusinessAreas';
-import { useBusinessFilters } from '@/composables/useBusinessFilters';
-import { useConfirmation } from '@/composables/useConfirmation';
-import { generateCsvColumns, useCsv } from '@/composables/useCsv';
-import { useFormatters } from '@/composables/useFormatters';
-import { useBusinessStore } from '@/stores/useBusinessStore';
-import { useSupportStore } from '@/stores/useSupportStore';
-import type { Business } from '@/types/business';
-import type { Support } from '@/types/monitoring-evaluation/Support';
+  import BooleanFilter from '@/components/common/BooleanFilter.vue'
+  import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
+  import SelectFilter from '@/components/common/SelectFilter.vue'
+  import TextFilter from '@/components/common/TextFilter.vue'
+  import { useBusinessAreas } from '@/composables/useBusinessAreas'
+  import { useBusinessFilters } from '@/composables/useBusinessFilters'
+  import { useConfirmation } from '@/composables/useConfirmation'
+  import { generateCsvColumns, useCsv } from '@/composables/useCsv'
+  import { useFormatters } from '@/composables/useFormatters'
+  import { useBusinessStore } from '@/stores/useBusinessStore'
+  import { useSupportStore } from '@/stores/useSupportStore'
+  import type { Business } from '@/types/business'
+  import type { Support } from '@/types/monitoring-evaluation/Support'
 
-const { t } = useI18n();
-const router = useRouter();
-const store = useBusinessStore();
-const supportStore = useSupportStore();
-const toast = useToast();
-const { businesses } = storeToRefs(store);
-const { confirmDelete, confirmDeleteSelected } = useConfirmation();
-const { getBusinessAreaLabel } = useBusinessAreas();
-const { ownerOptions, businessAreaOptions } = useBusinessFilters();
-const { formatDate } = useFormatters();
-const { exportCsv } = useCsv<Business>();
-const vTooltip = Tooltip;
+  const { t } = useI18n()
+  const router = useRouter()
+  const store = useBusinessStore()
+  const supportStore = useSupportStore()
+  const toast = useToast()
+  const { businesses } = storeToRefs(store)
+  const { confirmDelete, confirmDeleteSelected } = useConfirmation()
+  const { getBusinessAreaLabel } = useBusinessAreas()
+  const { ownerOptions, businessAreaOptions } = useBusinessFilters()
+  const { formatDate } = useFormatters()
+  const { exportCsv } = useCsv<Business>()
+  const vTooltip = Tooltip
 
-const showSupportDialog = ref(false);
-const selectedBusinessId = ref<string | undefined>(undefined);
+  const showSupportDialog = ref(false)
+  const selectedBusinessId = ref<string | undefined>(undefined)
 
-function openSupportDialog(businessId: string) {
-  selectedBusinessId.value = businessId;
-  showSupportDialog.value = true;
-}
-
-function truncateBusinessArea(label: string, maxLength: number = 40): string {
-  if (!label || label.length <= maxLength) return label;
-  return label.substring(0, maxLength) + '...';
-}
-
-const handleSupportSubmit = async (data: Support) => {
-  try {
-    await supportStore.addSupport(data);
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Support boost logged successfully', life: 3000 });
-    showSupportDialog.value = false;
-  } catch (error) {
-    console.error(error);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to log support boost', life: 3000 });
+  function openSupportDialog(businessId: string) {
+    selectedBusinessId.value = businessId
+    showSupportDialog.value = true
   }
-};
 
-/** Columns */
-const columns = ref([
-	{ field: 'logo', header: t('common.logo'), sortable: false },
-	{
-		field: 'name',
-		header: t('common.name'),
-		sortable: true,
-		filterField: 'name',
-		dataType: 'text' as const,
-	},
-	{
-		field: 'ownerName',
-		header: t('common.owner'),
-		sortable: true,
-		filterField: 'ownerName',
-		dataType: 'text' as const,
-	},
-	{
-		field: 'primaryBusinessArea',
-		header: t('common.primaryBusinessArea'),
-		sortable: true,
-		filterField: 'primaryBusinessArea',
-		dataType: 'text' as const,
-	},
-	{
-		field: 'registered',
-		header: t('common.registered'),
-		sortable: true,
-		filterField: 'isRegistered',
-		dataType: 'boolean' as const,
-	},
-	{
-		field: 'supportStartDate',
-		header: t('common.supportStartDate'),
-		sortable: true,
-		filterField: 'supportStartDate',
-		dataType: 'date' as const,
-	},
-]);
+  function truncateBusinessArea(label: string, maxLength: number = 40): string {
+    if (!label || label.length <= maxLength) return label
+    return label.substring(0, maxLength) + '...'
+  }
 
-/** Global filter fields */
-const globalFilterFields = ref(['name', 'ownerName', 'primaryBusinessArea']);
+  const handleSupportSubmit = async (data: Support) => {
+    try {
+      await supportStore.addSupport(data)
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Support boost logged successfully',
+        life: 3000
+      })
+      showSupportDialog.value = false
+    } catch (error) {
+      console.error(error)
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to log support boost',
+        life: 3000
+      })
+    }
+  }
 
-/** Filters */
-const filters = ref({
-	global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-	name: {
-		operator: FilterOperator.AND,
-		constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-	},
-	ownerName: {
-		operator: FilterOperator.OR,
-		constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
-	},
-	primaryBusinessArea: {
-		operator: FilterOperator.OR,
-		constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
-	},
-	isRegistered: { value: null, matchMode: FilterMatchMode.EQUALS },
-	supportStartDate: {
-		operator: FilterOperator.AND,
-		constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
-	},
-});
+  /** Columns */
+  const columns = ref([
+    { field: 'logo', header: t('common.logo'), sortable: false },
+    {
+      field: 'name',
+      header: t('common.name'),
+      sortable: true,
+      filterField: 'name',
+      dataType: 'text' as const
+    },
+    {
+      field: 'ownerName',
+      header: t('common.owner'),
+      sortable: true,
+      filterField: 'ownerName',
+      dataType: 'text' as const
+    },
+    {
+      field: 'primaryBusinessArea',
+      header: t('common.primaryBusinessArea'),
+      sortable: true,
+      filterField: 'primaryBusinessArea',
+      dataType: 'text' as const
+    },
+    {
+      field: 'registered',
+      header: t('common.registered'),
+      sortable: true,
+      filterField: 'isRegistered',
+      dataType: 'boolean' as const
+    },
+    {
+      field: 'supportStartDate',
+      header: t('common.supportStartDate'),
+      sortable: true,
+      filterField: 'supportStartDate',
+      dataType: 'date' as const
+    }
+  ])
 
-/** Navigation */
-function handleAddBusiness() {
-	router.push('/businesses/new');
-}
-function handleViewBusiness(id: string) {
-	if (id) router.push(`/businesses/${id}`);
-}
-function goToEntrepreneurProfile(id: string) {
-	if (id) router.push(`/entrepreneurs/${id}`);
-}
-function handleEditBusiness(id: string) {
-	if (id) router.push(`/businesses/${id}/edit`);
-}
+  /** Global filter fields */
+  const globalFilterFields = ref(['name', 'ownerName', 'primaryBusinessArea'])
 
-function handleDelete(id: string) {
-    const business = businesses.value.find(b => b.id === id);
-    const name = business?.name || t('common.business');
-    
+  /** Filters */
+  const filters = ref<any>({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }]
+    },
+    ownerName: {
+      operator: FilterOperator.OR,
+      constraints: [{ value: null, matchMode: FilterMatchMode.IN }]
+    },
+    primaryBusinessArea: {
+      operator: FilterOperator.OR,
+      constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }]
+    },
+    isRegistered: { value: null, matchMode: FilterMatchMode.EQUALS },
+    supportStartDate: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }]
+    }
+  })
+
+  /** Navigation */
+  function handleAddBusiness() {
+    router.push('/businesses/new')
+  }
+  function handleViewBusiness(id: string) {
+    if (id) router.push(`/businesses/${id}`)
+  }
+  function goToEntrepreneurProfile(id: string) {
+    if (id) router.push(`/entrepreneurs/${id}`)
+  }
+  function handleEditBusiness(id: string) {
+    if (id) router.push(`/businesses/${id}/edit`)
+  }
+
+  function handleDelete(id: string) {
+    const business = businesses.value.find((b) => b.id === id)
+    const name = business?.name || t('common.business')
+
     confirmDelete(name, async () => {
-        await store.remove(id);
-    });
-}
+      await store.remove(id)
+    })
+  }
 
-/** CSV export */
-const exportCSV = (dataToExport: Business[]) => {
-  if (!dataToExport.length) return;
-  const sample = dataToExport[0];
-  const cols = generateCsvColumns(
-    sample,
-    ['avatar','id', 'entrepreneur'], // Exclude nested objects
-    [{ key: 'ownerName', label: 'owner' }] // Add ownerName as 'Owner'
-  );
-  exportCsv(dataToExport, cols, 'businesses');
-};
+  /** CSV export */
+  const exportCSV = (dataToExport: Business[]) => {
+    if (!dataToExport.length) return
+    const sample = dataToExport[0]
+    const cols = generateCsvColumns(
+      sample,
+      ['avatar', 'id', 'entrepreneur'], // Exclude nested objects
+      [{ key: 'ownerName', label: 'owner' }] // Add ownerName as 'Owner'
+    )
+    exportCsv(dataToExport, cols, 'businesses')
+  }
 
-/** Load data */
-onMounted(() => store.fetchAll());
+  /** Load data */
+  onMounted(() => store.fetchAll())
 </script>
 
 <style scoped>
-.owner-link {
-  cursor: pointer;
-  color: var(--primary-color);
-  text-decoration: none;
-}
-.owner-link:hover {
-  text-decoration: underline;
-}
+  .owner-link {
+    cursor: pointer;
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+  .owner-link:hover {
+    text-decoration: underline;
+  }
 
-.business-area-tag {
-  max-width: 300px;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .business-area-tag {
+    max-width: 300px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 </style>

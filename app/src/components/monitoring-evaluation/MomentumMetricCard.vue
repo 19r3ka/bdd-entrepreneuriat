@@ -3,10 +3,16 @@
     <!-- Header -->
     <div class="flex justify-content-between align-items-start mb-2">
       <div>
-        <div class="text-sm text-500 mb-1 uppercase font-semibold">{{ $t(`momentumMetric.categories.${metric.category}`, metric.category) }}</div>
+        <div class="text-sm text-500 mb-1 uppercase font-semibold">
+          {{ $t(`momentumMetric.categories.${metric.category}`, metric.category) }}
+        </div>
         <div class="font-bold text-xl text-900">{{ metric.title }}</div>
       </div>
-      <Tag :value="metric.genderMarker" :severity="getGenderSeverity(metric.genderMarker)" v-if="metric.genderMarker" />
+      <Tag
+        :value="metric.genderMarker"
+        :severity="getGenderSeverity(metric.genderMarker)"
+        v-if="metric.genderMarker"
+      />
     </div>
 
     <!-- Indicators & Sparklines -->
@@ -14,11 +20,16 @@
       <div v-for="(indicator, index) in metric.indicators" :key="index" class="mb-3 last:mb-0">
         <div class="flex justify-content-between align-items-baseline mb-1">
           <span class="text-600 font-medium text-sm">{{ indicator.name }}</span>
-          <span class="text-900 font-bold">{{ formatValue(getLatestReading(indicator), indicator.unit) }}</span>
+          <span class="text-900 font-bold">{{
+            formatValue(getLatestReading(indicator), indicator.unit)
+          }}</span>
         </div>
-        
+
         <!-- Sparkline -->
-        <div class="h-2rem w-full bg-surface-50 border-round overflow-hidden relative" v-if="indicator.readings && indicator.readings.length > 1">
+        <div
+          class="h-2rem w-full bg-surface-50 border-round overflow-hidden relative"
+          v-if="indicator.readings && indicator.readings.length > 1"
+        >
           <svg class="w-full h-full" preserveAspectRatio="none">
             <polyline
               :points="getSparklinePoints(indicator.readings)"
@@ -29,8 +40,12 @@
             />
           </svg>
         </div>
-        <div v-else-if="indicator.readings && indicator.readings.length === 1" class="text-xs text-500 mt-1">
-          {{ $t('momentumMetric.baseline', 'Baseline') }}: {{ formatValue(indicator.baseline, indicator.unit) }}
+        <div
+          v-else-if="indicator.readings && indicator.readings.length === 1"
+          class="text-xs text-500 mt-1"
+        >
+          {{ $t('momentumMetric.baseline', 'Baseline') }}:
+          {{ formatValue(indicator.baseline, indicator.unit) }}
         </div>
       </div>
     </div>
@@ -44,76 +59,89 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+  import { computed } from 'vue'
+  import Tag from 'primevue/tag'
+  import Button from 'primevue/button'
+  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
 
-const props = defineProps<{
-  metric: MomentumMetric;
-}>();
+  const props = defineProps<{
+    metric: MomentumMetric
+  }>()
 
-defineEmits<{
-  (e: 'edit', metric: MomentumMetric): void;
-}>();
+  defineEmits<{
+    (e: 'edit', metric: MomentumMetric): void
+  }>()
 
-const getGenderSeverity = (marker?: string) => {
-  switch (marker) {
-    case 'GEN3': return 'success';
-    case 'GEN2': return 'info';
-    case 'GEN1': return 'warning';
-    case 'GEN0': return 'danger';
-    default: return 'secondary';
+  const getGenderSeverity = (marker?: string) => {
+    switch (marker) {
+      case 'GEN3':
+        return 'success'
+      case 'GEN2':
+        return 'info'
+      case 'GEN1':
+        return 'warning'
+      case 'GEN0':
+        return 'danger'
+      default:
+        return 'secondary'
+    }
   }
-};
 
-const getLatestReading = (indicator: any) => {
-  if (!indicator.readings || indicator.readings.length === 0) return null;
-  // Sort by date descending
-  const sorted = [...indicator.readings].sort((a, b) => new Date(b.asOf).getTime() - new Date(a.asOf).getTime());
-  return sorted[0].value;
-};
+  const getLatestReading = (indicator: any) => {
+    if (!indicator.readings || indicator.readings.length === 0) return null
+    // Sort by date descending
+    const sorted = [...indicator.readings].sort(
+      (a, b) => new Date(b.asOf).getTime() - new Date(a.asOf).getTime()
+    )
+    return sorted[0].value
+  }
 
-const formatValue = (value: any, unit?: string) => {
-  if (value === null || value === undefined) return '-';
-  
-  if (unit === 'percent') return `${value}%`;
-  if (unit === 'currency') return `${value}`; // Currency symbol handling could be added
-  if (unit === 'boolean') return value ? 'Yes' : 'No';
-  return value;
-};
+  const formatValue = (value: any, unit?: string) => {
+    if (value === null || value === undefined) return '-'
 
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString();
-};
+    if (unit === 'percent') return `${value}%`
+    if (unit === 'currency') return `${value}` // Currency symbol handling could be added
+    if (unit === 'boolean') return value ? 'Yes' : 'No'
+    return value
+  }
 
-const getSparklinePoints = (readings: any[]) => {
-  if (!readings || readings.length < 2) return '';
-  
-  // Sort by date ascending
-  const sorted = [...readings].sort((a, b) => new Date(a.asOf).getTime() - new Date(b.asOf).getTime());
-  
-  const values = sorted.map(r => Number(r.value));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1; // Avoid division by zero
-  
-  return values.map((val, index) => {
-    const x = (index / (values.length - 1)) * 100;
-    // Invert Y because SVG coords start from top
-    const y = 100 - ((val - min) / range) * 100; 
-    return `${x},${y}`;
-  }).join(' ');
-};
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return ''
+    return new Date(dateStr).toLocaleDateString()
+  }
+
+  const getSparklinePoints = (readings: any[]) => {
+    if (!readings || readings.length < 2) return ''
+
+    // Sort by date ascending
+    const sorted = [...readings].sort(
+      (a, b) => new Date(a.asOf).getTime() - new Date(b.asOf).getTime()
+    )
+
+    const values = sorted.map((r) => Number(r.value))
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min || 1 // Avoid division by zero
+
+    return values
+      .map((val, index) => {
+        const x = (index / (values.length - 1)) * 100
+        // Invert Y because SVG coords start from top
+        const y = 100 - ((val - min) / range) * 100
+        return `${x},${y}`
+      })
+      .join(' ')
+  }
 </script>
 
 <style scoped>
-.momentum-metric-card {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.momentum-metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-4);
-}
+  .momentum-metric-card {
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+  .momentum-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-4);
+  }
 </style>

@@ -1,4 +1,4 @@
-# Feature Specification: Log Support Boosts
+# Feature Specification: Monitoring & Evaluation (M&E) Module
 
 **Feature Branch**: `004-monitoring-evaluation`  
 **Created**: 2025-11-25
@@ -33,6 +33,50 @@ As a Program Manager (initially), I want to view the complete history of support
 **Acceptance Scenarios**:
 
 1. **Given** a business has received multiple support boosts, **When** I view the business's detail page, **Then** I see a list of all support boosts in reverse chronological order.
+
+---
+
+### User Story 3 - Define a Goal for a Business (Priority: P1)
+
+As a Program Manager, I want to define a specific, measurable goal for a business so that I can track its progress against a set target.
+
+**Acceptance Scenarios**:
+
+1. **Given** I am on the business detail page, **When** I navigate to the 'Goals' section and click "Add Goal", **Then** I am presented with a form to define the goal.
+2. **Given** I fill out the goal form with a name, description, type, baseline value, and target value, **When** I submit the form, **Then** the new goal is listed under the business's 'Goals' section.
+
+---
+
+### User Story 4 - Log a Measurement for a Goal (Priority: P1)
+
+As a Program Manager, I want to log a measurement against a goal, with evidence, so that I can record progress over time.
+
+**Acceptance Scenarios**:
+
+1. **Given** a goal has been defined for a business, **When** I click "Add Measurement" for that goal, **Then** I am shown a form to log a new measurement.
+2. **Given** I enter a value, date, and upload an evidence file, **When** I submit the form, **Then** the new measurement appears in the goal's history, and the evidence is stored securely.
+
+---
+
+### User Story 5 - Log a Quick Win (Priority: P1)
+
+As a Program Manager, I want to log a "Quick Win" to capture a specific, tangible achievement for a business.
+
+**Acceptance Scenarios**:
+
+1. **Given** I am on the business detail page, **When** I click "Add Quick Win", **Then** a form appears to enter the details of the achievement.
+2. **Given** I fill out the title, summary, date, and link relevant indicators, **When** I submit the form, **Then** the Quick Win is added to the business's activity feed or results history.
+
+---
+
+### User Story 6 - Report a Momentum Metric (Priority: P2)
+
+As a Program Manager, I want to create a "Momentum Metric" to package a result for formal reporting, often based on a Quick Win.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Quick Win has been logged, **When** I choose to create a Momentum Metric from it, **Then** a form opens, pre-filled with data inherited from the Quick Win.
+2. **Given** I complete the form with additional M&E data (like SDG targets and IRRF codes), **When** I submit the form, **Then** a formal Momentum Metric is created and visible in the reporting section.
 
 ---
 
@@ -86,6 +130,10 @@ As a Program Manager (initially), I want to view the complete history of support
 - **FR-006**: An authorized user MUST be able to delete a logged support boost.
 - **FR-007**: The system MUST assume that business records are managed internally within this application, and the `business_id` refers to an existing internal business entity.
 - **FR-010**: The system MUST allow users to export support boost data as a CSV file, initiated by a button click within the reporting view.
+- **FR-014**: The system MUST allow a user to define a Goal (Indicator Definition) for a business, including its name, type, baseline, and target.
+- **FR-015**: The system MUST allow a user to log Measurements against a Goal, including a value, date, and evidence file.
+- **FR-016**: The system MUST allow a user to log a Quick Win, capturing a title, summary, and category, and linking to relevant output indicators.
+- **FR-017**: The system MUST allow a user to create a Momentum Metric, which can inherit data from a Quick Win and includes fields for formal M&E reporting (e.g., SDG Targets, RBM Level).
 
 ### Non-Functional Requirements
 - **FR-008**: The system MUST be designed to handle a small scale, specifically up to 100 businesses, with an average of 1-2 support boosts per business per month.
@@ -97,6 +145,11 @@ As a Program Manager (initially), I want to view the complete history of support
 ### Key Entities
 
 - **SupportBoost**: Represents a single instance of support given to a business, conforming to the schema detailed in FR-002.
+- **IndicatorDefinition**: Represents a specific, measurable goal for a business, with a baseline and target.
+- **Measurement**: A single data point logged against an IndicatorDefinition, providing a value at a specific time with evidence.
+- **QuickWin**: A tangible achievement or milestone, linked to specific output indicators.
+- **MomentumMetric**: A formal result or outcome, often derived from a QuickWin, containing detailed M&E reporting data.
+- **OutputIndicator**: A predefined, granular metric that can be linked to a Quick Win.
 
 ## Success Criteria *(mandatory)*
 
@@ -106,3 +159,5 @@ As a Program Manager (initially), I want to view the complete history of support
 - **SC-002**: 100% of support boost logs are associated with a valid, existing business.
 - **SC-003**: Reports based on M&E data can be generated within 2 minutes.
 - **SC-004**: The time required to find the full support history for any given business is less than 30 seconds.
+- **SC-005**: A user can define a new goal and log the first measurement in under 3 minutes.
+- **SC-006**: All measurements are recorded with a valid evidence file.

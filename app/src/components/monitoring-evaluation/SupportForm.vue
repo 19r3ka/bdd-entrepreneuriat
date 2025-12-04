@@ -1,9 +1,11 @@
 <template>
   <div class="card">
     <Toast />
-    <h1 v-if="!hideTitle" class="m-0 mb-3">{{ isEdit ? 'Edit Support Intervention' : 'New Support Intervention' }}</h1>
+    <h1 v-if="!hideTitle" class="m-0 mb-3">
+      {{ isEdit ? 'Edit Support Intervention' : 'New Support Intervention' }}
+    </h1>
     <BaseForm
-      :schema="SupportSchema"
+      :schema="SupportBoostSchema"
       :initial-values="initialValues"
       :on-submit="handleSubmit"
       v-slot="{ defineField, canSubmit, isSubmitting }"
@@ -72,7 +74,7 @@
           </FormField>
 
           <FormField
-            v-if="defineField('modality').modelValue.value === SupportModality.CAPACITY_DEV"
+            v-if="defineField('modality').modelValue.value === 'capacity_dev'"
             name="duration"
             :label="$t('supportForm.duration')"
             v-bind="defineField('duration')"
@@ -160,7 +162,10 @@
         </div>
       </Section>
 
-      <Section v-if="defineField('modality').modelValue.value === SupportModality.GRANT" title="Finance Details">
+      <Section
+        v-if="defineField('modality').modelValue.value === 'financial_grant'"
+        title="Finance Details"
+      >
         <div class="formgrid grid">
           <FormField
             name="financeDetails.instrument"
@@ -238,8 +243,8 @@
         <Button
           type="submit"
           :label="isEdit ? $t('common.update') : $t('common.submit')"
-          :disabled="!canSubmit.value"
-          :loading="isSubmitting.value"
+          :disabled="!canSubmit"
+          :loading="isSubmitting"
         />
       </div>
     </BaseForm>
@@ -247,80 +252,88 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useToast } from 'primevue/usetoast';
-import BaseForm from '@/components/common/BaseForm.vue';
-import FormField from '@/components/common/FormField.vue';
-import Section from '@/components/common/FormSection.vue';
-import Button from 'primevue/button';
-import Select from 'primevue/select';
-import InputNumber from 'primevue/inputnumber';
-import DatePicker from 'primevue/datepicker';
-import Toast from 'primevue/toast';
-import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue';
-import { useSupportStore } from '@/stores/useSupportStore';
-import { SupportSchema, SupportModalityEnum, FinanceInstrumentEnum, FinanceSourceEnum } from '@/schemas/monitoring-evaluation/Support';
-import { SupportModality } from '@/types/monitoring-evaluation/Support';
-import type { Support as SupportType } from '@/types/monitoring-evaluation/Support';
-import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
+  import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { useToast } from 'primevue/usetoast'
+  import BaseForm from '@/components/common/BaseForm.vue'
+  import FormField from '@/components/common/FormField.vue'
+  import Section from '@/components/common/FormSection.vue'
+  import Button from 'primevue/button'
+  import Select from 'primevue/select'
+  import InputNumber from 'primevue/inputnumber'
+  import DatePicker from 'primevue/datepicker'
+  import Toast from 'primevue/toast'
+  import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
+  import { useSupportStore } from '@/stores/useSupportStore'
+  import { SupportBoostSchema } from '@/schemas/monitoring-evaluation/Support'
+  import type { Support as SupportType } from '@/types/monitoring-evaluation/Support'
+  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
 
-const props = defineProps<{
-  isEdit: boolean;
-  initialValues: Partial<SupportType>;
-  businessId?: string;
-  hideTitle?: boolean;
-}>();
+  const props = defineProps<{
+    isEdit: boolean
+    initialValues: Partial<SupportType>
+    businessId?: string
+    hideTitle?: boolean
+  }>()
 
-const emit = defineEmits(['success', 'cancel']);
+  const emit = defineEmits(['success', 'cancel'])
 
-const { t } = useI18n();
-const toast = useToast();
-const supportStore = useSupportStore();
-const { handleApiError } = useErrorHandler();
+  const { t } = useI18n()
+  const toast = useToast()
+  const supportStore = useSupportStore()
+  const { handleApiError } = useErrorHandler()
 
-const SupportModalityOptions = computed(() =>
-  Object.values(SupportModalityEnum.enum).map(value => ({ label: t(`supportModality.${value}`), value }))
-);
+  const SupportModalityOptions = computed(() =>
+    ['DIM', 'NIM', 'hybrid'].map((value) => ({ label: t(`supportModality.${value}`), value }))
+  )
 
-const sesRiskCategoryOptions = computed(() =>
-  (['Low', 'High'] as const).map(value => ({ label: t(`sesRiskCategory.${value}`), value }))
-);
+  const sesRiskCategoryOptions = computed(() =>
+    (['Low', 'High'] as const).map((value) => ({ label: t(`sesRiskCategory.${value}`), value }))
+  )
 
-const genderMarkerOptions = computed(() =>
-  (['GEN0', 'GEN1', 'GEN2', 'GEN3'] as const).map(value => ({ label: t(`genderMarker.${value}`), value }))
-);
+  const genderMarkerOptions = computed(() =>
+    (['GEN0', 'GEN1', 'GEN2', 'GEN3'] as const).map((value) => ({
+      label: t(`genderMarker.${value}`),
+      value
+    }))
+  )
 
-const FinanceInstrumentOptions = computed(() =>
-  Object.values(FinanceInstrumentEnum.enum).map(value => ({ label: t(`financeInstrument.${value}`), value }))
-);
+  const FinanceInstrumentOptions = computed(() =>
+    ['grant', 'loan', 'hybrid'].map((value) => ({ label: t(`financeInstrument.${value}`), value }))
+  )
 
-const FinanceSourceOptions = computed(() =>
-  Object.values(FinanceSourceEnum.enum).map(value => ({ label: t(`financeSource.${value}`), value }))
-);
+  const FinanceSourceOptions = computed(() =>
+    ['UNDP_core', 'donor', 'government', 'mixed'].map((value) => ({
+      label: t(`financeSource.${value}`),
+      value
+    }))
+  )
 
-async function handleSubmit(data: any) {
-  try {
-    if (props.isEdit) {
-      await supportStore.updateSupport(props.initialValues.id!, data);
-      toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Support intervention updated successfully',
-        life: 3000,
-      });
-    } else {
-      await supportStore.addSupport({ ...data, businessId: data.businessId || props.businessId });
-      toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Support intervention created successfully',
-        life: 3000,
-      });
+  async function handleSubmit(data: any) {
+    try {
+      if (props.isEdit) {
+        await supportStore.updateSupport(props.initialValues.id!, data)
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Support intervention updated successfully',
+          life: 3000
+        })
+      } else {
+        await supportStore.addSupport({ ...data, businessId: data.businessId || props.businessId })
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Support intervention created successfully',
+          life: 3000
+        })
+      }
+      emit('success')
+    } catch (error) {
+      handleApiError(
+        error as AppError,
+        `Failed to ${props.isEdit ? 'update' : 'create'} support intervention`
+      )
     }
-    emit('success');
-  } catch (error) {
-    handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} support intervention`);
   }
-}
 </script>

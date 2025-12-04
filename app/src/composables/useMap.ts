@@ -1,6 +1,6 @@
-import { ref } from 'vue';
-import type { Map } from 'leaflet';
-import L from 'leaflet';
+import { ref } from 'vue'
+import type { Map as LeafletMap } from 'leaflet'
+import L from 'leaflet'
 
 /**
  * @typedef {Object} UseMapReturn
@@ -14,14 +14,14 @@ import L from 'leaflet';
  * @returns {UseMapReturn}
  */
 export function useMap() {
-  const mapInstance = ref<Map | null>(null);
+  const mapInstance = ref<LeafletMap | null>(null)
 
   /**
    * Sets the internal Leaflet map instance.
-   * @param {Map} map - The Leaflet map object.
+   * @param {LeafletMap} map - The Leaflet map object.
    */
-  function setMap(map: Map) {
-    mapInstance.value = map;
+  function setMap(map: LeafletMap) {
+    mapInstance.value = map
   }
 
   /**
@@ -32,13 +32,12 @@ export function useMap() {
    */
   function addMarker(lat: number, lng: number, popupText: string) {
     if (mapInstance.value) {
-      L.marker([lat, lng]).addTo(mapInstance.value)
-        .bindPopup(popupText);
+      L.marker([lat, lng]).addTo(mapInstance.value as any).bindPopup(popupText)
     }
   }
 
   return {
     setMap,
-    addMarker,
-  };
+    addMarker
+  }
 }

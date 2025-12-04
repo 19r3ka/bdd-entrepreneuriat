@@ -24,33 +24,33 @@
 </template>
 
 <script setup lang="ts">
-import type { ZodSchema, z } from 'zod';
-import { type UniqueChecks, useValidationForm } from '@/composables/useValidationForm';
+  import type { ZodSchema, z } from 'zod'
+  import { type UniqueChecks, useValidationForm } from '@/composables/useValidationForm'
 
-interface Props<T extends ZodSchema> {
-	schema: T;
-	initialValues: z.infer<T>;
-	onSubmit: (values: z.infer<T>) => Promise<void> | void;
-	validateOnBlur?: boolean;
-	validateOnChange?: boolean;
-	uniqueChecks?: UniqueChecks;
-}
+  interface Props<T extends ZodSchema> {
+    schema: T
+    initialValues: z.infer<T>
+    onSubmit: (values: z.infer<T>) => Promise<void> | void
+    validateOnBlur?: boolean
+    validateOnChange?: boolean
+    uniqueChecks?: UniqueChecks
+  }
 
-const props = withDefaults(defineProps<Props<any>>(), {
-	validateOnBlur: true,
-	validateOnChange: false,
-	uniqueChecks: undefined,
-});
+  const props = withDefaults(defineProps<Props<any>>(), {
+    validateOnBlur: true,
+    validateOnChange: false,
+    uniqueChecks: undefined
+  })
 
-const form = useValidationForm({
-	initialValues: props.initialValues,
-	validationSchema: props.schema,
-	onSubmit: props.onSubmit,
-	validateOnBlur: props.validateOnBlur,
-	validateOnChange: props.validateOnChange,
-	uniqueChecks: props.uniqueChecks,
-});
+  const form = useValidationForm({
+    initialValues: props.initialValues,
+    validationSchema: props.schema,
+    onSubmit: props.onSubmit,
+    validateOnBlur: props.validateOnBlur,
+    validateOnChange: props.validateOnChange,
+    uniqueChecks: props.uniqueChecks
+  })
 
-// Expose full form state for parent components
-defineExpose(form);
+  // Expose full form state for parent components
+  defineExpose(form)
 </script>

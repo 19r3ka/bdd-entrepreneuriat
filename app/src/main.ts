@@ -1,44 +1,44 @@
-import { createPinia } from "pinia";
-import PrimeVue from "primevue/config";
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
-import ToastService from "primevue/toastservice";
-import ConfirmationService from "primevue/confirmationservice";
-import "vue-toastification/dist/index.css";
-import i18n from "./i18n"; // Import i18n configuration
+import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice'
+import 'vue-toastification/dist/index.css'
+import i18n from './i18n' // Import i18n configuration
 
-import Material from "@primeuix/themes/material"; // Import the Material theme preset
+import Material from '@primeuix/themes/material' // Import the Material theme preset
 
-import "primeicons/primeicons.css"; // PrimeIcons
-import "primeflex/primeflex.css"; // PrimeFlex CSS
-import "./assets/global.css"; // Global styles
+import 'primeicons/primeicons.css' // PrimeIcons
+import 'primeflex/primeflex.css' // PrimeFlex CSS
+import './assets/global.css' // Global styles
 
-const app = createApp(App);
+const app = createApp(App)
 
-app.use(createPinia());
-app.use(router);
+app.use(createPinia())
+app.use(router)
 app.use(PrimeVue, {
-	theme: {
-		preset: Material, // Use the base Material theme
-		options: {
-			prefix: "p",
-			darkModeSelector: "system",
-			cssLayer: false,
-		},
-	},
-});
+  theme: {
+    preset: Material, // Use the base Material theme
+    options: {
+      prefix: 'p',
+      darkModeSelector: 'system',
+      cssLayer: false
+    }
+  }
+})
 
-import Tooltip from 'primevue/tooltip';
+import Tooltip from 'primevue/tooltip'
 
 // Register toast notifications
-app.use(ToastService);
-app.use(ConfirmationService);
+app.use(ToastService)
+app.use(ConfirmationService)
 
 // Register Tooltip directive
-app.directive('tooltip', Tooltip);
+app.directive('tooltip', Tooltip)
 
 // Register i18n
-app.use(i18n);
+app.use(i18n)
 
-app.mount("#app");
+app.mount('#app')

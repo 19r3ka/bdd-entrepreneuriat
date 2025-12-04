@@ -1,66 +1,83 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ref } from 'vue';
-import { useCrudStore } from './useCrudStore';
-import { EntrepreneurSchema } from '../schemas/entrepreneur';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ref } from 'vue'
+import { useCrudStore } from './useCrudStore'
+import { EntrepreneurSchema } from '../schemas/entrepreneur'
+import { useStorage } from '@/composables/useStorage'
+import { z } from 'zod'
 
 // Mock the useStorage composable
-vi.mock('@/composables/useStorage', () => ({
-  useStorage: vi.fn(() => ({
-    uploadFile: vi.fn(),
-    updateFile: vi.fn(),
-    deleteFile: vi.fn(),
-    getFileUrl: vi.fn(),
-  })),
-}));
+vi.mock('@/composables/useStorage')
+
+const FILE_BUCKET = 'avatars'
 
 // Create a mock DB object with the necessary methods
 const createMockDb = () => {
-  const mockData: Record<string, any> = {};
+  const mockData: Record<string, any> = {}
   return {
     entrepreneurs: {
       add: vi.fn(async (item: any) => {
-        const id = item.id || crypto.randomUUID();
-        mockData[id] = { ...item, id };
-        return id;
+        const id = item.id || crypto.randomUUID()
+        mockData[id] = { ...item, id }
+        return id
       }),
       get: vi.fn(async (id: string) => mockData[id]),
       put: vi.fn(async (item: any) => {
-        mockData[item.id] = item;
-        return item.id;
+        mockData[item.id] = item
+        return item.id
       }),
       delete: vi.fn(async (id: string) => {
-        delete mockData[id];
-        return true;
+        delete mockData[id]
+        return 1
       }),
-      bulkGet: vi.fn(async (ids: string[]) => ids.map(id => mockData[id])),
+      bulkGet: vi.fn(async (ids: string[]) => ids.map((id) => mockData[id]).filter(Boolean)),
       bulkDelete: vi.fn(async (ids: string[]) => {
-        ids.forEach(id => delete mockData[id]);
-        return ids.length;
+        ids.forEach((id) => delete mockData[id])
+        return ids.length
       }),
-      toArray: vi.fn(async () => Object.values(mockData)),
+      toArray: vi.fn(async () => Object.values(mockData))
     },
     avatars: {
       put: vi.fn(),
       get: vi.fn(),
-      delete: vi.fn(),
+      delete: vi.fn()
     }
-  };
-};
+  }
+}
 
 describe('useCrudStore', () => {
-  let mockDb: any;
+  let mockDb: any
+  let mockUploadFile: any
+  let mockUpdateFile: any
+  let mockDeleteFile: any
 
   beforeEach(() => {
-    mockDb = createMockDb();
-    vi.clearAllMocks();
-  });
+    mockDb = createMockDb()
+    vi.clearAllMocks()
+
+    // Mock useStorage return values
+    mockUploadFile = vi.fn()
+    mockUpdateFile = vi.fn()
+    mockDeleteFile = vi.fn()
+    vi.mocked(useStorage).mockReturnValue({
+      loading: ref(false),
+      error: ref(null),
+      uploadFile: mockUploadFile,
+      updateFile: mockUpdateFile,
+      deleteFile: mockDeleteFile,
+      getFileUrl: vi.fn()
+    })
+
+    vi.stubGlobal('crypto', {
+      randomUUID: vi.fn(() => 'test-uuid-123')
+    })
+  })
 
   it('validates data against schema during add', async () => {
-    const { add } = useCrudStore({
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
 
     // Valid data should pass schema validation
     const validData = {
@@ -68,63 +85,65 @@ describe('useCrudStore', () => {
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' }
-    };
+    }
 
-    await expect(add(validData)).resolves.not.toThrow();
+    await expect(store.add(validData)).resolves.not.toThrow()
+    expect(mockDb.entrepreneurs.add).toHaveBeenCalled()
+    expect(store.items.value).toHaveLength(1)
 
     // Invalid data should fail schema validation
     const invalidData = {
-      firstName: 'John', // missing required lastName, slug, and contact
-    };
+      firstName: 'John' // missing required lastName, slug, and contact
+    }
 
-    await expect(add(invalidData)).rejects.toThrow();
-  });
+    await expect(store.add(invalidData as any)).rejects.toThrow(z.ZodError)
+    expect(mockDb.entrepreneurs.add).not.toHaveBeenCalledWith(
+      expect.objectContaining(invalidData)
+    )
+    expect(store.items.value).toHaveLength(1) // Optimistic update should be reverted
+  })
 
   it('validates data against schema during update', async () => {
-    const { update } = useCrudStore({
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
 
-    // Valid data with id should pass schema validation
-    const validData = {
-      id: 'test-id',
+    // Add an initial item
+    const initialData = {
+      id: 'ent1',
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' }
-    };
+    }
+    await mockDb.entrepreneurs.add(initialData)
+    store.items.value = [initialData] // Manually set for optimistic update checks
 
-    await expect(update(validData)).resolves.not.toThrow();
+    // Valid data with id should pass schema validation
+    const validUpdateData = { ...initialData, firstName: 'Jane' }
+    await expect(store.update(validUpdateData)).resolves.not.toThrow()
+    expect(mockDb.entrepreneurs.put).toHaveBeenCalledWith(validUpdateData)
+    expect(store.items.value[0]!.firstName).toBe('Jane')
 
     // Invalid data should fail schema validation
-    const invalidData = {
-      id: 'test-id',
-      firstName: 'John', // missing required lastName, slug, and contact
-    };
+    const invalidUpdateData = { ...initialData, lastName: undefined }
+    await expect(store.update(invalidUpdateData as any)).rejects.toThrow(z.ZodError)
+    expect(mockDb.entrepreneurs.put).not.toHaveBeenCalledWith(
+      expect.objectContaining(invalidUpdateData)
+    )
+    expect(store.items.value[0]!.firstName).toBe('Jane') // Should revert to previous valid state
+  })
 
-    await expect(update(invalidData)).rejects.toThrow();
-  });
-
-  it('handles avatar upload during add/update', async () => {
-    const mockFile = new File([], 'avatar.jpg');
-    const mockUploadFile = vi.fn().mockResolvedValue('dexie://avatars/test-avatar.jpg');
-    const mockUpdateFile = vi.fn().mockResolvedValue('dexie://avatars/test-avatar.jpg');
-    const mockDeleteFile = vi.fn().mockResolvedValue(undefined);
-
-    vi.mocked(() => ({
-      uploadFile: mockUploadFile,
-      updateFile: mockUpdateFile,
-      deleteFile: mockDeleteFile,
-      getFileUrl: vi.fn(),
-    }));
-
-    const { add } = useCrudStore({
+  it('handles avatar upload during add', async () => {
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
+    const mockFile = new File(['dummy content'], 'avatar.jpg', { type: 'image/jpeg' })
+    mockUploadFile.mockResolvedValue('dexie://avatars/test-uuid-123/avatar.jpg')
 
     const dataWithFileAvatar = {
       firstName: 'John',
@@ -132,136 +151,165 @@ describe('useCrudStore', () => {
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
       avatar: mockFile
-    };
+    }
 
-    await add(dataWithFileAvatar);
+    const addedItem = await store.add(dataWithFileAvatar as any)
 
-    // Should have called uploadFile with the avatar file
-    expect(mockUploadFile).toHaveBeenCalled();
-  });
+    expect(mockUploadFile).toHaveBeenCalledWith(
+      mockFile,
+      'test-uuid-123/avatar.jpg' // id will be generated by add function
+    )
+    expect(addedItem?.avatar).toBe('dexie://avatars/test-uuid-123/avatar.jpg')
+    expect(mockDb.entrepreneurs.add).toHaveBeenCalledWith(
+      expect.objectContaining({ avatar: 'dexie://avatars/test-uuid-123/avatar.jpg' })
+    )
+  })
 
-  it('properly cleans up avatar files during remove', async () => {
-    const mockDeleteFile = vi.fn().mockResolvedValue(undefined);
-
-    vi.mocked(() => ({
-      uploadFile: vi.fn(),
-      updateFile: vi.fn(),
-      deleteFile: mockDeleteFile,
-      getFileUrl: vi.fn(),
-    }));
-
-    const { add, remove } = useCrudStore({
+  it('handles avatar update during update', async () => {
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
 
-    // Add an item with avatar
-    const itemWithAvatar = {
-      id: 'test-id',
+    const initialItem = {
+      id: 'ent1',
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
-      avatar: 'dexie://avatars/test-avatar.jpg'
-    };
+      avatar: 'dexie://avatars/ent1/old-avatar.jpg'
+    }
+    await mockDb.entrepreneurs.add(initialItem)
+    store.items.value = [initialItem]
 
-    // Mock the DB get method to return the item when fetching
-    mockDb.entrepreneurs.get.mockResolvedValue(itemWithAvatar);
+    const newFile = new File(['new content'], 'new-avatar.png', { type: 'image/png' })
+    mockUpdateFile.mockResolvedValue('dexie://avatars/ent1/new-avatar.png')
 
-    await remove('test-id');
+    const updatedItem = { ...initialItem, avatar: newFile }
+    await store.update(updatedItem as any)
 
-    // Should have tried to delete the avatar file
-    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/test-avatar.jpg');
-  });
+    expect(mockUpdateFile).toHaveBeenCalledWith(
+      newFile,
+      'ent1/new-avatar.png',
+      'dexie://avatars/ent1/old-avatar.jpg'
+    )
+    expect(store.items.value[0]!.avatar).toBe('dexie://avatars/ent1/new-avatar.png')
+    expect(mockDb.entrepreneurs.put).toHaveBeenCalledWith(
+      expect.objectContaining({ avatar: 'dexie://avatars/ent1/new-avatar.png' })
+    )
+  })
 
-  it('reverts optimistic updates on error', async () => {
-    const { items, add, update, remove } = useCrudStore({
+  it('properly cleans up avatar files during remove', async () => {
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
 
-    // Test add revert on failure
-    mockDb.entrepreneurs.add.mockRejectedValue(new Error('DB Error'));
-    
+    const itemWithAvatar = {
+      id: 'ent1',
+      firstName: 'John',
+      lastName: 'Doe',
+      slug: 'john-doe',
+      contact: { email: 'john@example.com' },
+      avatar: 'dexie://avatars/ent1/avatar.jpg'
+    }
+    await mockDb.entrepreneurs.add(itemWithAvatar)
+    store.items.value = [itemWithAvatar]
+
+    await store.remove('ent1')
+
+    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/ent1/avatar.jpg')
+    expect(mockDb.entrepreneurs.delete).toHaveBeenCalledWith('ent1')
+    expect(store.items.value).toHaveLength(0)
+  })
+
+  it('properly cleans up avatar files during removeMany', async () => {
+    const store = useCrudStore({
+      schema: EntrepreneurSchema,
+      tableName: 'entrepreneurs',
+      db: mockDb
+    })
+
+    const item1 = {
+      id: 'ent1',
+      firstName: 'John',
+      lastName: 'Doe',
+      slug: 'john-doe',
+      contact: { email: 'john@example.com' },
+      avatar: 'dexie://avatars/ent1/avatar1.jpg'
+    }
+    const item2 = {
+      id: 'ent2',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      slug: 'jane-smith',
+      contact: { email: 'jane@example.com' },
+      avatar: 'dexie://avatars/ent2/avatar2.jpg'
+    }
+    await mockDb.entrepreneurs.add(item1)
+    await mockDb.entrepreneurs.add(item2)
+    store.items.value = [item1, item2]
+
+    await store.removeMany(['ent1', 'ent2'])
+
+    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/ent1/avatar1.jpg')
+    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/ent2/avatar2.jpg')
+    expect(mockDb.entrepreneurs.bulkDelete).toHaveBeenCalledWith(['ent1', 'ent2'])
+    expect(store.items.value).toHaveLength(0)
+  })
+
+  it('reverts optimistic updates on add error', async () => {
+    const store = useCrudStore({
+      schema: EntrepreneurSchema,
+      tableName: 'entrepreneurs',
+      db: mockDb
+    })
+
     const validData = {
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' }
-    };
+    }
 
-    await expect(add(validData)).rejects.toThrow('DB Error');
-    expect(items.value).toHaveLength(0); // Should revert to empty
+    mockDb.entrepreneurs.add.mockRejectedValueOnce(new Error('DB Error')) // Make add fail
 
-    // Test update revert on failure
-    const item = {
-      id: 'test-id',
+    await expect(store.add(validData)).rejects.toThrow('DB Error')
+    expect(store.items.value).toHaveLength(0) // Optimistic add should be reverted
+  })
+
+  it('reverts optimistic updates on update error', async () => {
+    const store = useCrudStore({
+      schema: EntrepreneurSchema,
+      tableName: 'entrepreneurs',
+      db: mockDb
+    })
+
+    const initialItem = {
+      id: 'ent1',
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' }
-    };
-    
-    items.value.push(item);
-    mockDb.entrepreneurs.put.mockRejectedValue(new Error('Update Error'));
-    
-    await expect(update({ ...item, firstName: 'Jane' })).rejects.toThrow('Update Error');
-    expect(items.value[0].firstName).toBe('John'); // Should revert to original
-  });
+    }
+    await mockDb.entrepreneurs.add(initialItem)
+    store.items.value = [initialItem]
 
-  it('handles bulk operations with avatar cleanup', async () => {
-    const mockDeleteFile = vi.fn().mockResolvedValue(undefined);
+    const updateData = { ...initialItem, firstName: 'Jane' }
+    mockDb.entrepreneurs.put.mockRejectedValueOnce(new Error('Update DB Error'))
 
-    vi.mocked(() => ({
-      uploadFile: vi.fn(),
-      updateFile: vi.fn(),
-      deleteFile: mockDeleteFile,
-      getFileUrl: vi.fn(),
-    }));
-
-    const { removeMany } = useCrudStore({
-      schema: EntrepreneurSchema,
-      tableName: 'entrepreneurs',
-      db: mockDb,
-    });
-
-    // Add items with avatars
-    const item1 = {
-      id: 'test-id-1',
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: { email: 'john@example.com' },
-      avatar: 'dexie://avatars/avatar1.jpg'
-    };
-
-    const item2 = {
-      id: 'test-id-2',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      slug: 'jane-smith',
-      contact: { email: 'jane@example.com' },
-      avatar: 'dexie://avatars/avatar2.jpg'
-    };
-
-    // Mock the bulkGet to return these items
-    mockDb.entrepreneurs.bulkGet.mockResolvedValue([item1, item2]);
-
-    await removeMany(['test-id-1', 'test-id-2']);
-
-    // Should have tried to delete both avatar files
-    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/avatar1.jpg');
-    expect(mockDeleteFile).toHaveBeenCalledWith('dexie://avatars/avatar2.jpg');
-  });
+    await expect(store.update(updateData)).rejects.toThrow('Update DB Error')
+    expect(store.items.value[0]!.firstName).toBe('John') // Should revert to original
+  })
 
   it('searches items correctly', () => {
-    const { items, search } = useCrudStore({
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
 
     const item1 = {
       id: 'test-id-1',
@@ -269,7 +317,7 @@ describe('useCrudStore', () => {
       lastName: 'Doe',
       slug: 'john-doe',
       contact: { email: 'john@example.com' }
-    };
+    }
 
     const item2 = {
       id: 'test-id-2',
@@ -277,48 +325,39 @@ describe('useCrudStore', () => {
       lastName: 'Smith',
       slug: 'jane-smith',
       contact: { email: 'jane@example.com' }
-    };
+    }
 
-    items.value = [item1, item2];
+    store.items.value = [item1, item2]
 
-    const results = search('john', ['firstName'], items);
-    expect(results).toHaveLength(1);
-    expect(results[0].firstName).toBe('John');
-  });
+    const results = store.search('john', ['firstName'], store.items)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.firstName).toBe('John')
 
-  it('handles errors consistently', async () => {
-    const { add, update, remove, fetchAll, fetchOne } = useCrudStore({
+    const allResults = store.search('', ['firstName'], store.items)
+    expect(allResults).toHaveLength(2)
+  })
+
+  it('handles errors consistently during fetchAll', async () => {
+    const store = useCrudStore({
       schema: EntrepreneurSchema,
       tableName: 'entrepreneurs',
-      db: mockDb,
-    });
+      db: mockDb
+    })
+    mockDb.entrepreneurs.toArray.mockRejectedValueOnce(new Error('FetchAll Error'))
 
-    // Mock DB operations to throw errors
-    mockDb.entrepreneurs.add.mockRejectedValue(new Error('Add Error'));
-    mockDb.entrepreneurs.put.mockRejectedValue(new Error('Update Error'));
-    mockDb.entrepreneurs.delete.mockRejectedValue(new Error('Delete Error'));
-    mockDb.entrepreneurs.toArray.mockRejectedValue(new Error('Fetch Error'));
-    mockDb.entrepreneurs.get.mockRejectedValue(new Error('Get Error'));
+    await expect(store.fetchAll()).rejects.toThrow('FetchAll Error')
+    expect(store.error.value).toBe('FetchAll Error')
+  })
 
-    await expect(add({
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: { email: 'john@example.com' }
-    })).rejects.toThrow('Add Error');
+  it('handles errors consistently during fetchOne', async () => {
+    const store = useCrudStore({
+      schema: EntrepreneurSchema,
+      tableName: 'entrepreneurs',
+      db: mockDb
+    })
+    mockDb.entrepreneurs.get.mockRejectedValueOnce(new Error('FetchOne Error'))
 
-    await expect(update({
-      id: 'test-id',
-      firstName: 'John',
-      lastName: 'Doe',
-      slug: 'john-doe',
-      contact: { email: 'john@example.com' }
-    })).rejects.toThrow('Update Error');
-
-    await expect(remove('test-id')).rejects.toThrow('Delete Error');
-
-    await expect(fetchAll()).rejects.toThrow('Fetch Error');
-
-    await expect(fetchOne('test-id')).rejects.toThrow('Get Error');
-  });
-});
+    await expect(store.fetchOne('some-id')).rejects.toThrow('FetchOne Error')
+    expect(store.error.value).toBe('FetchOne Error')
+  })
+})

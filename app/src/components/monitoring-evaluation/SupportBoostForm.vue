@@ -88,7 +88,14 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <DatePicker
             :model-value="modelValue ? new Date(modelValue) : null"
-            @update:model-value="(date) => updateModelValue(date ? date.toISOString().split('T')[0] : '')"
+            @update:model-value="
+              (value: Date | Date[] | (Date | null)[] | null | undefined) => {
+                const date = Array.isArray(value) ? value[0] : value
+                updateModelValue(
+                  date && date instanceof Date ? date.toISOString().split('T')[0] : ''
+                )
+              }
+            "
             showIcon
             dateFormat="mm/dd/yy"
             :class="['w-full', { 'p-invalid': hasError }]"
@@ -107,7 +114,14 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <DatePicker
             :model-value="modelValue ? new Date(modelValue) : null"
-            @update:model-value="(date) => updateModelValue(date ? date.toISOString().split('T')[0] : '')"
+            @update:model-value="
+              (value: Date | Date[] | (Date | null)[] | null | undefined) => {
+                const date = Array.isArray(value) ? value[0] : value
+                updateModelValue(
+                  date && date instanceof Date ? date.toISOString().split('T')[0] : ''
+                )
+              }
+            "
             showIcon
             dateFormat="mm/dd/yy"
             :class="['w-full', { 'p-invalid': hasError }]"
@@ -247,84 +261,85 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import BaseForm from '@/components/common/BaseForm.vue';
-import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue';
-import FormField from '@/components/common/FormField.vue';
-import { SupportBoostSchema } from '@/schemas/monitoring-evaluation/Support';
-import type { Support } from '@/types/monitoring-evaluation/Support';
-import Button from 'primevue/button';
-import DatePicker from 'primevue/datepicker';
-import InputNumber from 'primevue/inputnumber';
-import Select from 'primevue/select';
-import { v4 as uuidv4 } from 'uuid';
+  import { computed } from 'vue'
+  import BaseForm from '@/components/common/BaseForm.vue'
+  import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
+  import FormField from '@/components/common/FormField.vue'
+  import { SupportBoostSchema } from '@/schemas/monitoring-evaluation/Support'
+  import type { Support } from '@/types/monitoring-evaluation/Support'
+  import Button from 'primevue/button'
+  import DatePicker from 'primevue/datepicker'
+  import InputNumber from 'primevue/inputnumber'
+  import Select from 'primevue/select'
+  import { v4 as uuidv4 } from 'uuid'
 
-const props = defineProps<{
-  initialData?: Partial<Support>;
-  businessId?: string;
-}>();
+  const props = defineProps<{
+    initialData?: Partial<Support>
+    businessId?: string
+  }>()
 
-const emit = defineEmits<{
-  (e: 'submit', data: Support): void;
-}>();
+  const emit = defineEmits<{
+    (e: 'submit', data: Support): void
+  }>()
 
-const initialValues = computed(() => ({
-  id: props.initialData?.id || uuidv4(),
-  businessId: props.initialData?.businessId || props.businessId || '',
-  title: props.initialData?.title || '',
-  boostType: props.initialData?.boostType || undefined,
-  modality: props.initialData?.modality || undefined,
-  startDate: props.initialData?.startDate || new Date().toISOString().split('T')[0],
-  endDate: props.initialData?.endDate || undefined,
-  provider: props.initialData?.provider || 'UNDP',
-  channel: props.initialData?.channel || undefined,
-  quantity: {
-    value: props.initialData?.quantity?.value,
-    unit: props.initialData?.quantity?.unit,
-    currency: props.initialData?.quantity?.currency,
-  },
-  genderMarker: props.initialData?.genderMarker || 'GEN1',
-  notes: props.initialData?.notes || '',
-  createdAt: props.initialData?.createdAt || new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
+  const initialValues = computed(() => ({
+    id: props.initialData?.id || uuidv4(),
+    businessId: props.initialData?.businessId || props.businessId || '',
+    title: props.initialData?.title || '',
+    boostType: props.initialData?.boostType || undefined,
+    modality: props.initialData?.modality || undefined,
+    startDate: props.initialData?.startDate || new Date().toISOString().split('T')[0],
+    endDate: props.initialData?.endDate || undefined,
+    provider: props.initialData?.provider || 'UNDP',
+    channel: props.initialData?.channel || undefined,
+    quantity: {
+      value: props.initialData?.quantity?.value,
+      unit: props.initialData?.quantity?.unit,
+      currency: props.initialData?.quantity?.currency
+    },
+    genderMarker: props.initialData?.genderMarker || 'GEN1',
+    notes: props.initialData?.notes || '',
+    createdAt: props.initialData?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }))
 
-const onSubmit = async (values: Support) => {
-  // Sanitize the data to ensure it's serializable for IndexedDB
-  const sanitizedData: Support = {
-    ...values,
-    // Ensure dates are ISO strings, not Date objects
-    // Treat empty strings as undefined for optional fields
-    startDate: typeof values.startDate === 'string' ? values.startDate : values.startDate?.toISOString?.().split('T')[0] || '',
-    endDate: values.endDate && values.endDate !== '' 
-      ? (typeof values.endDate === 'string' ? values.endDate : values.endDate?.toISOString?.().split('T')[0]) 
-      : undefined,
-    // Clean up quantity object - remove undefined values
-    quantity: values.quantity ? {
-      ...(values.quantity.value !== undefined && values.quantity.value !== null ? { value: values.quantity.value } : {}),
-      ...(values.quantity.unit ? { unit: values.quantity.unit } : {}),
-      ...(values.quantity.currency ? { currency: values.quantity.currency } : {}),
-    } : {},
-  };
-  
-  emit('submit', sanitizedData);
-};
+  const onSubmit = async (values: Support) => {
+    // Sanitize the data to ensure it's serializable for IndexedDB
+    const sanitizedData: Support = {
+      ...values,
+      // Dates are already strings from the schema/form
+      startDate: values.startDate || '',
+      endDate: values.endDate || undefined,
+      // Clean up quantity object - remove undefined values
+      quantity: values.quantity
+        ? {
+            ...(values.quantity.value !== undefined && values.quantity.value !== null
+              ? { value: values.quantity.value }
+              : {}),
+            ...(values.quantity.unit ? { unit: values.quantity.unit } : {}),
+            ...(values.quantity.currency ? { currency: values.quantity.currency } : {})
+          }
+        : {}
+    }
 
-const boostTypeOptions = [
-  { label: 'Financial Grant', value: 'financial_grant' },
-  { label: 'Financial Match', value: 'financial_match' },
-  { label: 'Training', value: 'training' },
-  { label: 'Advisory / Mentoring', value: 'advisory_mentoring' },
-  { label: 'Equipment / Infrastructure', value: 'equipment_infrastructure' },
-  { label: 'Workspace Access', value: 'workspace_access' },
-  { label: 'Policy Advocacy', value: 'policy_advocacy' },
-  { label: 'Partnership Linkage', value: 'partnership_linkage' },
-  { label: 'Market Access', value: 'market_access' },
-  { label: 'Digitalization Support', value: 'digitalization_support' },
-];
+    emit('submit', sanitizedData)
+  }
 
-const modalityOptions = ['DIM', 'NIM', 'hybrid'];
-const channelOptions = ['in-person', 'online', 'hybrid'];
-const unitOptions = ['currency', 'sessions', 'hours', 'participants', 'items', 'linkages', 'docs'];
-const genderMarkerOptions = ['GEN0', 'GEN1', 'GEN2', 'GEN3'];
+  const boostTypeOptions = [
+    { label: 'Financial Grant', value: 'financial_grant' },
+    { label: 'Financial Match', value: 'financial_match' },
+    { label: 'Training', value: 'training' },
+    { label: 'Advisory / Mentoring', value: 'advisory_mentoring' },
+    { label: 'Equipment / Infrastructure', value: 'equipment_infrastructure' },
+    { label: 'Workspace Access', value: 'workspace_access' },
+    { label: 'Policy Advocacy', value: 'policy_advocacy' },
+    { label: 'Partnership Linkage', value: 'partnership_linkage' },
+    { label: 'Market Access', value: 'market_access' },
+    { label: 'Digitalization Support', value: 'digitalization_support' }
+  ]
+
+  const modalityOptions = ['DIM', 'NIM', 'hybrid']
+  const channelOptions = ['in-person', 'online', 'hybrid']
+  const unitOptions = ['currency', 'sessions', 'hours', 'participants', 'items', 'linkages', 'docs']
+  const genderMarkerOptions = ['GEN0', 'GEN1', 'GEN2', 'GEN3']
 </script>

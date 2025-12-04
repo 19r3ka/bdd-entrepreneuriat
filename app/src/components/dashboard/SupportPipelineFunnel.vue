@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import Card from 'primevue/card';
+  import { computed } from 'vue'
+  import Card from 'primevue/card'
 
-interface Stage {
-  label: string;
-  count: number;
-  color: string;
-}
+  interface Stage {
+    label: string
+    count: number
+    color: string
+  }
 
-const props = defineProps<{
-  stages: Stage[];
-}>();
+  const props = defineProps<{
+    stages: Stage[]
+  }>()
 
-const maxCount = computed(() => {
-  return Math.max(...props.stages.map(s => s.count), 1); // Avoid div by zero
-});
+  const maxCount = computed(() => {
+    return Math.max(...props.stages.map((s) => s.count), 1) // Avoid div by zero
+  })
 
-const getWidth = (count: number) => {
-  return `${Math.max((count / maxCount.value) * 100, 5)}%`;
-};
+  const getWidth = (count: number) => {
+    return `${Math.max((count / maxCount.value) * 100, 5)}%`
+  }
 </script>
 
 <template>
@@ -36,17 +36,20 @@ const getWidth = (count: number) => {
             <span class="text-sm font-medium text-700 dark:text-300">{{ stage.label }}</span>
             <span class="text-sm font-bold text-900 dark:text-white">{{ stage.count }}</span>
           </div>
-          
-          <div class="w-full bg-surface-100 dark:bg-surface-800 border-round overflow-hidden" style="height: 8px;">
-            <div 
+
+          <div
+            class="w-full bg-surface-100 dark:bg-surface-800 border-round overflow-hidden"
+            style="height: 8px"
+          >
+            <div
               class="h-full border-round transition-all duration-500 ease-out"
               :style="{ width: getWidth(stage.count), backgroundColor: stage.color }"
             ></div>
           </div>
-          
+
           <!-- Conversion Rate (skip for first item) -->
           <div v-if="index > 0" class="text-xs text-500 mt-1 text-right">
-            {{ Math.round((stage.count / stages[index-1].count) * 100) || 0 }}% conversion
+            {{ Math.round((stage.count / stages[index - 1]!.count) * 100) || 0 }}% conversion
           </div>
         </div>
       </div>
@@ -55,7 +58,7 @@ const getWidth = (count: number) => {
 </template>
 
 <style scoped>
-.pipeline-stage {
-  position: relative;
-}
+  .pipeline-stage {
+    position: relative;
+  }
 </style>

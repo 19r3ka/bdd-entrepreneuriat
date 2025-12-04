@@ -23,16 +23,16 @@
 </template>
 
 <script setup lang="ts">
-import type { Entrepreneur } from '@/types/entrepreneur';
+  import type { Entrepreneur } from '@/types/entrepreneur'
 
-defineProps<{
-  entrepreneur: Entrepreneur;
-}>();
+  defineProps<{
+    entrepreneur: Entrepreneur
+  }>()
 </script>
 
 <style scoped>
-.field p {
-  margin-top: 0.5rem;
-  margin-bottom: 0;
-}
+  .field p {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
 </style>

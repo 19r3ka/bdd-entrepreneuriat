@@ -1,10 +1,6 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
-export const IndicatorTypeEnum = z.enum([
-  'Economic',
-  'Behavioral',
-  'Institutional',
-]);
+export const IndicatorTypeEnum = z.enum(['Economic', 'Behavioral', 'Institutional'])
 
 export const IndicatorDefinitionSchema = z.object({
   id: z.string().uuid(),
@@ -17,8 +13,8 @@ export const IndicatorDefinitionSchema = z.object({
   targetValue: z.number(),
   targetDate: z.date(),
   createdAt: z.date(),
-  updatedAt: z.date(),
-});
+  updatedAt: z.date()
+})
 
 export const MeasurementSchema = z.object({
   id: z.string().uuid(),
@@ -28,5 +24,5 @@ export const MeasurementSchema = z.object({
   evidenceSource: z.string().min(1), // Assuming this will be a reference to an uploaded file's ID
   contributionNarrative: z.string().min(1),
   createdAt: z.date(),
-  updatedAt: z.date(),
-});
+  updatedAt: z.date()
+})

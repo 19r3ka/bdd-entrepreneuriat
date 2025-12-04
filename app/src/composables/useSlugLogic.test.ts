@@ -1,102 +1,99 @@
-import { describe, it, expect, vi } from 'vitest';
-import { reactive } from 'vue';
-import { useSlugLogic } from './useSlugLogic';
+import { describe, it, expect, vi } from 'vitest'
+import { reactive, nextTick } from 'vue'
+import { useSlugLogic } from './useSlugLogic'
 
 describe('useSlugLogic', () => {
-  it('generates slug from firstName and lastName', () => {
+  it('should generate a slug automatically from firstName and lastName', async () => {
     const formValues = reactive({
       firstName: 'John',
       lastName: 'Doe',
       slug: ''
-    });
+    })
 
-    const { generateSlug } = useSlugLogic(formValues as any);
+    useSlugLogic(formValues)
 
-    const result = generateSlug();
-    expect(result).toBe('john-doe');
-  });
+    await nextTick()
+    expect(formValues.slug).toBe('john-doe')
+  })
 
-  it('sanitizes slug by removing invalid characters', () => {
+  it('should update the slug when name fields change', async () => {
+    const formValues = reactive({
+      firstName: 'John',
+      lastName: 'Doe',
+      slug: ''
+    })
+    useSlugLogic(formValues)
+
+    await nextTick()
+    expect(formValues.slug).toBe('john-doe')
+
+    formValues.firstName = 'Jane'
+    await nextTick()
+    expect(formValues.slug).toBe('jane-doe')
+  })
+
+  it('should sanitize the slug', async () => {
     const formValues = reactive({
       firstName: 'John!',
       lastName: 'Doe@#$',
       slug: ''
-    });
+    })
+    useSlugLogic(formValues)
 
-    const { generateSlug } = useSlugLogic(formValues as any);
+    await nextTick()
+    expect(formValues.slug).toBe('john-doe')
+  })
 
-    const result = generateSlug();
-    expect(result).toBe('john-doe'); // Special chars removed
-  });
-
-  it('collapses multiple delimiters', () => {
-    const formValues = reactive({
-      firstName: 'John O',
-      lastName: 'Mc Test',
-      slug: ''
-    });
-
-    const { generateSlug } = useSlugLogic(formValues as any);
-
-    const result = generateSlug();
-    expect(result).toBe('john-o-mc-test'); // Spaces become single hyphens
-  });
-
-  it('generates slug from single name', () => {
-    const formValues = reactive({
-      firstName: 'John',
-      lastName: '',
-      slug: ''
-    });
-
-    const { generateSlug } = useSlugLogic(formValues as any);
-
-    const result = generateSlug();
-    expect(result).toBe('john');
-  });
-
-  it('manual override stops auto updates', async () => {
+  it('should not update slug if it has been manually edited', async () => {
     const formValues = reactive({
       firstName: 'John',
       lastName: 'Doe',
       slug: ''
-    });
+    })
+    const { markSlugAsManual } = useSlugLogic(formValues)
 
-    const { generateSlug, markSlugAsManual } = useSlugLogic(formValues as any);
+    await nextTick()
+    expect(formValues.slug).toBe('john-doe')
 
-    // Initially auto-generated
-    formValues.firstName = 'Jane';
-    await new Promise(resolve => setTimeout(resolve, 0)); // Wait for any watcher
-    let autoSlug = generateSlug();
-    expect(autoSlug).toBe('jane-doe');
+    // Manually edit slug and mark it as such
+    formValues.slug = 'custom-slug'
+    markSlugAsManual()
 
-    // Mark as manual - this should prevent auto updates
-    markSlugAsManual();
-    
-    // Change name again, but slug should not auto-update
-    formValues.firstName = 'Bob';
-    await new Promise(resolve => setTimeout(resolve, 0)); // Wait for any watcher
-    
-    // The slug should still be based on the previous values
-    // This test depends on implementation details
-    expect(typeof autoSlug).toBe('string');
-  });
+    // Change name, slug should not update
+    formValues.firstName = 'Jane'
+    await nextTick()
+    expect(formValues.slug).toBe('custom-slug')
+  })
 
-  it('reset functionality resumes auto updates', () => {
+  it('should resume auto-updating after reset', async () => {
     const formValues = reactive({
       firstName: 'John',
       lastName: 'Doe',
       slug: 'custom-slug'
-    });
+    })
+    const { markSlugAsManual, resetSlugManualEdit } = useSlugLogic(formValues)
 
-    const { resetSlug, generateSlug } = useSlugLogic(formValues as any);
+    markSlugAsManual()
+    formValues.firstName = 'Jane'
+    await nextTick()
+    expect(formValues.slug).toBe('custom-slug') // Still manual
 
-    // Reset should clear the custom slug and allow auto generation
-    resetSlug();
-    
-    // This would trigger a new slug generation based on current name
-    // Implementation may vary depending on exactly how the reset works
-    const newSlug = generateSlug();
-    expect(typeof newSlug).toBe('string');
-  });
-});
+    resetSlugManualEdit()
+
+    // Now it should auto-update based on the current name
+    formValues.firstName = 'Bob'
+    await nextTick()
+    expect(formValues.slug).toBe('bob-doe')
+  })
+
+  it('should handle single names', async () => {
+    const formValues = reactive({
+      firstName: 'Cher',
+      lastName: '',
+      slug: ''
+    })
+    useSlugLogic(formValues)
+    await nextTick()
+    expect(formValues.slug).toBe('cher')
+  })
+})

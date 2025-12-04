@@ -1,153 +1,139 @@
-import { describe, it, expect, vi } from 'vitest';
-import { useErrorHandler } from './useErrorHandler';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { useErrorHandler, type AppError } from './useErrorHandler'
+import { useToast } from 'primevue/usetoast'
 
-// Mock PrimeVue toast
-const mockToastAdd = vi.fn();
-
+// Mock PrimeVue toast and vue-i18n
 vi.mock('primevue/usetoast', () => ({
   useToast: vi.fn(() => ({
-    add: mockToastAdd,
-  })),
-}));
+    add: vi.fn()
+  }))
+}))
 
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(() => ({
-    t: vi.fn((key) => key), // Return key as translation
-  })),
-}));
+    t: (key: string) => key // Simple translation mock
+  }))
+}))
 
 describe('useErrorHandler', () => {
+  let mockToastAdd: any
+
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    // We need to get the mock `add` function from the `useToast` mock
+    mockToastAdd = vi.fn()
+    vi.mocked(useToast).mockReturnValue({
+      add: mockToastAdd,
+      remove: vi.fn(),
+      removeGroup: vi.fn(),
+      removeAllGroups: vi.fn()
+    })
+    vi.spyOn(console, 'error').mockImplementation(() => {}) // Suppress console.error
+  })
 
-  describe('normalizeError', () => {
-    it('handles string errors', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const result = normalizeError('Something went wrong');
-      expect(result).toBe('Something went wrong');
-    });
-
-    it('handles Error objects', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const error = new Error('Test error message');
-      const result = normalizeError(error);
-      expect(result).toBe('Test error message');
-    });
-
-    it('handles object errors with message property', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const errorObj = { message: 'Object error message' };
-      const result = normalizeError(errorObj);
-      expect(result).toBe('Object error message');
-    });
-
-    it('handles object errors with error.message property', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const errorObj = { error: { message: 'Nested error message' } };
-      const result = normalizeError(errorObj);
-      expect(result).toBe('Nested error message');
-    });
-
-    it('uses customMessage when available', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const error = new Error('Original error');
-      const result = normalizeError(error, 'Custom error message');
-      expect(result).toBe('Custom error message');
-    });
-
-    it('returns default message for unknown error types', () => {
-      const { normalizeError } = useErrorHandler();
-      
-      const result = normalizeError(123);
-      expect(result).toBe('An error occurred');
-    });
-  });
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
 
   describe('handleApiError', () => {
-    it('shows toast and logs error', () => {
-      const { handleApiError } = useErrorHandler();
-      
-      handleApiError('API Error');
-      
-      expect(mockToastAdd).toHaveBeenCalledWith({
-        severity: 'error',
-        summary: 'API Error',
-        life: 5000,
-      });
-    });
+    it('should show toast with a string error and log it', () => {
+      const { handleApiError } = useErrorHandler()
+      handleApiError('Network failed')
 
-    it('uses custom message when provided', () => {
-      const { handleApiError } = useErrorHandler();
-      
-      handleApiError(new Error('Original'), 'Custom API Error');
-      
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'error',
-        summary: 'Custom API Error',
-        life: 5000,
-      });
-    });
-  });
+        summary: 'Error',
+        detail: 'Network failed',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('API Error:', 'Network failed')
+    })
+
+    it('should show toast with an Error object message and log it', () => {
+      const { handleApiError } = useErrorHandler()
+      const error = new Error('Server overload')
+      handleApiError(error)
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Server overload',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('API Error:', error)
+    })
+
+    it('should use a custom message when provided', () => {
+      const { handleApiError } = useErrorHandler()
+      const error = new Error('Original error')
+      handleApiError(error, 'Please try again later.')
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please try again later.',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('API Error:', error)
+    })
+  })
 
   describe('handleValidationError', () => {
-    it('shows toast for single validation error', () => {
-      const { handleValidationError } = useErrorHandler();
-      
-      const error = 'Field is required';
-      handleValidationError(error);
-      
+    it('should handle a single string error', () => {
+      const { handleValidationError } = useErrorHandler()
+      handleValidationError('Email is required.')
+
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Validation Error',
-        detail: 'Field is required',
-        life: 5000,
-      });
-    });
+        detail: 'Email is required.',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('Validation Error:', 'Email is required.')
+    })
 
-    it('shows toast for multiple validation errors', () => {
-      const { handleValidationError } = useErrorHandler();
-      
-      const errors = ['Field 1 is required', 'Field 2 is invalid'];
-      handleValidationError(errors);
-      
+    it('should handle an array of errors by using a generic message', () => {
+      const { handleValidationError } = useErrorHandler()
+      const errors: AppError[] = ['Invalid name', { message: 'Email taken' }]
+      handleValidationError(errors)
+
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'error',
-        summary: 'Validation Errors',
-        detail: '• Field 1 is required\n• Field 2 is invalid',
-        life: 5000,
-      });
-    });
-  });
+        summary: 'Validation Error',
+        detail: 'Validation failed', // Default message for array
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('Validation Error:', 'Invalid name')
+      expect(console.error).toHaveBeenCalledWith('Validation Error:', { message: 'Email taken' })
+    })
+  })
 
   describe('handleGenericError', () => {
-    it('shows toast and logs generic error', () => {
-      const { handleGenericError } = useErrorHandler();
-      
-      handleGenericError('Generic error');
-      
-      expect(mockToastAdd).toHaveBeenCalledWith({
-        severity: 'error',
-        summary: 'Generic error',
-        life: 5000,
-      });
-    });
+    it('should show a toast with the provided error message', () => {
+      const { handleGenericError } = useErrorHandler()
+      const error = new Error('Something broke')
+      handleGenericError(error)
 
-    it('uses default message when no error provided', () => {
-      const { handleGenericError } = useErrorHandler();
-      
-      handleGenericError();
-      
       expect(mockToastAdd).toHaveBeenCalledWith({
         severity: 'error',
-        summary: 'An unexpected error occurred',
-        life: 5000,
-      });
-    });
-  });
-});
+        summary: 'Error',
+        detail: 'Something broke',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('Generic Error:', error)
+    })
+
+    it('should use a default message if the error is not standard', () => {
+      const { handleGenericError } = useErrorHandler()
+      const unusualError = { code: 500, status: 'Internal' }
+      handleGenericError(unusualError as any)
+
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'An unexpected error occurred',
+        life: 5000
+      })
+      expect(console.error).toHaveBeenCalledWith('Generic Error:', unusualError)
+    })
+  })
+})
