@@ -3,10 +3,10 @@
     class="surface-0 p-3 flex align-items-center justify-content-between border-b surface-border"
   >
     <!-- Logo and Title on the left -->
-    <div class="flex align-items-center">
+    <router-link to="/" class="flex align-items-center no-underline">
       <img src="/logo.svg" :alt="$t('common.logoAlt')" height="20" class="mr-3" />
-      <h2 class="text-900 font-bold text-lg line-height-1 m-0">{{ $t('common.appName') }}</h2>
-    </div>
+      <h2 class="text-900 font-bold text-lg line-height-1 m-0">{{ appName }}</h2>
+    </router-link>
 
     <!-- Mobile menu button -->
     <a
@@ -52,15 +52,7 @@
             <span>{{ $t('pages.businesses.title') }}</span>
           </router-link>
         </li>
-        <li class="mx-3">
-          <router-link
-            to="/reports"
-            v-ripple
-            class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
-          >
-            <span>{{ $t('common.reports') }}</span>
-          </router-link>
-        </li>
+
         <li class="mx-3">
           <router-link
             to="/supports"
@@ -105,10 +97,14 @@
   import Avatar from 'primevue/avatar'
   import Ripple from 'primevue/ripple'
   import StyleClass from 'primevue/styleclass'
+  import packageJson from '../../package.json'
 
   // Register PrimeVue directives
   const vRipple = Ripple
   const vStyleclass = StyleClass
+
+  // App name from package.json
+  const appName = computed(() => packageJson.name || 'Entrepreneur App')
 
   // Check if running in development mode
   const isDev = computed(() => import.meta.env.DEV)

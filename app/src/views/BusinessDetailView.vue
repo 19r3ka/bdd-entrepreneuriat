@@ -30,12 +30,7 @@
   import { useQuickWinStore } from '@/stores/useQuickWinStore'
   import type { Support } from '@/types/monitoring-evaluation/Support'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import GoalForm from '@/components/monitoring-evaluation/GoalForm.vue'
-  import MeasurementForm from '@/components/monitoring-evaluation/MeasurementForm.vue'
-  import { useIndicatorStore } from '@/stores/useIndicatorStore'
-  import type { IndicatorDefinition, Measurement } from '@/types/monitoring-evaluation/Indicator'
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
+
   import MomentumMetricList from '@/components/monitoring-evaluation/MomentumMetricList.vue'
   import MomentumMetricForm from '@/components/monitoring-evaluation/MomentumMetricForm.vue'
   import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore'
@@ -53,7 +48,6 @@
   const businessStore = useBusinessStore()
   const entrepreneurStore = useEntrepreneurStore()
   const supportStore = useSupportStore()
-  const indicatorStore = useIndicatorStore()
   const quickWinStore = useQuickWinStore()
   const momentumMetricStore = useMomentumMetricStore()
 
@@ -67,16 +61,7 @@
   const selectedSupport = ref<Support | undefined>(undefined)
   const isEditMode = ref(false)
 
-  // Goals & Measurements State
-  const goals = ref<IndicatorDefinition[]>([])
-  const goalMeasurements = ref<Record<string, Measurement[]>>({})
-  const isGoalFormVisible = ref(false)
-  const isMeasurementFormVisible = ref(false)
-  const selectedGoal = ref<IndicatorDefinition | null>(null)
-  const selectedMeasurement = ref<Measurement | null>(null)
-  const isGoalEditMode = ref(false)
-  const isMeasurementEditMode = ref(false)
-  const activeGoalId = ref<string | null>(null)
+
 
   // Momentum Metrics State
   const momentumMetrics = ref<MomentumMetric[]>([])
@@ -93,7 +78,6 @@
     businessSupports.value = await supportStore.getSupportsByBusinessId(businessId)
     businessQuickWins.value = await quickWinStore.getQuickWinsByBusinessId(businessId)
     momentumMetrics.value = await momentumMetricStore.getMetricsByBusinessId(businessId)
-    await fetchGoalsAndMeasurements()
   })
 
   // Computed State
@@ -291,102 +275,7 @@
     })
   }
 
-  // Goal & Measurement Handlers
-  const fetchGoalsAndMeasurements = async () => {
-    goals.value = await indicatorStore.getIndicatorsByBusinessId(businessId)
-    for (const goal of goals.value) {
-      goalMeasurements.value[goal.id] = await indicatorStore.getMeasurementsByIndicatorId(goal.id)
-    }
-  }
 
-  const openGoalForm = () => {
-    isGoalEditMode.value = false
-    selectedGoal.value = null
-    isGoalFormVisible.value = true
-  }
-
-  const editGoal = (goal: IndicatorDefinition) => {
-    isGoalEditMode.value = true
-    selectedGoal.value = goal
-    isGoalFormVisible.value = true
-  }
-
-  const deleteGoal = (goal: IndicatorDefinition) => {
-    showConfirmation('Are you sure you want to delete this goal?', 'Confirm Deletion', async () => {
-      try {
-        await indicatorStore.deleteIndicator(goal.id)
-        await fetchGoalsAndMeasurements()
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Goal deleted successfully',
-          life: 3000
-        })
-      } catch {
-        toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete goal',
-          life: 3000
-        })
-      }
-    })
-  }
-
-  const handleGoalSuccess = async () => {
-    isGoalFormVisible.value = false
-    await fetchGoalsAndMeasurements()
-  }
-
-  const openMeasurementForm = (goal: IndicatorDefinition) => {
-    activeGoalId.value = goal.id
-    isMeasurementEditMode.value = false
-    selectedMeasurement.value = null
-    isMeasurementFormVisible.value = true
-  }
-
-  const editMeasurement = (measurement: Measurement, goal: IndicatorDefinition) => {
-    activeGoalId.value = goal.id
-    isMeasurementEditMode.value = true
-    selectedMeasurement.value = measurement
-    isMeasurementFormVisible.value = true
-  }
-
-  const deleteMeasurement = (measurement: Measurement, goal: IndicatorDefinition) => {
-    showConfirmation(
-      'Are you sure you want to delete this measurement?',
-      'Confirm Deletion',
-      async () => {
-        try {
-          await indicatorStore.deleteMeasurement(measurement.id)
-          goalMeasurements.value[goal.id] = await indicatorStore.getMeasurementsByIndicatorId(
-            goal.id
-          )
-          toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Measurement deleted successfully',
-            life: 3000
-          })
-        } catch {
-          toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to delete measurement',
-            life: 3000
-          })
-        }
-      }
-    )
-  }
-
-  const handleMeasurementSuccess = async () => {
-    isMeasurementFormVisible.value = false
-    if (activeGoalId.value) {
-      goalMeasurements.value[activeGoalId.value] =
-        await indicatorStore.getMeasurementsByIndicatorId(activeGoalId.value)
-    }
-  }
 
   // Momentum Metrics Handlers
   const openMomentumForm = (quickWinId?: string) => {
@@ -505,12 +394,7 @@
                 <span class="font-semibold">Outcomes</span>
               </div>
             </Tab>
-            <Tab :value="BUSINESS_TABS.MATURITY">
-              <div class="flex align-items-center gap-2">
-                <i class="pi pi-bullseye"></i>
-                <span class="font-semibold">Goals</span>
-              </div>
-            </Tab>
+
           </TabList>
           <TabPanels>
             <TabPanel :value="BUSINESS_TABS.OVERVIEW">
@@ -524,187 +408,44 @@
             </TabPanel>
 
             <TabPanel :value="BUSINESS_TABS.SUPPORTS">
-              <div class="p-4">
-                <div class="flex justify-content-between align-items-center mb-4">
-                  <div>
-                    <h2 class="m-0 text-xl font-bold">
-                      {{ $t('support.titlePlural', 'Supports Provided') }}
-                    </h2>
-                    <p class="text-600 m-0 text-sm">
-                      Interventions and assistance provided to the business.
-                    </p>
-                  </div>
+              <SupportBoostList
+                :data="businessSupports"
+                @edit="editSupport"
+                @delete="deleteSupport"
+              >
+                <template #append-actions="{ data }">
                   <Button
-                    :label="$t('support.add', 'Log Support')"
-                    icon="pi pi-plus"
-                    @click="openSupportForm()"
+                    icon="pi pi-check-circle"
+                    class="p-button-rounded p-button-text p-button-success"
+                    v-tooltip.top="'Add Quick Win'"
+                    @click="openQuickWinForm(data.id)"
                   />
-                </div>
-                <SupportBoostList
-                  :data="businessSupports"
-                  @edit="editSupport"
-                  @delete="deleteSupport"
-                >
-                  <template #append-actions="{ data }">
-                    <Button
-                      icon="pi pi-check-circle"
-                      class="p-button-rounded p-button-text p-button-success"
-                      v-tooltip.top="'Add Quick Win'"
-                      @click="openQuickWinForm(data.id)"
-                    />
-                  </template>
-                </SupportBoostList>
-              </div>
+                </template>
+              </SupportBoostList>
             </TabPanel>
 
             <TabPanel :value="BUSINESS_TABS.QUICK_WINS">
-              <div class="p-4">
-                <div class="flex justify-content-between align-items-center mb-4">
-                  <div>
-                    <h2 class="m-0 text-xl font-bold">
-                      {{ $t('quickWin.titlePlural', 'Quick Wins') }}
-                    </h2>
-                    <p class="text-600 m-0 text-sm">Immediate results and outputs achieved.</p>
-                  </div>
+              <QuickWinList
+                :data="businessQuickWins"
+                @edit="(id) => router.push(`/quick-wins/${id}/edit`)"
+                @delete="deleteQuickWin"
+              >
+                <template #append-actions="{ data }">
                   <Button
-                    :label="$t('quickWin.add', 'Add Quick Win')"
-                    icon="pi pi-plus"
-                    @click="openQuickWinForm()"
+                    icon="pi pi-chart-line"
+                    class="p-button-rounded p-button-text p-button-help"
+                    v-tooltip.top="'Add Performance Report'"
+                    @click="openMomentumForm(data.id)"
                   />
-                </div>
-                <QuickWinList
-                  :data="businessQuickWins"
-                  @edit="(id) => router.push(`/quick-wins/${id}/edit`)"
-                  @delete="deleteQuickWin"
-                >
-                  <template #append-actions="{ data }">
-                    <Button
-                      icon="pi pi-chart-line"
-                      class="p-button-rounded p-button-text p-button-help"
-                      v-tooltip.top="'Add Performance Report'"
-                      @click="openMomentumForm(data.id)"
-                    />
-                  </template>
-                </QuickWinList>
-              </div>
+                </template>
+              </QuickWinList>
             </TabPanel>
 
             <TabPanel :value="BUSINESS_TABS.OUTCOMES">
-              <div class="p-4">
-                <div class="flex justify-content-between align-items-center mb-4">
-                  <div>
-                    <h2 class="m-0 text-xl font-bold">
-                      {{ $t('momentumMetric.titlePlural', 'Outcome Metrics') }}
-                    </h2>
-                    <p class="text-600 m-0 text-sm">
-                      {{
-                        $t(
-                          'momentumMetric.description',
-                          'Track medium-term outcomes and performance indicators.'
-                        )
-                      }}
-                    </p>
-                  </div>
-                  <Button
-                    :label="$t('momentumMetric.add', 'Add Outcome')"
-                    icon="pi pi-plus"
-                    @click="openMomentumForm()"
-                  />
-                </div>
-
-                <MomentumMetricList :metrics="momentumMetrics" @edit="editMetric" />
-              </div>
+              <MomentumMetricList :metrics="momentumMetrics" @edit="editMetric" />
             </TabPanel>
 
-            <TabPanel :value="BUSINESS_TABS.MATURITY">
-              <div class="p-4">
-                <div class="flex justify-content-between align-items-center mb-4">
-                  <h2>Goals & Measurements</h2>
-                  <Button label="New Goal" icon="pi pi-plus" @click="openGoalForm" />
-                </div>
 
-                <div v-if="goals.length === 0" class="text-center p-4">No goals defined yet.</div>
-
-                <div v-else class="flex flex-column gap-4">
-                  <div
-                    v-for="goal in goals"
-                    :key="goal.id"
-                    class="card p-3 border-1 surface-border"
-                  >
-                    <div class="flex justify-content-between align-items-start">
-                      <div>
-                        <h3 class="m-0">{{ goal.name }}</h3>
-                        <span class="text-sm text-500">{{ goal.type }}</span>
-                        <p>{{ goal.description }}</p>
-                        <div class="flex gap-4 mt-2">
-                          <div>
-                            <strong>Baseline:</strong> {{ goal.baselineValue }} ({{
-                              new Date(goal.baselineDate).toLocaleDateString()
-                            }})
-                          </div>
-                          <div>
-                            <strong>Target:</strong> {{ goal.targetValue }} ({{
-                              new Date(goal.targetDate).toLocaleDateString()
-                            }})
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex gap-2">
-                        <Button icon="pi pi-pencil" class="p-button-text" @click="editGoal(goal)" />
-                        <Button
-                          icon="pi pi-trash"
-                          class="p-button-text p-button-danger"
-                          @click="deleteGoal(goal)"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="mt-4 pl-4 border-left-2 border-primary-500">
-                      <div class="flex justify-content-between align-items-center mb-2">
-                        <h4 class="m-0">Measurements</h4>
-                        <Button
-                          label="Add Measurement"
-                          icon="pi pi-plus"
-                          size="small"
-                          outlined
-                          @click="openMeasurementForm(goal)"
-                        />
-                      </div>
-
-                      <div
-                        v-if="!goalMeasurements[goal.id] || goalMeasurements[goal.id]?.length === 0"
-                        class="text-sm text-500"
-                      >
-                        No measurements recorded.
-                      </div>
-                      <DataTable v-else :value="goalMeasurements[goal.id] || []" size="small">
-                        <Column field="dateRecorded" header="Date">
-                          <template #body="slotProps">
-                            {{ new Date(slotProps.data.dateRecorded).toLocaleDateString() }}
-                          </template>
-                        </Column>
-                        <Column field="currentValue" header="Value"></Column>
-                        <Column field="contributionNarrative" header="Narrative"></Column>
-                        <Column header="Actions">
-                          <template #body="slotProps">
-                            <Button
-                              icon="pi pi-pencil"
-                              class="p-button-text p-button-sm"
-                              @click="editMeasurement(slotProps.data, goal)"
-                            />
-                            <Button
-                              icon="pi pi-trash"
-                              class="p-button-text p-button-danger p-button-sm"
-                              @click="deleteMeasurement(slotProps.data, goal)"
-                            />
-                          </template>
-                        </Column>
-                      </DataTable>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabPanel>
           </TabPanels>
         </Tabs>
       </div>
@@ -728,35 +469,7 @@
       />
     </Dialog>
 
-    <Dialog
-      v-model:visible="isGoalFormVisible"
-      modal
-      :header="isGoalEditMode ? $t('goalForm.edit') : $t('goalForm.new')"
-      :style="{ width: '50vw' }"
-    >
-      <GoalForm
-        :business-id="businessId"
-        :is-edit="isGoalEditMode"
-        :initial-values="selectedGoal || {}"
-        @success="handleGoalSuccess"
-        @cancel="isGoalFormVisible = false"
-      />
-    </Dialog>
 
-    <Dialog
-      v-model:visible="isMeasurementFormVisible"
-      modal
-      :header="isMeasurementEditMode ? $t('measurementForm.edit') : $t('measurementForm.new')"
-      :style="{ width: '50vw' }"
-    >
-      <MeasurementForm
-        :indicator-id="activeGoalId!"
-        :is-edit="isMeasurementEditMode"
-        :initial-values="selectedMeasurement || {}"
-        @success="handleMeasurementSuccess"
-        @cancel="isMeasurementFormVisible = false"
-      />
-    </Dialog>
 
     <Dialog
       v-model:visible="isMomentumFormVisible"

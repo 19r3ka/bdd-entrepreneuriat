@@ -1,18 +1,10 @@
 <template>
-  <div class="quick-win-list-view">
-    <div class="flex align-items-center justify-content-between mb-4">
-      <h1 class="text-2xl font-bold m-0">{{ $t('pages.quickWins.title') }}</h1>
-    </div>
-
-    <div class="card">
-      <QuickWinList
-        :quick-wins="quickWins"
-        @create="createQuickWin"
-        @view="viewQuickWin"
-        @edit="editQuickWin"
-      />
-    </div>
-  </div>
+  <QuickWinList
+    :quick-wins="quickWins"
+    @create="createQuickWin"
+    @view="viewQuickWin"
+    @edit="editQuickWin"
+  />
 </template>
 
 <script setup lang="ts">

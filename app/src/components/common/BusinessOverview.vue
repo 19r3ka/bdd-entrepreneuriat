@@ -10,13 +10,13 @@
         <label class="block text-900 font-medium mb-2">{{
           $t('common.primaryBusinessArea')
         }}</label>
-        <p>{{ business.primaryBusinessArea || $t('common.notAvailable') }}</p>
+        <p>{{ getBusinessAreaLabel(business.primaryBusinessArea || '') || $t('common.notAvailable') }}</p>
       </div>
       <div class="col-12 md:col-6 field">
         <label class="block text-900 font-medium mb-2">{{
           $t('common.secondaryBusinessArea')
         }}</label>
-        <p>{{ business.secondaryBusinessArea || $t('common.notAvailable') }}</p>
+        <p>{{ getBusinessAreaLabel(business.secondaryBusinessArea || '') || $t('common.notAvailable') }}</p>
       </div>
       <!-- onlinePresence field removed - property doesn't exist in Business type -->
       <!-- <div class="col-12 md:col-6 field">
@@ -63,10 +63,13 @@
 
 <script setup lang="ts">
   import type { Business } from '@/types/business'
+  import { useBusinessAreas } from '@/composables/useBusinessAreas'
 
   defineProps<{
     business: Business
   }>()
+
+  const { getBusinessAreaLabel } = useBusinessAreas()
 </script>
 
 <style scoped>
