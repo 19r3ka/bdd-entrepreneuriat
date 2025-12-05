@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
   import Tag from 'primevue/tag'
@@ -8,6 +9,8 @@
   import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore'
   import { useRouter } from 'vue-router'
   import MetricCard from '@/components/shared/MetricCard.vue'
+
+  const { d, n } = useI18n()
 
   const props = withDefaults(
     defineProps<{
@@ -54,7 +57,7 @@
   const periodLabel = computed(() => {
     const now = new Date()
     if (selectedPeriod.value === 'Month') {
-      return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      return d(now, { month: 'long', year: 'numeric' })
     } else if (selectedPeriod.value === 'Quarter') {
       const quarter = Math.floor((now.getMonth() + 3) / 3)
       return `Q${quarter} ${now.getFullYear()}`
@@ -193,7 +196,7 @@
                   revenueMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ Math.abs(revenueMetric.trend).toFixed(1) }}%</span>
+              <span>{{ n(Math.abs(revenueMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
           </template>
 
@@ -248,7 +251,7 @@
                   marketMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ Math.abs(marketMetric.trend).toFixed(1) }}%</span>
+              <span>{{ n(Math.abs(marketMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
           </template>
 
@@ -303,7 +306,7 @@
                   profitMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ Math.abs(profitMetric.trend).toFixed(1) }}%</span>
+              <span>{{ n(Math.abs(profitMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
           </template>
 

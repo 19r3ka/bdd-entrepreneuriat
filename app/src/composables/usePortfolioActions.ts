@@ -1,4 +1,5 @@
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Business } from '@/types/business'
 import type { Support } from '@/types/monitoring-evaluation/Support'
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
@@ -19,6 +20,8 @@ export function usePortfolioActions(
   supports: () => Support[],
   quickWins: () => QuickWin[]
 ) {
+  const { t } = useI18n()
+
   const urgentActions = computed<ActionItem[]>(() => {
     const actions: ActionItem[] = []
     const now = new Date()
@@ -38,8 +41,8 @@ export function usePortfolioActions(
         actions.push({
           id: `inactive-${b.id}`,
           type: 'urgent',
-          title: 'Inactive Business',
-          description: `${b.name} has had no activity for over 90 days.`,
+          title: t('pages.dashboard.actions.inactiveBusiness.title'),
+          description: t('pages.dashboard.actions.inactiveBusiness.description', { name: b.name }),
           entityId: b.id,
           entityType: 'business',
           priority: 'high'
@@ -53,8 +56,8 @@ export function usePortfolioActions(
         actions.push({
           id: `no-maturity-${b.id}`,
           type: 'urgent',
-          title: 'Missing Assessment',
-          description: `${b.name} needs an initial maturity assessment.`,
+          title: t('pages.dashboard.actions.missingAssessment.title'),
+          description: t('pages.dashboard.actions.missingAssessment.description', { name: b.name }),
           entityId: b.id,
           entityType: 'business',
           priority: 'medium'
@@ -79,8 +82,11 @@ export function usePortfolioActions(
         opps.push({
           id: `scaling-${b.id}`,
           type: 'opportunity',
-          title: 'Ready for Scaling',
-          description: `${b.name} shows good maturity (Avg: ${avg.toFixed(1)}). Consider scaling support.`,
+          title: t('pages.dashboard.actions.readyForScaling.title'),
+          description: t('pages.dashboard.actions.readyForScaling.description', {
+            name: b.name,
+            avg: avg.toFixed(1)
+          }),
           entityId: b.id,
           entityType: 'business',
           priority: 'high'
@@ -95,8 +101,11 @@ export function usePortfolioActions(
         opps.push({
           id: `momentum-${b.id}`,
           type: 'opportunity',
-          title: 'High Momentum',
-          description: `${b.name} has achieved ${wins.length} quick wins recently. Capitalize on this momentum.`,
+          title: t('pages.dashboard.actions.highMomentum.title'),
+          description: t('pages.dashboard.actions.highMomentum.description', {
+            name: b.name,
+            count: wins.length
+          }),
           entityId: b.id,
           entityType: 'business',
           priority: 'medium'

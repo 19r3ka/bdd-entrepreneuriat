@@ -54,7 +54,10 @@
 <script setup lang="ts">
   import Tag from 'primevue/tag'
   import Button from 'primevue/button'
+  import { useI18n } from 'vue-i18n'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+
+  const { d } = useI18n()
 
   interface Props {
     quickWin: QuickWin
@@ -69,6 +72,6 @@
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleDateString()
+    return d(new Date(dateStr), 'long')
   }
 </script>

@@ -97,7 +97,7 @@
                 <template v-if="col.dataType === 'date'">
                   {{
                     resolveFieldData(slotProps.data, col.field)
-                      ? new Date(resolveFieldData(slotProps.data, col.field) as string).toLocaleDateString()
+                      ? d(new Date(resolveFieldData(slotProps.data, col.field) as string), 'long')
                       : '-'
                   }}
                 </template>
@@ -250,7 +250,7 @@
   const filters = defineModel<FilterState>('filters')
   const emit = defineEmits(['add', 'view', 'edit', 'delete', 'delete-selected', 'export-csv'])
   const { showConfirmation } = useConfirmation()
-  const { t } = useI18n()
+  const { t, d } = useI18n()
 
   /* Selection and actions */
   const isMultiSelect = ref(false)

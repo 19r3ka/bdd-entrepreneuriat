@@ -267,8 +267,8 @@
     </div>
 
     <div v-else class="text-center p-6">
-      <div class="text-xl text-900 mb-2">Quick Win Not Found</div>
-      <Button label="Go Back" @click="goBack" />
+      <div class="text-xl text-900 mb-2">{{ t('pages.quickWin.notFoundTitle') }}</div>
+      <Button :label="t('common.goBack')" @click="goBack" />
     </div>
 
     <Dialog
@@ -292,6 +292,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import Button from 'primevue/button'
   import Tag from 'primevue/tag'
   import DataTable from 'primevue/datatable'
@@ -305,6 +306,8 @@
   import QuickWinHeroCard from '@/components/monitoring-evaluation/QuickWinHeroCard.vue'
   import EvidenceCard from '@/components/common/EvidenceCard.vue'
   import DetailViewFooter from '@/components/common/DetailViewFooter.vue'
+
+  const { t } = useI18n()
   import { useQuickWinStore } from '@/stores/useQuickWinStore'
   import { useOutputIndicatorStore } from '@/stores/useOutputIndicatorStore'
   import { db } from '@/services/local-db'

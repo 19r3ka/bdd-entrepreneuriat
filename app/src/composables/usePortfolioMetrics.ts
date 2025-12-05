@@ -1,4 +1,5 @@
-import { computed } from 'vue'
+import { computed, type Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Business } from '@/types/business'
 import type { Support } from '@/types/monitoring-evaluation/Support'
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
@@ -10,6 +11,8 @@ export function usePortfolioMetrics(
   quickWins: () => QuickWin[],
   metrics: () => MomentumMetric[]
 ) {
+  const { t } = useI18n()
+
   // --- Pipeline Stages ---
 
   const totalBusinesses = computed(() => businesses().length)
@@ -41,11 +44,11 @@ export function usePortfolioMetrics(
   })
 
   const pipelineStages = computed(() => [
-    { label: 'Total Portfolio', count: totalBusinesses.value, color: '#3B82F6' },
-    { label: 'Assessed', count: businessesWithAssessment.value, color: '#8B5CF6' },
-    { label: 'Active Support', count: businessesWithSupport.value, color: '#F59E0B' },
-    { label: 'Quick Wins', count: businessesWithQuickWins.value, color: '#10B981' },
-    { label: 'Graduated', count: graduatedBusinesses.value, color: '#059669' }
+    { label: t('pages.dashboard.pipeline.stages.totalPortfolio'), count: totalBusinesses.value, color: '#3B82F6' },
+    { label: t('pages.dashboard.pipeline.stages.assessed'), count: businessesWithAssessment.value, color: '#8B5CF6' },
+    { label: t('pages.dashboard.pipeline.stages.activeSupport'), count: businessesWithSupport.value, color: '#F59E0B' },
+    { label: t('pages.dashboard.pipeline.stages.quickWins'), count: businessesWithQuickWins.value, color: '#10B981' },
+    { label: t('pages.dashboard.pipeline.stages.graduated'), count: graduatedBusinesses.value, color: '#059669' }
   ])
 
   // --- Impact Trends (Mocked for now as we lack historical data structure) ---
@@ -59,13 +62,13 @@ export function usePortfolioMetrics(
       labels: months,
       datasets: [
         {
-          label: 'Jobs Created',
+          label: t('pages.dashboard.impactTrends.jobsCreated'),
           data: [12, 19, 25, 32, 45, 58], // Mock cumulative
           borderColor: '#3B82F6',
           tension: 0.4
         },
         {
-          label: 'Revenue Growth (%)',
+          label: t('pages.dashboard.impactTrends.revenueGrowth'),
           data: [5, 8, 12, 15, 22, 28], // Mock avg growth
           borderColor: '#10B981',
           tension: 0.4

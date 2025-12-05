@@ -62,67 +62,67 @@
     <!-- Portfolio Health Score -->
     <div class="col-12">
       <KPIMetricCard
-        label="Portfolio Health Score"
+        :label="$t('pages.dashboard.executiveSummary.portfolioHealthScore')"
         :value="`${healthPercentage}%`"
         :change="5"
-        changeLabel="vs last quarter"
+        :changeLabel="$t('pages.dashboard.executiveSummary.vsLastQuarter')"
         trend="up"
         icon="pi pi-heart-fill"
         :severity="healthSeverity"
-        tooltip="Overall health based on average business maturity scores across the portfolio."
+        :tooltip="$t('pages.dashboard.executiveSummary.tooltips.health')"
       />
     </div>
 
     <!-- Key Metrics Row -->
     <div class="col-12 md:col-6 lg:col-3">
       <KPIMetricCard
-        label="Total Businesses"
+        :label="$t('pages.dashboard.executiveSummary.totalBusinesses')"
         :value="totalBusinesses"
         :change="businessTrend"
-        changeLabel="this month"
+        :changeLabel="$t('pages.dashboard.executiveSummary.thisMonth')"
         trend="up"
         icon="pi pi-building"
         severity="success"
-        tooltip="Total number of active businesses in the portfolio."
+        :tooltip="$t('pages.dashboard.executiveSummary.tooltips.businesses')"
       />
     </div>
 
     <div class="col-12 md:col-6 lg:col-3">
       <KPIMetricCard
-        label="Support Interventions"
+        :label="$t('pages.dashboard.executiveSummary.supportInterventions')"
         :value="totalSupports"
         :change="supportTrend"
-        changeLabel="this month"
+        :changeLabel="$t('pages.dashboard.executiveSummary.thisMonth')"
         trend="up"
         icon="pi pi-heart"
         severity="info"
-        tooltip="Total number of support boosts provided to businesses."
+        :tooltip="$t('pages.dashboard.executiveSummary.tooltips.supports')"
       />
     </div>
 
     <div class="col-12 md:col-6 lg:col-3">
       <KPIMetricCard
-        label="Quick Wins"
+        :label="$t('pages.dashboard.executiveSummary.quickWins')"
         :value="totalQuickWins"
         :change="quickWinTrend"
-        changeLabel="this month"
+        :changeLabel="$t('pages.dashboard.executiveSummary.thisMonth')"
         trend="up"
         icon="pi pi-check-circle"
         severity="warning"
-        tooltip="Number of quick wins achieved and documented."
+        :tooltip="$t('pages.dashboard.executiveSummary.tooltips.quickWins')"
       />
     </div>
 
     <div class="col-12 md:col-6 lg:col-3">
       <KPIMetricCard
-        label="Active Outcomes"
+        :label="$t('pages.dashboard.executiveSummary.activeOutcomes')"
         :value="metrics.length"
         :change="8"
-        changeLabel="this month"
+        :changeLabel="$t('pages.dashboard.executiveSummary.thisMonth')"
         trend="up"
         icon="pi pi-chart-line"
         severity="success"
-        tooltip="Number of active outcome indicators being tracked."
+        :tooltip="$t('pages.dashboard.executiveSummary.tooltips.outcomes')"
       />
     </div>
   </div>

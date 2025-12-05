@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import SplitButton from 'primevue/splitbutton'
   import Tag from 'primevue/tag'
   import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
@@ -22,17 +23,18 @@
   }>()
 
   const router = useRouter()
+  const { t } = useI18n()
 
   // Actions Menu
   const actionItems = [
     {
-      label: 'Edit Profile',
+      label: t('common.edit'),
       icon: 'pi pi-pencil',
       command: () => emit('action', BUSINESS_ACTIONS.EDIT)
     },
     { separator: true },
     {
-      label: 'Delete Business',
+      label: t('common.delete') + ' ' + t('business.label'),
       icon: 'pi pi-trash',
       class: 'text-red-500',
       command: () => emit('action', BUSINESS_ACTIONS.DELETE)
@@ -68,7 +70,7 @@
             class="w-5rem h-5rem md:w-7rem md:h-7rem border-round-xl object-cover border-1 border-200 shadow-1 text-3xl"
           />
           <div class="absolute -bottom-2 -right-2 z-1">
-            <Tag :severity="statusSeverity" value="ACTIVE" class="text-xs" />
+            <Tag :severity="statusSeverity" :value="t('common.active')" class="text-xs" />
           </div>
         </div>
 
@@ -88,7 +90,7 @@
             @click="goToOwner"
             class="flex align-items-center gap-2 mt-1 pt-2 border-top-1 border-200 cursor-pointer hover:surface-100 transition-colors p-1 border-round"
           >
-            <span class="text-xs text-500 uppercase font-medium">Owned by:</span>
+            <span class="text-xs text-500 uppercase font-medium">{{ t('common.owner') }}:</span>
             <div class="flex align-items-center gap-2">
               <AvatarDisplay
                 :src="entrepreneur.avatar || undefined"
@@ -107,7 +109,7 @@
 
       <div class="flex gap-2 align-self-end lg:align-self-center">
         <SplitButton
-          label="Log Intervention"
+          :label="t('common.logIntervention')"
           icon="pi pi-plus"
           :model="actionItems"
           severity="primary"

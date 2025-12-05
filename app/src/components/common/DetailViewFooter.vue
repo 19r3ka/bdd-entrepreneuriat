@@ -14,6 +14,9 @@
 </template>
 
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n'
+
+  const { d } = useI18n()
   interface Props {
     createdAt?: string | Date
     updatedAt?: string | Date
@@ -23,6 +26,6 @@
 
   const formatDateTime = (date?: string | Date) => {
     if (!date) return '-'
-    return new Date(date).toLocaleString()
+    return d(new Date(date))
   }
 </script>

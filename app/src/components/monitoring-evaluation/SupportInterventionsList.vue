@@ -2,18 +2,18 @@
   <div class="support-interventions-list">
     <Card>
       <template #title>
-        <span class="text-xl font-bold">Support Interventions</span>
+        <span class="text-xl font-bold">{{ $t('pages.supports.title') }}</span>
       </template>
       <template #content>
         <DataTable :value="supports" responsiveLayout="scroll">
-          <Column field="modality" header="Modality"></Column>
-          <Column field="description" header="Description"></Column>
-          <Column field="createdAt" header="Date">
+          <Column field="modality" :header="$t('support.modality')"></Column>
+          <Column field="description" :header="$t('common.description')"></Column>
+          <Column field="createdAt" :header="$t('common.createdAt')">
             <template #body="slotProps">
-              {{ new Date(slotProps.data.createdAt).toLocaleDateString() }}
+              {{ d(new Date(slotProps.data.createdAt), 'long') }}
             </template>
           </Column>
-          <Column header="Actions">
+          <Column :header="$t('common.actions')">
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"
@@ -38,7 +38,10 @@
   import Column from 'primevue/column'
   import Button from 'primevue/button'
   import Card from 'primevue/card'
+  import { useI18n } from 'vue-i18n'
   import type { Support } from '@/types/monitoring-evaluation/Support'
+
+  const { d } = useI18n()
 
   defineProps<{
     supports: Support[]

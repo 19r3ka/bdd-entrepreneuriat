@@ -37,7 +37,10 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import Button from 'primevue/button'
+
+  const { d } = useI18n()
 
   interface Evidence {
     id: string
@@ -86,6 +89,6 @@
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleDateString()
+    return d(new Date(dateStr), 'long')
   }
 </script>

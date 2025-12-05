@@ -186,6 +186,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import { useSupportStore } from '@/stores/useSupportStore'
   import { useBusinessStore } from '@/stores/useBusinessStore'
   import { useQuickWinStore } from '@/stores/useQuickWinStore'
@@ -197,6 +198,8 @@
   import QuickWinTimeline from '@/components/monitoring-evaluation/QuickWinTimeline.vue'
   import type { Support } from '@/types/monitoring-evaluation/Support'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+
+  const { d } = useI18n()
 
   const route = useRoute()
   const router = useRouter()
@@ -243,12 +246,12 @@
 
   function formatDate(dateString: string | undefined) {
     if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString()
+    return d(new Date(dateString), 'long')
   }
 
   function formatDateTime(dateString: string | undefined) {
     if (!dateString) return ''
-    return new Date(dateString).toLocaleString()
+    return d(new Date(dateString))
   }
 
   function handleDelete() {

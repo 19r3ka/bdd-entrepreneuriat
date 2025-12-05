@@ -31,7 +31,7 @@
             <template #icon>
               <i class="pi pi-exclamation-triangle"></i>
             </template>
-            <strong>Validation issues:</strong>
+            <strong>{{ $t('common.validationIssues') }}:</strong>
             <ul class="mt-2 ml-3">
               <li
                 v-for="issue in rawErrors.value.filter(
@@ -307,9 +307,12 @@
   import Select from 'primevue/select'
   import Toast from 'primevue/toast'
   import { useToast } from 'primevue/usetoast'
+  import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
   import type { ZodSchema } from 'zod'
   import { computed } from 'vue'
+
+  const { t } = useI18n()
 
   import AvatarUpload from '@/components/common/AvatarUpload.vue'
   import BaseForm from '@/components/common/BaseForm.vue'
@@ -343,7 +346,7 @@
         {
           lat: props.initialValues.location.latitude,
           lng: props.initialValues.location.longitude,
-          name: props.initialValues.name || 'Business Location'
+          name: props.initialValues.name || t('common.businessLocation')
         }
       ]
     }

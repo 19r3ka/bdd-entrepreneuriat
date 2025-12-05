@@ -79,6 +79,20 @@
     "dashboard": "Tableau de bord",
     "reports": "Rapports",
     "supports": "Soutiens",
+    "devTools": {
+      "entrepreneursLabel": "Entrepreneurs:",
+      "businessesLabel": "Entreprises:",
+      "supportsLabel": "Soutiens:",
+      "quickWinsLabel": "Victoires rapides:",
+      "momentumMetricsLabel": "Métriques de performance:",
+      "epicenterLatLabel": "Latitude épicentre:",
+      "epicenterLngLabel": "Longitude épicentre:",
+      "radiusLabel": "Rayon (km):",
+      "clearDbLabel": "Effacer la base de données existante avant le peuplement",
+      "databaseInfoTitle": "Informations sur la base de données",
+      "databaseNameLabel": "Nom de la base de données",
+      "versionLabel": "Version"
+    },
     "filterComingSoon": "Filtre bientôt disponible",
     "otherProperties": "Autres propriétés",
     "retry": "Réessayer",
@@ -106,7 +120,42 @@
     "dateOfBirth": "Date de naissance",
     "personalDetails": "Détails personnels",
     "age": "Âge",
-    "years": "ans"
+    "years": "ans",
+    "unknownBusiness": "Entreprise inconnue",
+    "active": "ACTIF",
+    "logIntervention": "Enregistrer l'intervention",
+    "businessLocation": "Emplacement de l'entreprise",
+    "validationIssues": "Problèmes de validation",
+    "goBack": "Retour",
+    "logSupport": "Enregistrer le soutien",
+    "addQuickWin": "Ajouter une victoire rapide",
+    "seedDatabase": "Peupler la base de données",
+    "addEntrepreneur": "Ajouter un entrepreneur",
+    "selectBusiness": "Sélectionner l'entreprise",
+    "description": "Description",
+    "amount": "Montant"
+  },
+  "messages": {
+    "businessUpdated": "Entreprise mise à jour avec succès",
+    "businessCreated": "Entreprise créée avec succès",
+    "entrepreneurUpdated": "Entrepreneur mis à jour avec succès",
+    "entrepreneurCreated": "Entrepreneur créé avec succès",
+    "entrepreneurNotFound": "Entrepreneur non trouvé",
+    "supportUpdated": "Soutien mis à jour avec succès",
+    "supportCreated": "Soutien enregistré avec succès",
+    "supportDeleted": "Soutien supprimé avec succès",
+    "supportFailed": "Échec de l'enregistrement du soutien",
+    "supportInterventionUpdated": "Intervention de soutien mise à jour avec succès",
+    "supportInterventionCreated": "Intervention de soutien créée avec succès",
+    "quickWinUpdated": "Victoire rapide mise à jour avec succès",
+    "quickWinCreated": "Victoire rapide créée avec succès",
+    "quickWinFailed": "Échec de la création de la victoire rapide",
+    "quickWinUpdateFailed": "Échec de la mise à jour de la victoire rapide",
+    "metricCreated": "Métrique de résultat créée avec succès",
+    "metricFailed": "Échec de l'enregistrement de la métrique",
+    "fileUploaded": "Fichier téléchargé",
+    "seedingFailed": "Échec du peuplement",
+    "seedingError": "Une erreur s'est produite lors du peuplement de la base de données."
   },
   "business": {
     "label": "Entreprise"
@@ -418,10 +467,51 @@
     "notes": "Notes",
     "notesPlaceholder": "Informations supplémentaires...",
     "saveSupport": "Enregistrer le soutien",
-    "add": "Ajouter un soutien"
+    "add": "Ajouter un soutien",
+    "boostTypes": {
+      "financial_grant": "Subvention financière",
+      "financial_match": "Contrepartie financière",
+      "training": "Formation",
+      "advisory_mentoring": "Conseil / Mentorat",
+      "equipment_infrastructure": "Équipement / Infrastructure",
+      "workspace_access": "Accès à l'espace de travail",
+      "policy_advocacy": "Plaidoyer politique",
+      "partnership_linkage": "Partenariat / Lien",
+      "market_access": "Accès au marché",
+      "digitalization_support": "Soutien à la numérisation"
+    },
+    "modalities": {
+      "DIM": "Exécution directe (DIM)",
+      "NIM": "Exécution nationale (NIM)",
+      "hybrid": "Hybride"
+    },
+    "channels": {
+      "in-person": "En personne",
+      "online": "En ligne",
+      "hybrid": "Hybride"
+    },
+    "units": {
+      "currency": "Devise",
+      "sessions": "Sessions",
+      "hours": "Heures",
+      "participants": "Participants",
+      "items": "Articles",
+      "linkages": "Liens",
+      "docs": "Documents"
+    },
+    "genderMarkers": {
+      "GEN0": "GEN0 - Aucune contribution attendue",
+      "GEN1": "GEN1 - Contribution limitée",
+      "GEN2": "GEN2 - Contribution significative",
+      "GEN3": "GEN3 - Objectif principal"
+    },
+    "new": "Enregistrer un nouveau soutien",
+    "edit": "Modifier le soutien",
+    "notFound": "Soutien non trouvé."
   },
   "quickWin": {
     "title": "Titre",
+    "singular": "Victoire rapide",
     "business": "Entreprise",
     "supportBoost": "Soutien lié",
     "achievedOn": "Réalisé le",
@@ -473,7 +563,166 @@
     "dashboard": {
       "totalEntrepreneurs": "Total des entrepreneurs",
       "totalBusinesses": "Total des entreprises",
-      "quickAddEntrepreneur": "Ajouter rapidement un entrepreneur"
+      "quickAddEntrepreneur": "Ajouter rapidement un entrepreneur",
+      "quickActions": "Actions rapides",
+      "logSupport": "Enregistrer un soutien",
+      "addGoal": "Ajouter un objectif",
+      "recordMeasurement": "Enregistrer une mesure",
+      "businessLocations": "Localisations des entreprises",
+      "portfolioOverview": "Vue d'ensemble du portefeuille",
+      "exportData": "Exporter les données",
+      "urgentActions": "Actions urgentes",
+      "opportunities": "Opportunités",
+      "allCaughtUp": "Tout est à jour !",
+      "noUrgentActions": "Aucune action urgente requise.",
+      "noNewOpportunities": "Pas de nouvelles opportunités",
+      "checkBackLater": "Revenez plus tard pour des recommandations.",
+      "pipeline": {
+        "title": "Pipeline de soutien",
+        "conversion": "{rate}% conversion",
+        "stages": {
+          "totalPortfolio": "Portefeuille total",
+          "assessed": "Évalué",
+          "activeSupport": "Soutien actif",
+          "quickWins": "Victoires rapides",
+          "graduated": "Gradué"
+        }
+      },
+      "executiveSummary": {
+        "portfolioHealthScore": "Score de santé du portefeuille",
+        "vsLastQuarter": "vs dernier trimestre",
+        "thisMonth": "ce mois-ci",
+        "totalBusinesses": "Total des entreprises",
+        "supportInterventions": "Interventions de soutien",
+        "quickWins": "Victoires rapides",
+        "activeOutcomes": "Résultats actifs",
+        "tooltips": {
+          "health": "Santé globale basée sur les scores moyens de maturité des entreprises du portefeuille.",
+          "businesses": "Nombre total d'entreprises actives dans le portefeuille.",
+          "supports": "Nombre total de soutiens fournis aux entreprises.",
+          "quickWins": "Nombre de victoires rapides réalisées et documentées.",
+          "outcomes": "Nombre d'indicateurs de résultats actifs suivis."
+        }
+      },
+      "activity": {
+        "title": "Activités et alertes",
+        "recent": "Activités récentes",
+        "alerts": "Alertes",
+        "noActivity": "Aucune activité récente",
+        "noAlerts": "Aucune alerte active",
+        "newBusinessRegistered": "Nouvelle entreprise enregistrée",
+        "support": "Soutien : {type}",
+        "quickWin": "Victoire rapide : {title}",
+        "performanceReported": "Performance signalée : {title}",
+        "newAdded": "Nouveau {type} ajouté",
+        "updated": "{type} mis à jour",
+        "deleted": "{type} supprimé",
+        "status": {
+          "registered": "Enregistré",
+          "completed": "Terminé",
+          "achieved": "Atteint",
+          "reported": "Signalé",
+          "created": "Créé",
+          "updated": "Mis à jour",
+          "deleted": "Supprimé"
+        },
+        "columns": {
+          "entity": "ENTITÉ",
+          "activity": "ACTIVITÉ",
+          "status": "STATUT",
+          "when": "QUAND",
+          "issue": "PROBLÈME",
+          "time": "TEMPS",
+          "action": "Action"
+        }
+      },
+      "alerts": {
+        "incompleteProfile": {
+          "title": "Profil incomplet",
+          "message": "Le profil de l'entreprise doit être complété"
+        },
+        "missingEntrepreneur": {
+          "title": "Entrepreneur manquant",
+          "message": "Aucun entrepreneur lié à l'entreprise"
+        },
+        "action": {
+          "complete": "Compléter",
+          "link": "Lier"
+        }
+      },
+      "time": {
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "daysAgo": "il y a {days} jours",
+        "urgent": "Urgent",
+        "unknown": "Inconnu"
+      },
+      "impactTrends": {
+        "title": "Tendances d'impact (6 mois)",
+        "jobsCreated": "Emplois créés",
+        "revenueGrowth": "Croissance des revenus (%)"
+      },
+      "businessDetail": {
+        "tabs": {
+          "overview": "Aperçu",
+          "reports": "Rapports",
+          "supports": "Soutiens",
+          "quickWins": "Victoires rapides",
+          "outcomes": "Résultats"
+        },
+        "actions": {
+          "trackPerformance": "Suivre la performance",
+          "addQuickWin": "Ajouter une victoire rapide",
+          "addPerformanceReport": "Ajouter un rapport de performance"
+        },
+        "messages": {
+          "cannotDelete": "Impossible de supprimer",
+          "quickWinHasReports": "Cette victoire rapide a des rapports de performance liés. Veuillez d'abord les supprimer.",
+          "deleteQuickWinError": "Échec de la suppression de la victoire rapide",
+          "deleteSupportError": "Échec de la suppression du soutien",
+          "metricUpdatedSuccess": "Métrique de résultat mise à jour avec succès",
+          "metricCreatedSuccess": "Métrique de résultat créée avec succès",
+          "metricDeletedSuccess": "Métrique de résultat supprimée avec succès",
+          "metricDeleteError": "Échec de la suppression de la métrique"
+        }
+      },
+      "regional": {
+        "businessOverview": "Vue d'ensemble des entreprises",
+        "visible": "Visibles",
+        "shown": "{count} affichées",
+        "active": "Actif",
+        "locationPinned": "Emplacement épinglé sur la carte",
+        "viewDetails": "Voir les détails",
+        "noBusinessesFound": "Aucune entreprise trouvée dans cette zone",
+        "tryPanning": "Essayez de déplacer la carte vers un autre emplacement",
+        "unknownSector": "Secteur inconnu"
+      },
+      "maturity": {
+        "title": "Aperçu de la maturité",
+        "milestoneProgress": "Progrès des jalons",
+        "dimension": "Dimension",
+        "level": "Niv {level}",
+        "nextMilestoneAdvisory": "Conseil pour le prochain jalon",
+        "noAdvisory": "Aucun conseil pour le moment. Toutes les entreprises sont au niveau de maturité maximum !"
+      },
+      "actions": {
+        "inactiveBusiness": {
+          "title": "Entreprise inactive",
+          "description": "{name} n'a eu aucune activité depuis plus de 90 jours."
+        },
+        "missingAssessment": {
+          "title": "Évaluation manquante",
+          "description": "{name} nécessite une évaluation de maturité initiale."
+        },
+        "readyForScaling": {
+          "title": "Prêt pour la mise à l'échelle",
+          "description": "{name} montre une bonne maturité (Moy: {avg}). Envisagez d'augmenter le soutien."
+        },
+        "highMomentum": {
+          "title": "Forte dynamique",
+          "description": "{name} a réalisé {count} victoires rapides récemment. Capitalisez sur cette dynamique."
+        }
+      }
     },
     "entrepreneurs": {
       "title": "Entrepreneurs",
@@ -540,7 +789,13 @@
       "titlePlural": "Victoires rapides",
       "new": "Nouvelle victoire rapide",
       "edit": "Modifier la victoire rapide",
-      "detail": "Détails de la victoire rapide"
+      "details": "Détails de la victoire rapide",
+      "deleteError": "Échec de la suppression de la victoire rapide",
+      "achievedOn": "Réalisé le",
+      "indicators": "Indicateurs",
+      "tags": "Tags",
+      "label": "Victoire rapide",
+      "notFoundTitle": "Victoire rapide non trouvée"
     }
   },
   "reporting": {

@@ -32,7 +32,7 @@
         <p>
           {{
             business.registrationDate
-              ? new Date(business.registrationDate).toLocaleDateString()
+              ? d(new Date(business.registrationDate), 'long')
               : $t('common.notAvailable')
           }}
         </p>
@@ -42,7 +42,7 @@
         <p>
           {{
             business.activityStartDate
-              ? new Date(business.activityStartDate).toLocaleDateString()
+              ? d(new Date(business.activityStartDate), 'long')
               : $t('common.notAvailable')
           }}
         </p>
@@ -52,7 +52,7 @@
         <p>
           {{
             business.supportStartDate
-              ? new Date(business.supportStartDate).toLocaleDateString()
+              ? d(new Date(business.supportStartDate), 'long')
               : $t('common.notAvailable')
           }}
         </p>
@@ -62,8 +62,11 @@
 </template>
 
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n'
   import type { Business } from '@/types/business'
   import { useBusinessAreas } from '@/composables/useBusinessAreas'
+
+  const { d } = useI18n()
 
   defineProps<{
     business: Business

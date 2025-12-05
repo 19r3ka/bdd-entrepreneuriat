@@ -81,6 +81,20 @@
     "dashboard": "Dashboard",
     "reports": "Reports",
     "supports": "Supports",
+    "devTools": {
+      "entrepreneursLabel": "Entrepreneurs:",
+      "businessesLabel": "Businesses:",
+      "supportsLabel": "Supports:",
+      "quickWinsLabel": "Quick Wins:",
+      "momentumMetricsLabel": "Momentum Metrics:",
+      "epicenterLatLabel": "Epicenter Lat:",
+      "epicenterLngLabel": "Epicenter Lng:",
+      "radiusLabel": "Radius (km):",
+      "clearDbLabel": "Clear existing database before seeding",
+      "databaseInfoTitle": "Database Info",
+      "databaseNameLabel": "Database Name",
+      "versionLabel": "Version"
+    },
     "filterComingSoon": "Filter coming soon",
     "otherProperties": "Other Properties",
     "retry": "Retry",
@@ -108,7 +122,42 @@
     "dateOfBirth": "Date of Birth",
     "personalDetails": "Personal Details",
     "age": "Age",
-    "years": "years"
+    "years": "years",
+    "unknownBusiness": "Unknown Business",
+    "active": "ACTIVE",
+    "logIntervention": "Log Intervention",
+    "businessLocation": "Business Location",
+    "validationIssues": "Validation issues",
+    "goBack": "Go Back",
+    "logSupport": "Log Support",
+    "addQuickWin": "Add Quick Win",
+    "seedDatabase": "Seed Database",
+    "addEntrepreneur": "Add Entrepreneur",
+    "selectBusiness": "Select Business",
+    "description": "Description",
+    "amount": "Amount"
+  },
+  "messages": {
+    "businessUpdated": "Business updated successfully",
+    "businessCreated": "Business created successfully",
+    "entrepreneurUpdated": "Entrepreneur updated successfully",
+    "entrepreneurCreated": "Entrepreneur created successfully",
+    "entrepreneurNotFound": "Entrepreneur not found",
+    "supportUpdated": "Support boost updated successfully",
+    "supportCreated": "Support boost logged successfully",
+    "supportDeleted": "Support deleted successfully",
+    "supportFailed": "Failed to save support boost",
+    "supportInterventionUpdated": "Support intervention updated successfully",
+    "supportInterventionCreated": "Support intervention created successfully",
+    "quickWinUpdated": "Quick Win updated successfully",
+    "quickWinCreated": "Quick Win created successfully",
+    "quickWinFailed": "Failed to create Quick Win",
+    "quickWinUpdateFailed": "Failed to update Quick Win",
+    "metricCreated": "Outcome metric created successfully",
+    "metricFailed": "Failed to save outcome metric",
+    "fileUploaded": "File uploaded",
+    "seedingFailed": "Seeding Failed",
+    "seedingError": "An error occurred while seeding the database."
   },
   "business": {
     "label": "Business"
@@ -135,13 +184,238 @@
     "latitudeRange": "Latitude must be between -90 and 90"
   },
   "pages": {
+    "support": {
+      "title": "Support Title",
+      "titlePlaceholder": "e.g., Training on Market Access",
+      "boostType": "Support Type",
+      "selectType": "Select support type",
+      "modality": "Modality",
+      "selectModality": "Select modality",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "channel": "Channel",
+      "selectChannel": "Select channel",
+      "genderMarker": "Gender Marker",
+      "selectMarker": "Select marker",
+      "provider": "Provider",
+      "providerPlaceholder": "e.g., UNDP",
+      "quantityValue": "Quantity & Value",
+      "value": "Value",
+      "valuePlaceholder": "Enter value",
+      "unit": "Unit",
+      "selectUnit": "Select unit",
+      "currency": "Currency",
+      "currencyPlaceholder": "e.g., USD",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional information about this support...",
+      "saveSupport": "Save Support",
+      "boostTypes": {
+        "financial_grant": "Financial Grant",
+        "financial_match": "Financial Match",
+        "training": "Training",
+        "advisory_mentoring": "Advisory / Mentoring",
+        "equipment_infrastructure": "Equipment / Infrastructure",
+        "workspace_access": "Workspace Access",
+        "policy_advocacy": "Policy Advocacy",
+        "partnership_linkage": "Partnership Linkage",
+        "market_access": "Market Access",
+        "digitalization_support": "Digitalization Support"
+      },
+      "modalities": {
+        "DIM": "Direct Implementation (DIM)",
+        "NIM": "National Implementation (NIM)",
+        "hybrid": "Hybrid"
+      },
+      "channels": {
+        "in-person": "In-Person",
+        "online": "Online",
+        "hybrid": "Hybrid"
+      },
+      "units": {
+        "currency": "Currency",
+        "sessions": "Sessions",
+        "hours": "Hours",
+        "participants": "Participants",
+        "items": "Items",
+        "linkages": "Linkages",
+        "docs": "Documents"
+      },
+      "genderMarkers": {
+        "GEN0": "GEN0 - No expected contribution",
+        "GEN1": "GEN1 - Limited contribution",
+        "GEN2": "GEN2 - Significant contribution",
+        "GEN3": "GEN3 - Principal objective"
+      },
+      "new": "Log New Support",
+      "edit": "Edit Support",
+      "notFound": "Support boost not found."
+    },
     "supports": {
       "title": "Support Interventions"
     },
     "dashboard": {
       "totalEntrepreneurs": "Total Entrepreneurs",
       "totalBusinesses": "Total Businesses",
-      "quickAddEntrepreneur": "Quick Add Entrepreneur"
+      "quickAddEntrepreneur": "Quick Add Entrepreneur",
+      "quickActions": "Quick Actions",
+      "logSupport": "Log Support",
+      "addGoal": "Add Goal",
+      "recordMeasurement": "Record Measurement",
+      "businessLocations": "Business Locations",
+      "portfolioOverview": "Portfolio Overview",
+      "exportData": "Export Data",
+      "urgentActions": "Urgent Actions",
+      "opportunities": "Opportunities",
+      "allCaughtUp": "All caught up!",
+      "noUrgentActions": "No urgent actions required.",
+      "noNewOpportunities": "No new opportunities",
+      "checkBackLater": "Check back later for recommendations.",
+      "pipeline": {
+        "title": "Support Pipeline",
+        "conversion": "{rate}% conversion",
+        "stages": {
+          "totalPortfolio": "Total Portfolio",
+          "assessed": "Assessed",
+          "activeSupport": "Active Support",
+          "quickWins": "Quick Wins",
+          "graduated": "Graduated"
+        }
+      },
+      "executiveSummary": {
+        "portfolioHealthScore": "Portfolio Health Score",
+        "vsLastQuarter": "vs last quarter",
+        "thisMonth": "this month",
+        "totalBusinesses": "Total Businesses",
+        "supportInterventions": "Support Interventions",
+        "quickWins": "Quick Wins",
+        "activeOutcomes": "Active Outcomes",
+        "tooltips": {
+          "health": "Overall health based on average business maturity scores across the portfolio.",
+          "businesses": "Total number of active businesses in the portfolio.",
+          "supports": "Total number of support boosts provided to businesses.",
+          "quickWins": "Number of quick wins achieved and documented.",
+          "outcomes": "Number of active outcome indicators being tracked."
+        }
+      },
+      "activity": {
+        "title": "Activity & Alerts",
+        "recent": "Recent Activity",
+        "alerts": "Alerts",
+        "noActivity": "No recent activity",
+        "noAlerts": "No active alerts",
+        "newBusinessRegistered": "New business registered",
+        "support": "Support: {type}",
+        "quickWin": "Quick Win: {title}",
+        "performanceReported": "Performance Reported: {title}",
+        "newAdded": "New {type} added",
+        "updated": "{type} updated",
+        "deleted": "{type} deleted",
+        "status": {
+          "registered": "Registered",
+          "completed": "Completed",
+          "achieved": "Achieved",
+          "reported": "Reported",
+          "created": "Created",
+          "updated": "Updated",
+          "deleted": "Deleted"
+        },
+        "columns": {
+          "entity": "ENTITY",
+          "activity": "ACTIVITY",
+          "status": "STATUS",
+          "when": "WHEN",
+          "issue": "ISSUE",
+          "time": "TIME",
+          "action": "Action"
+        }
+      },
+      "alerts": {
+        "incompleteProfile": {
+          "title": "Incomplete Profile",
+          "message": "Business profile needs completion"
+        },
+        "missingEntrepreneur": {
+          "title": "Missing Entrepreneur",
+          "message": "No entrepreneur linked to business"
+        },
+        "action": {
+          "complete": "Complete",
+          "link": "Link"
+        }
+      },
+      "time": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "daysAgo": "{days} days ago",
+        "urgent": "Urgent",
+        "unknown": "Unknown"
+      },
+      "impactTrends": {
+        "title": "Impact Trends (6 Months)",
+        "jobsCreated": "Jobs Created",
+        "revenueGrowth": "Revenue Growth (%)"
+      },
+      "businessDetail": {
+        "tabs": {
+          "overview": "Overview",
+          "reports": "Reports",
+          "supports": "Supports",
+          "quickWins": "Quick Wins",
+          "outcomes": "Outcomes"
+        },
+        "actions": {
+          "trackPerformance": "Track Performance",
+          "addQuickWin": "Add Quick Win",
+          "addPerformanceReport": "Add Performance Report"
+        },
+        "messages": {
+          "cannotDelete": "Cannot Delete",
+          "quickWinHasReports": "This Quick Win has linked Performance Reports. Please delete them first.",
+          "deleteQuickWinError": "Failed to delete Quick Win",
+          "deleteSupportError": "Failed to delete Support",
+          "metricUpdatedSuccess": "Outcome metric updated successfully",
+          "metricCreatedSuccess": "Outcome metric created successfully",
+          "metricDeletedSuccess": "Outcome metric deleted successfully",
+          "metricDeleteError": "Failed to delete metric"
+        }
+      },
+      "regional": {
+        "businessOverview": "Business Overview",
+        "visible": "Visible",
+        "shown": "{count} shown",
+        "active": "Active",
+        "locationPinned": "Location pinned on map",
+        "viewDetails": "View Details",
+        "noBusinessesFound": "No businesses found in this area",
+        "tryPanning": "Try panning the map to a different location",
+        "unknownSector": "Unknown Sector"
+      },
+      "maturity": {
+        "title": "Maturity Overview",
+        "milestoneProgress": "Milestone Progress",
+        "dimension": "Dimension",
+        "level": "Lvl {level}",
+        "nextMilestoneAdvisory": "Next Milestone Advisory",
+        "noAdvisory": "No advisory items at this time. All businesses are at maximum maturity level!"
+      },
+      "actions": {
+        "inactiveBusiness": {
+          "title": "Inactive Business",
+          "description": "{name} has had no activity for over 90 days."
+        },
+        "missingAssessment": {
+          "title": "Missing Assessment",
+          "description": "{name} needs an initial maturity assessment."
+        },
+        "readyForScaling": {
+          "title": "Ready for Scaling",
+          "description": "{name} shows good maturity (Avg: {avg}). Consider scaling support."
+        },
+        "highMomentum": {
+          "title": "High Momentum",
+          "description": "{name} has achieved {count} quick wins recently. Capitalize on this momentum."
+        }
+      }
     },
     "entrepreneurs": {
       "title": "Entrepreneurs",
@@ -200,14 +474,20 @@
       "description": "Generate various reports for entrepreneurs and businesses.",
       "generateEntrepreneurReport": "Generate Entrepreneur Report",
       "generateBusinessReport": "Generate Business Report",
-      "entrepreneurReport": "Entrepreneur Report",
-      "businessReport": "Business Report"
+        "businessReport": "Business Report"
     },
     "quickWins": {
       "title": "Quick Wins",
       "new": "New Quick Win",
+      "notFound": "Quick Win Not Found",
       "edit": "Edit Quick Win",
-      "detail": "Quick Win Details"
+      "details": "Quick Win Details",
+      "deleteError": "Failed to delete quick win",
+      "achievedOn": "Achieved On",
+      "indicators": "Indicators",
+      "tags": "Tags",
+      "label": "Quick Win",
+      "notFoundTitle": "Quick Win Not Found"
     }
   },
   "forms": {
@@ -526,6 +806,7 @@
   },
   "quickWin": {
     "title": "Title",
+    "singular": "Quick Win",
     "titlePlural": "Quick Wins",
     "business": "Business",
     "supportBoost": "Linked Support",

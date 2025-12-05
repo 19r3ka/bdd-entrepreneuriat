@@ -133,7 +133,7 @@
   import Dialog from 'primevue/dialog'
   import Tag from 'primevue/tag'
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, computed } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
   import { useToast } from 'primevue/usetoast'
@@ -183,8 +183,8 @@
       await supportStore.addSupport(data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Support boost logged successfully',
+        summary: t('common.success'),
+        detail: t('messages.supportCreated'),
         life: 3000
       })
       showSupportDialog.value = false
@@ -192,15 +192,15 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to log support boost',
+        summary: t('common.error'),
+        detail: t('messages.supportFailed'),
         life: 3000
       })
     }
   }
 
   /** Columns */
-  const columns = ref([
+  const columns = computed(() => [
     { field: 'logo', header: t('common.logo'), sortable: false },
     {
       field: 'name',

@@ -56,7 +56,7 @@
     businessId: string
   }>()
 
-  const { t } = useI18n()
+  const { t, d } = useI18n()
   const supportStore = useSupportStore()
   const indicatorStore = useIndicatorStore()
 
@@ -90,7 +90,7 @@
       supports.forEach((s: Support) => {
         timelineEvents.push({
           id: s.id,
-          date: new Date(s.startDate).toLocaleDateString(),
+          date: d(new Date(s.startDate), 'long'),
           rawDate: new Date(s.startDate),
           title: t(`supportBoost.boostType.${s.boostType}`), // Translate boostType for title
           typeLabel: t('meTimeline.support'),
@@ -108,7 +108,7 @@
         measurements.forEach((m: Measurement) => {
           timelineEvents.push({
             id: m.id,
-            date: new Date(m.dateRecorded).toLocaleDateString(),
+            date: d(new Date(m.dateRecorded), 'long'),
             rawDate: new Date(m.dateRecorded),
             title: ind.name,
             typeLabel: t('meTimeline.measurement'),

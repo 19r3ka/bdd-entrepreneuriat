@@ -70,6 +70,8 @@
             :model-value="modelValue"
             @update:model-value="updateModelValue"
             :options="modalityOptions"
+            optionLabel="label"
+            optionValue="value"
             :placeholder="$t('support.selectModality')"
             :class="['w-full', { 'p-invalid': hasError }]"
             @blur="onBlur && onBlur()"
@@ -143,6 +145,8 @@
             :model-value="modelValue"
             @update:model-value="updateModelValue"
             :options="channelOptions"
+            optionLabel="label"
+            optionValue="value"
             :placeholder="$t('support.selectChannel')"
             :class="['w-full', { 'p-invalid': hasError }]"
             @blur="onBlur && onBlur()"
@@ -163,6 +167,8 @@
             :model-value="modelValue"
             @update:model-value="updateModelValue"
             :options="genderMarkerOptions"
+            optionLabel="label"
+            optionValue="value"
             :placeholder="$t('support.selectMarker')"
             :class="['w-full', { 'p-invalid': hasError }]"
             @blur="onBlur && onBlur()"
@@ -215,6 +221,8 @@
                   :model-value="modelValue"
                   @update:model-value="updateModelValue"
                   :options="unitOptions"
+                  optionLabel="label"
+                  optionValue="value"
                   :placeholder="$t('support.selectUnit')"
                   :class="['w-full', { 'p-invalid': hasError }]"
                   @blur="onBlur && onBlur()"
@@ -262,6 +270,7 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import BaseForm from '@/components/common/BaseForm.vue'
   import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
   import FormField from '@/components/common/FormField.vue'
@@ -272,6 +281,8 @@
   import InputNumber from 'primevue/inputnumber'
   import Select from 'primevue/select'
   import { v4 as uuidv4 } from 'uuid'
+
+  const { t } = useI18n()
 
   const props = defineProps<{
     initialData?: Partial<Support>
@@ -325,21 +336,45 @@
     emit('submit', sanitizedData)
   }
 
-  const boostTypeOptions = [
-    { label: 'Financial Grant', value: 'financial_grant' },
-    { label: 'Financial Match', value: 'financial_match' },
-    { label: 'Training', value: 'training' },
-    { label: 'Advisory / Mentoring', value: 'advisory_mentoring' },
-    { label: 'Equipment / Infrastructure', value: 'equipment_infrastructure' },
-    { label: 'Workspace Access', value: 'workspace_access' },
-    { label: 'Policy Advocacy', value: 'policy_advocacy' },
-    { label: 'Partnership Linkage', value: 'partnership_linkage' },
-    { label: 'Market Access', value: 'market_access' },
-    { label: 'Digitalization Support', value: 'digitalization_support' }
-  ]
+  const boostTypeOptions = computed(() => [
+    { label: t('support.boostTypes.financial_grant'), value: 'financial_grant' },
+    { label: t('support.boostTypes.financial_match'), value: 'financial_match' },
+    { label: t('support.boostTypes.training'), value: 'training' },
+    { label: t('support.boostTypes.advisory_mentoring'), value: 'advisory_mentoring' },
+    { label: t('support.boostTypes.equipment_infrastructure'), value: 'equipment_infrastructure' },
+    { label: t('support.boostTypes.workspace_access'), value: 'workspace_access' },
+    { label: t('support.boostTypes.policy_advocacy'), value: 'policy_advocacy' },
+    { label: t('support.boostTypes.partnership_linkage'), value: 'partnership_linkage' },
+    { label: t('support.boostTypes.market_access'), value: 'market_access' },
+    { label: t('support.boostTypes.digitalization_support'), value: 'digitalization_support' }
+  ])
 
-  const modalityOptions = ['DIM', 'NIM', 'hybrid']
-  const channelOptions = ['in-person', 'online', 'hybrid']
-  const unitOptions = ['currency', 'sessions', 'hours', 'participants', 'items', 'linkages', 'docs']
-  const genderMarkerOptions = ['GEN0', 'GEN1', 'GEN2', 'GEN3']
+  const modalityOptions = computed(() => [
+    { label: t('support.modalities.DIM'), value: 'DIM' },
+    { label: t('support.modalities.NIM'), value: 'NIM' },
+    { label: t('support.modalities.hybrid'), value: 'hybrid' }
+  ])
+
+  const channelOptions = computed(() => [
+    { label: t('support.channels.in-person'), value: 'in-person' },
+    { label: t('support.channels.online'), value: 'online' },
+    { label: t('support.channels.hybrid'), value: 'hybrid' }
+  ])
+
+  const unitOptions = computed(() => [
+    { label: t('support.units.currency'), value: 'currency' },
+    { label: t('support.units.sessions'), value: 'sessions' },
+    { label: t('support.units.hours'), value: 'hours' },
+    { label: t('support.units.participants'), value: 'participants' },
+    { label: t('support.units.items'), value: 'items' },
+    { label: t('support.units.linkages'), value: 'linkages' },
+    { label: t('support.units.docs'), value: 'docs' }
+  ])
+
+  const genderMarkerOptions = computed(() => [
+    { label: t('support.genderMarkers.GEN0'), value: 'GEN0' },
+    { label: t('support.genderMarkers.GEN1'), value: 'GEN1' },
+    { label: t('support.genderMarkers.GEN2'), value: 'GEN2' },
+    { label: t('support.genderMarkers.GEN3'), value: 'GEN3' }
+  ])
 </script>

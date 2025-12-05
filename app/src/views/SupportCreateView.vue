@@ -2,7 +2,7 @@
   <div class="surface-ground min-h-screen p-4 md:p-6">
     <div class="max-w-3xl mx-auto">
       <div class="card p-4">
-        <h2 class="mb-4">Log New Support</h2>
+        <h2 class="mb-4">{{ $t('support.new') }}</h2>
         <SupportBoostForm @submit="handleSubmit" />
       </div>
     </div>
@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
   import { useSupportStore } from '@/stores/useSupportStore'
   import type { Support } from '@/types/monitoring-evaluation/Support'
@@ -19,14 +20,15 @@
   const router = useRouter()
   const supportStore = useSupportStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   const handleSubmit = async (data: Support) => {
     try {
       await supportStore.addSupport(data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Support boost logged successfully',
+        summary: t('common.success'),
+        detail: t('messages.supportCreated'),
         life: 3000
       })
       router.push('/supports')
@@ -34,8 +36,8 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to log support boost',
+        summary: t('common.error'),
+        detail: t('messages.supportFailed'),
         life: 3000
       })
     }

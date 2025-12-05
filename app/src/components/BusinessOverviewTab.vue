@@ -15,7 +15,7 @@
   }
 
   const props = defineProps<Props>()
-  const { t } = useI18n()
+  const { t, d } = useI18n()
 
   // Helper functions internal to this display component
   function getBusinessAreaName(code?: string) {
@@ -26,11 +26,7 @@
 
   function formatDate(date: string | Date | null | undefined): string {
     if (!date) return t('common.notAvailable')
-    return new Date(date).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return d(new Date(date), 'long')
   }
 
   const mapLocations = computed(() => {
@@ -39,7 +35,7 @@
         {
           lat: props.business.location.latitude,
           lng: props.business.location.longitude,
-          name: props.business.name || 'Business Location'
+          name: props.business.name || t('common.businessLocation')
         }
       ]
     }

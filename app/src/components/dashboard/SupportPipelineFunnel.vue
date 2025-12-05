@@ -25,7 +25,7 @@
   <Card class="h-full">
     <template #title>
       <div class="flex align-items-center justify-content-between mb-2">
-        <h3 class="text-lg font-bold m-0">Support Pipeline</h3>
+        <h3 class="text-lg font-bold m-0">{{ $t('pages.dashboard.pipeline.title') }}</h3>
         <i class="pi pi-filter text-500"></i>
       </div>
     </template>
@@ -49,7 +49,7 @@
 
           <!-- Conversion Rate (skip for first item) -->
           <div v-if="index > 0" class="text-xs text-500 mt-1 text-right">
-            {{ Math.round((stage.count / stages[index - 1]!.count) * 100) || 0 }}% conversion
+            {{ $t('pages.dashboard.pipeline.conversion', { rate: Math.round((stage.count / stages[index - 1]!.count) * 100) || 0 }) }}
           </div>
         </div>
       </div>

@@ -1,26 +1,44 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useBusinessAreas } from './useBusinessAreas'
+
+// Mock vue-i18n
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => {
+      // Simple mock: just return the last part of the key
+      // In real translations, businessAreas.A becomes "Agriculture, forestry and fishing"
+      const mockTranslations: Record<string, string> = {
+        'businessAreas.A': 'Agriculture, forestry and fishing',
+        'businessAreas.B': 'Mining and quarrying',
+        'businessAreas.C': 'Manufacturing',
+        'businessAreas.J': 'Information and communication',
+        'businessAreas.K': 'Financial and insurance activities',
+        'businessAreas.P': 'Education',
+        'businessAreas.Q': 'Human health and social work',
+        'businessAreas.R': 'Arts, entertainment and recreation'
+      }
+      return mockTranslations[key] || key
+    }
+  })
+}))
 
 describe('useBusinessAreas', () => {
   it('businessAreaMap correctly maps codes to names', () => {
     const { businessAreaMap } = useBusinessAreas()
 
-    // Test that some common codes map to correct names
-    expect(businessAreaMap['IT']).toBe('Information Technology')
-    expect(businessAreaMap['FIN']).toBe('Financial Services')
-    expect(businessAreaMap['HLTH']).toBe('Healthcare')
-    expect(businessAreaMap['EDU']).toBe('Education')
-    expect(businessAreaMap['MFG']).toBe('Manufacturing')
-    expect(businessAreaMap['AGR']).toBe('Agriculture')
-    expect(businessAreaMap['TRVL']).toBe('Travel & Tourism')
+    // Test that some common codes map to correct names (using actual business area codes from constants)
+    expect(businessAreaMap.value['A']).toBe('Agriculture, forestry and fishing')
+    expect(businessAreaMap.value['C']).toBe('Manufacturing')
+    expect(businessAreaMap.value['P']).toBe('Education')
+    expect(businessAreaMap.value['J']).toBe('Information and communication')
   })
 
   it('getBusinessAreaLabel returns name for known code, falls back to code for unknown', () => {
     const { getBusinessAreaLabel } = useBusinessAreas()
 
     // Known code should return name
-    expect(getBusinessAreaLabel('IT')).toBe('Information Technology')
-    expect(getBusinessAreaLabel('FIN')).toBe('Financial Services')
+    expect(getBusinessAreaLabel('A')).toBe('Agriculture, forestry and fishing')
+    expect(getBusinessAreaLabel('J')).toBe('Information and communication')
 
     // Unknown code should return the code itself
     expect(getBusinessAreaLabel('UNKNOWN')).toBe('UNKNOWN')
@@ -45,16 +63,16 @@ describe('useBusinessAreas', () => {
     }
 
     // Check a specific option
-    const itOption = options.find((o) => o.value === 'IT')
-    expect(itOption).toEqual({ value: 'IT', label: 'Information Technology' })
+    const aOption = options.find((o) => o.value === 'A')
+    expect(aOption).toEqual({ value: 'A', label: 'Agriculture, forestry and fishing' })
   })
 
   it('isValidBusinessArea is true for known codes, false for unknown', () => {
     const { isValidBusinessArea } = useBusinessAreas()
 
     // Known codes should be valid
-    expect(isValidBusinessArea('IT')).toBe(true)
-    expect(isValidBusinessArea('FIN')).toBe(true)
+    expect(isValidBusinessArea('A')).toBe(true)
+    expect(isValidBusinessArea('C')).toBe(true)
 
     // Unknown codes should be invalid
     expect(isValidBusinessArea('UNKNOWN')).toBe(false)

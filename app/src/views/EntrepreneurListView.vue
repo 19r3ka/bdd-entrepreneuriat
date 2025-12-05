@@ -45,7 +45,7 @@
   import { storeToRefs } from 'pinia'
   import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
   import { useToast } from 'primevue/usetoast'
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, computed } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
   import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
@@ -68,7 +68,7 @@
   /**
    * Column definitions: lean, declarative.
    */
-  const columns = ref([
+  const columns = computed(() => [
     {
       field: 'firstName',
       header: t('common.firstName'),

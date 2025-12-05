@@ -1,10 +1,13 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
   import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore'
   import SelectButton from 'primevue/selectbutton'
   import MetricCard from '@/components/shared/MetricCard.vue'
+
+  const { n } = useI18n()
 
   const props = defineProps<{
     metrics: MomentumMetric[]
@@ -88,7 +91,7 @@
               :class="staffGrowth.direction === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ Math.abs(staffGrowth.trend).toFixed(1) }}%
+            {{ n(Math.abs(staffGrowth.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
           </span>
         </template>
       </MetricCard>
@@ -111,7 +114,7 @@
               :class="marketMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ Math.abs(marketMetric.trend!).toFixed(1) }}%
+            {{ n(Math.abs(marketMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
           </span>
         </template>
       </MetricCard>
@@ -134,7 +137,7 @@
               :class="revenueMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ Math.abs(revenueMetric.trend!).toFixed(1) }}%
+            {{ n(Math.abs(revenueMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
           </span>
         </template>
       </MetricCard>
@@ -157,7 +160,7 @@
               :class="profitMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ Math.abs(profitMetric.trend!).toFixed(1) }}%
+            {{ n(Math.abs(profitMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
           </span>
         </template>
       </MetricCard>

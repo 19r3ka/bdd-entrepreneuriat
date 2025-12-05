@@ -8,7 +8,6 @@
   import { useSupportStore } from '@/stores/useSupportStore'
   import { useActivityLogStore } from '@/stores/useActivityLogStore'
   import { useRouter } from 'vue-router'
-
   import PortfolioHealthSummary from '@/components/dashboard/PortfolioHealthSummary.vue'
   import MaturityPortfolioView from '@/components/dashboard/MaturityPortfolioView.vue'
   import AggregatedKPICards from '@/components/dashboard/AggregatedKPICards.vue'
@@ -20,6 +19,9 @@
   import ActionListWidget from '@/components/dashboard/ActionListWidget.vue'
   import { usePortfolioMetrics } from '@/composables/usePortfolioMetrics'
   import { usePortfolioActions, type ActionItem } from '@/composables/usePortfolioActions'
+  import { useI18n } from 'vue-i18n'
+
+  const { t, d } = useI18n()
 
   import Button from 'primevue/button'
 
@@ -80,9 +82,9 @@
       b.name,
       b.registrationNumber || '',
       b.primaryBusinessArea || '',
-      b.registrationDate ? new Date(b.registrationDate).toLocaleDateString() : '',
-      b.supportStartDate ? new Date(b.supportStartDate).toLocaleDateString() : '',
-      'Active' // Placeholder
+      b.registrationDate ? d(new Date(b.registrationDate), 'long') : '',
+      b.supportStartDate ? d(new Date(b.supportStartDate), 'long') : '',
+      t('common.active') // Placeholder
     ])
 
     const csvContent = [
@@ -123,12 +125,12 @@
     <!-- Header -->
     <div class="flex flex-wrap justify-content-between align-items-center gap-4 mb-6">
       <div class="flex flex-column gap-1">
-        <h1 class="text-900 dark:text-white text-4xl font-black m-0">Portfolio Overview</h1>
+        <h1 class="text-900 dark:text-white text-4xl font-black m-0">{{ $t('pages.dashboard.portfolioOverview') }}</h1>
         <p class="text-500 dark:text-400 text-base font-normal m-0">Maritime, Togo</p>
       </div>
       <div>
         <Button
-          label="Export Data"
+          :label="$t('pages.dashboard.exportData')"
           icon="pi pi-download"
           severity="secondary"
           outlined
@@ -171,24 +173,24 @@
     <div class="grid mb-6">
       <div class="col-12 lg:col-6 h-full">
         <ActionListWidget
-          title="Urgent Actions"
+          :title="$t('pages.dashboard.urgentActions')"
           icon="pi-exclamation-triangle"
           color="red"
           :actions="urgentActions"
-          empty-title="All caught up!"
-          empty-message="No urgent actions required."
+          :empty-title="$t('pages.dashboard.allCaughtUp')"
+          :empty-message="$t('pages.dashboard.noUrgentActions')"
           empty-icon="pi-check-circle"
           @action-click="handleActionClick"
         />
       </div>
       <div class="col-12 lg:col-6 h-full">
         <ActionListWidget
-          title="Opportunities"
+          :title="$t('pages.dashboard.opportunities')"
           icon="pi-sparkles"
           color="blue"
           :actions="opportunities"
-          empty-title="No new opportunities"
-          empty-message="Check back later for recommendations."
+          :empty-title="$t('pages.dashboard.noNewOpportunities')"
+          :empty-message="$t('pages.dashboard.checkBackLater')"
           empty-icon="pi-info-circle"
           @action-click="handleActionClick"
         />

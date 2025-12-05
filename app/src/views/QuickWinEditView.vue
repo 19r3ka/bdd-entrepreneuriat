@@ -13,8 +13,8 @@
     </div>
 
     <div v-else class="text-center p-6">
-      <div class="text-xl text-900 mb-2">Quick Win Not Found</div>
-      <Button label="Go Back" @click="goBack" />
+      <div class="text-xl text-900 mb-2">{{ $t('pages.quickWins.notFound') }}</div>
+      <Button :label="$t('common.goBack')" @click="goBack" />
     </div>
   </div>
 </template>
@@ -22,6 +22,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import Button from 'primevue/button'
   import QuickWinForm from '@/components/monitoring-evaluation/QuickWinForm.vue'
   import { useQuickWinStore } from '@/stores/useQuickWinStore'
@@ -32,6 +33,7 @@
   const router = useRouter()
   const store = useQuickWinStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   const quickWinId = route.params.id as string
   const quickWin = ref<QuickWin | undefined>(undefined)
@@ -56,8 +58,8 @@
       await store.updateQuickWin(quickWinId, data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Quick Win updated successfully',
+        summary: t('common.success'),
+        detail: t('messages.quickWinUpdated'),
         life: 3000
       })
       goBack()
@@ -65,8 +67,8 @@
       console.error('Failed to update quick win', error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to update Quick Win',
+        summary: t('common.error'),
+        detail: t('messages.quickWinUpdateFailed'),
         life: 3000
       })
     }

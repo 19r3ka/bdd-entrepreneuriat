@@ -38,7 +38,11 @@ app.use(ConfirmationService)
 // Register Tooltip directive
 app.directive('tooltip', Tooltip)
 
-// Register i18n
 app.use(i18n)
 
 app.mount('#app')
+
+// Initialize language store after mount to ensure Pinia and i18n are ready
+import { useLanguageStore } from '@/stores/useLanguageStore'
+const languageStore = useLanguageStore()
+languageStore.init()

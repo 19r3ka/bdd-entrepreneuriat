@@ -8,6 +8,7 @@
   import type { ActivityLog } from '@/types/ActivityLog'
   import { useActivityFeed } from '@/composables/useActivityFeed'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
 
   import Card from 'primevue/card'
   import Tabs from 'primevue/tabs'
@@ -32,6 +33,7 @@
   }>()
 
   const router = useRouter()
+  const { t } = useI18n()
 
   // Convert props to refs for the composable
   const { businesses, entrepreneurs, supports, quickWins, metrics, logs } = toRefs(props)
@@ -69,23 +71,23 @@
   const formatRelativeTime = (date: Date) => {
     const now = new Date()
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Yesterday'
-    return `${diffDays} days ago`
+    if (diffDays === 0) return t('pages.dashboard.time.today')
+    if (diffDays === 1) return t('pages.dashboard.time.yesterday')
+    return t('pages.dashboard.time.daysAgo', { days: diffDays })
   }
 </script>
 
 <template>
   <Card class="h-full border-1 border-surface-200 dark:border-surface-700 shadow-sm flex flex-col">
     <template #title>
-      <h2 class="text-900 dark:text-white text-lg font-bold m-0">Activity & Alerts</h2>
+      <h2 class="text-900 dark:text-white text-lg font-bold m-0">{{ $t('pages.dashboard.activity.title') }}</h2>
     </template>
     <template #content>
       <Tabs value="0">
         <TabList>
-          <Tab value="0">Recent Activity</Tab>
+          <Tab value="0">{{ $t('pages.dashboard.activity.recent') }}</Tab>
           <Tab value="1">
-            Alerts
+            {{ $t('pages.dashboard.activity.alerts') }}
             <Badge :value="alerts.length" severity="warn" class="ml-2" v-if="alerts.length > 0" />
           </Tab>
         </TabList>
@@ -97,9 +99,9 @@
               :rows="5"
               paginator
               class="p-datatable-sm"
-              empty-message="No recent activity"
+              :empty-message="$t('pages.dashboard.activity.noActivity')"
             >
-              <Column field="entity" header="ENTITY">
+              <Column field="entity" :header="$t('pages.dashboard.activity.columns.entity')">
                 <template #body="slotProps">
                   <div class="flex align-items-center gap-2">
                     <Avatar
@@ -119,7 +121,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="description" header="ACTIVITY">
+              <Column field="description" :header="$t('pages.dashboard.activity.columns.activity')">
                 <template #body="slotProps">
                   <div class="flex flex-column">
                     <span class="text-sm text-900 dark:text-white font-medium">{{
@@ -131,7 +133,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="status" header="STATUS">
+              <Column field="status" :header="$t('pages.dashboard.activity.columns.status')">
                 <template #body="slotProps">
                   <Tag
                     :value="slotProps.data.status"
@@ -140,14 +142,14 @@
                   />
                 </template>
               </Column>
-              <Column field="date" header="WHEN">
+              <Column field="date" :header="$t('pages.dashboard.activity.columns.when')">
                 <template #body="slotProps">
                   <span class="text-sm text-500 dark:text-400">{{
                     formatRelativeTime(slotProps.data.date)
                   }}</span>
                 </template>
               </Column>
-              <Column header="Action" style="width: 10%">
+              <Column :header="$t('pages.dashboard.activity.columns.action')" style="width: 10%">
                 <template #body="slotProps">
                   <Button
                     icon="pi pi-arrow-right"
@@ -168,9 +170,9 @@
               :rows="5"
               paginator
               class="p-datatable-sm"
-              empty-message="No active alerts"
+              :empty-message="$t('pages.dashboard.activity.noAlerts')"
             >
-              <Column field="entity" header="ENTITY">
+              <Column field="entity" :header="$t('pages.dashboard.activity.columns.entity')">
                 <template #body="slotProps">
                   <div class="flex align-items-center gap-2">
                     <Avatar
@@ -187,7 +189,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="title" header="ISSUE">
+              <Column field="title" :header="$t('pages.dashboard.activity.columns.issue')">
                 <template #body="slotProps">
                   <div class="flex flex-column gap-1">
                     <Tag
@@ -199,7 +201,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="time" header="TIME">
+              <Column field="time" :header="$t('pages.dashboard.activity.columns.time')">
                 <template #body="slotProps">
                   <span
                     class="text-sm font-bold"
@@ -211,7 +213,7 @@
                   >
                 </template>
               </Column>
-              <Column header="Action" style="width: 10%">
+              <Column :header="$t('pages.dashboard.activity.columns.action')" style="width: 10%">
                 <template #body="slotProps">
                   <Button
                     :label="slotProps.data.actionLabel"

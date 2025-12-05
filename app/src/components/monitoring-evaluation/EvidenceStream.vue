@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
 
   import Card from 'primevue/card'
   import Tabs from 'primevue/tabs'
@@ -10,6 +11,8 @@
   import Timeline from 'primevue/timeline'
   import Tag from 'primevue/tag'
   import Button from 'primevue/button'
+
+  const { d } = useI18n()
 
   interface Activity {
     type: 'quick_win' | 'metric' | 'support'
@@ -42,9 +45,7 @@
         icon,
         color: `bg-${colorBase}-500`,
         borderClass: `border-${colorBase}-200`,
-        dateStr: a.date
-          .toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-          .toUpperCase()
+        dateStr: d(a.date, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()
       }
     })
   })

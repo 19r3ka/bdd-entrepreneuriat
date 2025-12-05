@@ -42,7 +42,7 @@
   <Card class="h-full">
     <template #title>
       <div class="flex align-items-center justify-content-between mb-2">
-        <h3 class="text-lg font-bold m-0">Impact Trends (6 Months)</h3>
+        <h3 class="text-lg font-bold m-0">{{ $t('pages.dashboard.impactTrends.title') }}</h3>
         <i class="pi pi-chart-line text-500"></i>
       </div>
     </template>

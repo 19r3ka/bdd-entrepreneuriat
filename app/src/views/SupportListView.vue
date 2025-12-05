@@ -33,6 +33,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import { FilterMatchMode } from '@primevue/core/api'
   import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
   import { useSupportStore } from '@/stores/useSupportStore'
@@ -40,6 +41,7 @@
   import { useConfirmation } from '@/composables/useConfirmation'
 
   const router = useRouter()
+  const { t } = useI18n()
   const supportStore = useSupportStore()
   const businessStore = useBusinessStore()
   const { confirmDelete } = useConfirmation()
@@ -60,16 +62,16 @@
     genderMarker: { value: null, matchMode: FilterMatchMode.EQUALS }
   })
 
-  const columns = [
-    { field: 'title', header: 'Title', sortable: true, dataType: 'text' as const },
-    { field: 'businessId', header: 'Business', sortable: true, dataType: 'text' as const },
-    { field: 'boostType', header: 'Type', sortable: true, dataType: 'text' as const },
-    { field: 'modality', header: 'Modality', sortable: true, dataType: 'text' as const },
-    { field: 'startDate', header: 'Start Date', sortable: true, dataType: 'date' as const },
-    { field: 'endDate', header: 'End Date', sortable: true, dataType: 'date' as const },
-    { field: 'provider', header: 'Provider', sortable: true, dataType: 'text' as const },
-    { field: 'quantity', header: 'Quantity' }
-  ]
+  const columns = computed(() => [
+    { field: 'title', header: t('support.title'), sortable: true, dataType: 'text' as const },
+    { field: 'businessId', header: t('business.label'), sortable: true, dataType: 'text' as const },
+    { field: 'boostType', header: t('support.boostType'), sortable: true, dataType: 'text' as const },
+    { field: 'modality', header: t('support.modality'), sortable: true, dataType: 'text' as const },
+    { field: 'startDate', header: t('support.startDate'), sortable: true, dataType: 'date' as const },
+    { field: 'endDate', header: t('support.endDate'), sortable: true, dataType: 'date' as const },
+    { field: 'provider', header: t('support.provider'), sortable: true, dataType: 'text' as const },
+    { field: 'quantity', header: t('support.quantityValue'), sortable: false }
+  ])
 
   onMounted(async () => {
     loading.value = true
@@ -82,7 +84,7 @@
 
   function getBusinessName(businessId: string) {
     const business = businessStore.businesses.find((b) => b.id === businessId)
-    return business ? business.name : 'Unknown Business'
+    return business ? business.name : t('common.unknownBusiness')
   }
 
   function getBusinessId(businessId: string) {

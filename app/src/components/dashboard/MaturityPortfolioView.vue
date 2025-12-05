@@ -39,7 +39,7 @@
 <template>
   <Card class="mb-6 border-1 border-surface-200 dark:border-surface-700 shadow-sm">
     <template #title>
-      <h2 class="text-900 dark:text-0 text-lg font-bold m-0">Maturity Matrix Portfolio View</h2>
+      <h2 class="text-900 dark:text-0 text-lg font-bold m-0">{{ $t('pages.dashboard.maturity.title') }}</h2>
     </template>
     <template #content>
       <div class="flex flex-column lg:flex-row gap-4">
@@ -55,16 +55,16 @@
         <div class="flex-1" style="min-width: 300px">
           <!-- Progress Table -->
           <div class="mb-4">
-            <h3 class="font-bold text-800 dark:text-100 mb-2 text-base">Milestone Progress</h3>
+            <h3 class="font-bold text-800 dark:text-100 mb-2 text-base">{{ $t('pages.dashboard.maturity.milestoneProgress') }}</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-sm text-left border-collapse">
                 <thead
                   class="text-xs text-500 dark:text-400 uppercase bg-surface-50 dark:bg-surface-800"
                 >
                   <tr>
-                    <th class="px-4 py-2 font-semibold">Dimension</th>
+                    <th class="px-4 py-2 font-semibold">{{ $t('pages.dashboard.maturity.dimension') }}</th>
                     <th v-for="i in 4" :key="i" class="px-4 py-2 text-center font-semibold">
-                      Lvl {{ i }}
+                      {{ $t('pages.dashboard.maturity.level', { level: i }) }}
                     </th>
                   </tr>
                 </thead>
@@ -91,7 +91,7 @@
           <!-- Advisory -->
           <div>
             <h3 class="font-bold text-800 dark:text-100 mb-2 text-base">
-              "Next Milestone" Advisory
+              {{ $t('pages.dashboard.maturity.nextMilestoneAdvisory') }}
             </h3>
             <div v-if="advisoryList.length > 0" class="flex flex-column gap-2">
               <AdvisoryItem
@@ -105,7 +105,7 @@
               />
             </div>
             <div v-else class="text-500 text-sm">
-              No advisory items at this time. All businesses are at maximum maturity level!
+              {{ $t('pages.dashboard.maturity.noAdvisory') }}
             </div>
           </div>
         </div>

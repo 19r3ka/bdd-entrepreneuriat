@@ -54,10 +54,12 @@
   import { useRouter } from 'vue-router'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
   import { useConfirmation } from '@/composables/useConfirmation'
+  import { useI18n } from 'vue-i18n'
 
   const router = useRouter()
   const quickWinStore = useQuickWinStore()
   const businessStore = useBusinessStore()
+  const { t } = useI18n()
 
   const loading = ref(false)
   const quickWins = computed(() => quickWinStore.quickWins)
@@ -71,13 +73,13 @@
     genderMarker: { value: null, matchMode: FilterMatchMode.EQUALS }
   })
 
-  const columns = [
-    { field: 'title', header: 'Title', sortable: true, dataType: 'text' as const },
-    { field: 'businessId', header: 'Business', sortable: true, dataType: 'text' as const },
-    { field: 'achievedOn', header: 'Achieved On', sortable: true, dataType: 'date' as const },
-    { field: 'indicators', header: 'Indicators' },
-    { field: 'tags', header: 'Tags' }
-  ]
+  const columns = computed(() => [
+    { field: 'title', header: t('quickWins.title'), sortable: true, dataType: 'text' as const },
+    { field: 'businessId', header: t('business.label'), sortable: true, dataType: 'text' as const },
+    { field: 'achievedOn', header: t('quickWins.achievedOn'), sortable: true, dataType: 'date' as const },
+    { field: 'indicators', header: t('quickWins.indicators') },
+    { field: 'tags', header: t('quickWins.tags') }
+  ])
 
   onMounted(async () => {
     loading.value = true
@@ -90,7 +92,7 @@
 
   function getBusinessName(businessId: string) {
     const business = businessStore.businesses.find((b) => b.id === businessId)
-    return business ? business.name : 'Unknown Business'
+    return business ? business.name : t('common.unknownBusiness')
   }
 
   function getBusinessId(businessId: string) {
@@ -113,7 +115,7 @@
 
   function onDelete(id: string) {
     const quickWin = quickWins.value.find((qw) => qw.id === id)
-    const name = quickWin?.title || 'Quick Win'
+    const name = quickWin?.title || t('quickWins.label')
 
     confirmDelete(name, async () => {
       await quickWinStore.deleteQuickWin(id)

@@ -57,11 +57,14 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import Timeline from 'primevue/timeline'
   import Card from 'primevue/card'
   import Button from 'primevue/button'
   import Tag from 'primevue/tag'
   import type { Support } from '@/types/monitoring-evaluation/Support'
+
+  const { d } = useI18n()
 
   const props = defineProps<{
     supports: Support[]
@@ -81,11 +84,7 @@
 
   function formatDate(dateStr: string) {
     if (!dateStr) return ''
-    return new Date(dateStr).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return d(new Date(dateStr), 'long')
   }
 
   function formatType(type: string) {

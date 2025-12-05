@@ -93,11 +93,14 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import Card from 'primevue/card'
   import Tag from 'primevue/tag'
   import Button from 'primevue/button'
   import type { Support } from '@/types/monitoring-evaluation/Support'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+
+  const { d } = useI18n()
 
   const props = defineProps<{
     activity: {
@@ -181,11 +184,7 @@
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return ''
-    return new Date(dateStr).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return d(new Date(dateStr), 'short')
   }
 
   const truncate = (text: string, length: number) => {

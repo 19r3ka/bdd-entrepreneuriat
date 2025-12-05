@@ -1,17 +1,20 @@
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import type { Business } from '@/types/business'
   import InteractiveMap from '@/components/InteractiveMap.vue'
   import Card from 'primevue/card'
   import Button from 'primevue/button'
   import { useRouter } from 'vue-router'
-  import { businessAreaOptions } from '@/constants/businessAreas'
+  import { useBusinessAreas } from '@/composables/useBusinessAreas'
 
   const props = defineProps<{
     businesses: Business[]
   }>()
 
   const router = useRouter()
+  const { t } = useI18n()
+  const { getBusinessAreaLabel } = useBusinessAreas()
   const mapRef = ref<any>(null)
   const visibleBusinesses = ref<Business[]>([])
 
@@ -64,9 +67,8 @@
   }
 
   const getBusinessAreaName = (code: string | undefined) => {
-    if (!code) return 'Unknown Sector'
-    const areaOption = businessAreaOptions.find((option) => option.code === code)
-    return areaOption ? areaOption.name : code
+    if (!code) return t('pages.dashboard.regional.unknownSector')
+    return getBusinessAreaLabel(code)
   }
 </script>
 
@@ -94,7 +96,7 @@
             >
               <i class="pi pi-eye text-primary"></i>
               <span class="font-bold text-900 dark:text-0">{{ visibleBusinesses.length }}</span>
-              <span class="text-700 dark:text-200 text-sm font-medium">Visible</span>
+              <span class="text-700 dark:text-200 text-sm font-medium">{{ $t('pages.dashboard.regional.visible') }}</span>
             </div>
           </div>
         </template>
@@ -108,11 +110,11 @@
       >
         <template #title>
           <div class="flex justify-content-between align-items-center p-2">
-            <h3 class="text-lg font-bold m-0">Business Overview</h3>
+            <h3 class="text-lg font-bold m-0">{{ $t('pages.dashboard.regional.businessOverview') }}</h3>
             <span
               class="text-xs text-500 bg-surface-100 dark:bg-surface-800 px-2 py-1 border-round"
             >
-              {{ visibleBusinesses.length }} shown
+              {{ $t('pages.dashboard.regional.shown', { count: visibleBusinesses.length }) }}
             </span>
           </div>
         </template>
@@ -134,7 +136,7 @@
                   <span
                     class="flex-shrink-0 text-xs font-medium px-2 py-1 border-round bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                   >
-                    Active
+                    {{ $t('pages.dashboard.regional.active') }}
                   </span>
                 </div>
 
@@ -142,7 +144,7 @@
                 <div class="flex align-items-center gap-2 text-sm text-600 dark:text-400">
                   <i class="pi pi-map-marker text-primary text-xs"></i>
                   <span class="white-space-nowrap overflow-hidden text-overflow-ellipsis">
-                    {{ business.location?.address || 'Location pinned on map' }}
+                    {{ business.location?.address || $t('pages.dashboard.regional.locationPinned') }}
                   </span>
                 </div>
 
@@ -157,7 +159,7 @@
                   <span
                     class="text-xs text-primary font-medium flex align-items-center gap-1 hover:underline flex-shrink-0"
                   >
-                    View Details <i class="pi pi-arrow-right text-xs"></i>
+                    {{ $t('pages.dashboard.regional.viewDetails') }} <i class="pi pi-arrow-right text-xs"></i>
                   </span>
                 </div>
               </div>
@@ -167,8 +169,8 @@
                 class="flex flex-column align-items-center justify-content-center py-6 text-center text-500"
               >
                 <i class="pi pi-map text-4xl mb-3 text-300"></i>
-                <span class="font-medium">No businesses found in this area</span>
-                <span class="text-sm mt-1">Try panning the map to a different location</span>
+                <span class="font-medium">{{ $t('pages.dashboard.regional.noBusinessesFound') }}</span>
+                <span class="text-sm mt-1">{{ $t('pages.dashboard.regional.tryPanning') }}</span>
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { computed, type Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Business } from '@/types/business'
 import type { Entrepreneur } from '@/types/entrepreneur'
 import type { Support } from '@/types/monitoring-evaluation/Support'
@@ -39,6 +40,7 @@ export function useActivityFeed(
   metrics: Ref<MomentumMetric[]>,
   logs: Ref<ActivityLog[]>
 ) {
+  const { t } = useI18n()
   // Helper to get entrepreneur details for a business
   const getEntDetails = (businessId: string) => {
     const business = businesses.value.find((b) => b.id === businessId)
@@ -75,16 +77,16 @@ export function useActivityFeed(
 
       switch (log.action) {
         case 'create':
-          description = `New ${log.entityType} added`
-          status = 'Created'
+          description = t('pages.dashboard.activity.newAdded', { type: log.entityType })
+          status = t('pages.dashboard.activity.status.created')
           break
         case 'update':
-          description = `${log.entityType} updated`
-          status = 'Updated'
+          description = t('pages.dashboard.activity.updated', { type: log.entityType })
+          status = t('pages.dashboard.activity.status.updated')
           break
         case 'delete':
-          description = `${log.entityType} deleted`
-          status = 'Deleted'
+          description = t('pages.dashboard.activity.deleted', { type: log.entityType })
+          status = t('pages.dashboard.activity.status.deleted')
           break
       }
 
@@ -122,9 +124,9 @@ export function useActivityFeed(
           entityName: b.name,
           entityInitials: b.name.substring(0, 2).toUpperCase(),
           entityType: 'Business',
-          description: 'New business registered',
+          description: t('pages.dashboard.activity.newBusinessRegistered'),
           date: date,
-          status: 'Registered',
+          status: t('pages.dashboard.activity.status.registered'),
           link: `/businesses/${b.id}`,
           meta: b.primaryBusinessArea
         })
@@ -141,9 +143,9 @@ export function useActivityFeed(
           entityName: business.name,
           entityInitials: business.name.substring(0, 2).toUpperCase(),
           entityType: 'Business',
-          description: `Support: ${s.boostType}`,
+          description: t('pages.dashboard.activity.support', { type: s.boostType }),
           date: new Date(s.startDate),
-          status: 'Completed',
+          status: t('pages.dashboard.activity.status.completed'),
           link: `/businesses/${business.id}?tab=supports`,
           meta: s.dimension
         })
@@ -160,9 +162,9 @@ export function useActivityFeed(
           entityName: business.name,
           entityInitials: business.name.substring(0, 2).toUpperCase(),
           entityType: 'Business',
-          description: `Quick Win: ${qw.title}`,
+          description: t('pages.dashboard.activity.quickWin', { title: qw.title }),
           date: new Date(qw.achievedOn),
-          status: 'Achieved',
+          status: t('pages.dashboard.activity.status.achieved'),
           link: `/businesses/${business.id}?tab=quick-wins`,
           meta: qw.dimension
         })
@@ -189,9 +191,9 @@ export function useActivityFeed(
             entityName: business.name,
             entityInitials: business.name.substring(0, 2).toUpperCase(),
             entityType: 'Business',
-            description: `Performance Reported: ${m.title}`,
+            description: t('pages.dashboard.activity.performanceReported', { title: m.title }),
             date: lastDate,
-            status: 'Reported',
+            status: t('pages.dashboard.activity.status.reported'),
             link: `/businesses/${business.id}?tab=outcomes`,
             meta: m.dimension
           })

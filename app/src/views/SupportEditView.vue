@@ -5,12 +5,12 @@
         <i class="pi pi-spin pi-spinner text-4xl"></i>
       </div>
       <div v-else-if="support" class="card p-4">
-        <h2 class="mb-4">Edit Support</h2>
+        <h2 class="mb-4">{{ $t('support.edit') }}</h2>
         <SupportBoostForm :initial-data="support" @submit="handleSubmit" />
       </div>
       <div v-else class="text-center">
-        <p>Support boost not found.</p>
-        <Button label="Go Back" @click="router.back()" />
+        <p>{{ $t('support.notFound') }}</p>
+        <Button :label="$t('common.goBack')" @click="router.back()" />
       </div>
     </div>
   </div>
@@ -19,6 +19,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
   import { useSupportStore } from '@/stores/useSupportStore'
   import type { Support } from '@/types/monitoring-evaluation/Support'
@@ -29,6 +30,7 @@
   const router = useRouter()
   const store = useSupportStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   const support = ref<Support | undefined>(undefined)
   const loading = ref(true)
@@ -45,8 +47,8 @@
       await store.updateSupport(support.value.id, data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Support boost updated successfully',
+        summary: t('common.success'),
+        detail: t('messages.supportUpdated'),
         life: 3000
       })
       router.push('/supports')
@@ -54,8 +56,8 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to update support boost',
+        summary: t('common.error'),
+        detail: t('messages.supportFailed'),
         life: 3000
       })
     }

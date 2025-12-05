@@ -18,6 +18,7 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import Button from 'primevue/button'
   import QuickWinForm from '@/components/monitoring-evaluation/QuickWinForm.vue'
   import { useQuickWinStore } from '@/stores/useQuickWinStore'
@@ -27,6 +28,7 @@
   const router = useRouter()
   const store = useQuickWinStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   const businessId = computed(() => route.query.businessId as string | undefined)
   const supportBoostId = computed(() => route.query.supportBoostId as string | undefined)
@@ -40,8 +42,8 @@
       await store.createQuickWin(data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Quick Win created successfully',
+        summary: t('common.success'),
+        detail: t('messages.quickWinCreated'),
         life: 3000
       })
       goBack()
@@ -49,8 +51,8 @@
       console.error('Failed to create quick win', error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to create Quick Win',
+        summary: t('common.error'),
+        detail: t('messages.quickWinFailed'),
         life: 3000
       })
     }

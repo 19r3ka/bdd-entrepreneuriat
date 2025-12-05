@@ -1,10 +1,13 @@
 <script setup lang="ts">
   import { toRef } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import type { Business } from '@/types/business'
   import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
   import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
   import { usePortfolioHealth } from '@/composables/usePortfolioHealth'
   import MetricCard from '@/components/shared/MetricCard.vue'
+
+  const { n } = useI18n()
 
   const props = defineProps<{
     businesses: Business[]
@@ -114,14 +117,14 @@
     </MetricCard>
 
     <!-- Finance Unlocked -->
-    <MetricCard title="FINANCE UNLOCKED" icon="pi pi-wallet">
+    <MetricCard :title="$t('dashboard.financeUnlockedTitle')" icon="pi pi-wallet">
       <template #value>
         <p class="text-900 dark:text-0 text-4xl font-bold m-0">
-          ${{ financeUnlocked.toLocaleString() }}
+          ${{ n(financeUnlocked, 'currency') }}
         </p>
       </template>
       <template #subtext>
-        <p class="text-500 dark:text-400 text-xs m-0">Past Year</p>
+        <p class="text-500 dark:text-400 text-xs m-0">{{ $t('dashboard.pastYear') }}</p>
       </template>
     </MetricCard>
 

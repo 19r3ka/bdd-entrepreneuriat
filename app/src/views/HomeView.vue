@@ -24,12 +24,20 @@
 
     <div class="col-12">
       <div class="card">
-        <h2 class="mb-3">Quick Actions</h2>
+        <h2 class="mb-3">{{ $t('pages.dashboard.quickActions') }}</h2>
         <div class="flex gap-3 flex-wrap">
-          <Button label="Log Support" icon="pi pi-heart" @click="showSupportDialog = true" />
-          <Button label="Add Goal" icon="pi pi-flag" @click="showGoalDialog = true" />
           <Button
-            label="Record Measurement"
+            :label="$t('pages.dashboard.logSupport')"
+            icon="pi pi-heart"
+            @click="showSupportDialog = true"
+          />
+          <Button
+            :label="$t('pages.dashboard.addGoal')"
+            icon="pi pi-flag"
+            @click="showGoalDialog = true"
+          />
+          <Button
+            :label="$t('pages.dashboard.recordMeasurement')"
             icon="pi pi-chart-line"
             @click="showMeasurementDialog = true"
           />
@@ -39,7 +47,7 @@
 
     <div class="col-12 xl:col-8">
       <div class="card">
-        <h2>Business Locations</h2>
+        <h2>{{ $t('pages.dashboard.businessLocations') }}</h2>
         <InteractiveMap :locations="businessLocations" class="w-full h-full" :is-editable="false" />
       </div>
     </div>
@@ -52,7 +60,7 @@
   <!-- Dialogs -->
   <Dialog
     v-model:visible="showSupportDialog"
-    header="Log Support"
+    :header="$t('pages.dashboard.logSupport')"
     modal
     class="p-fluid"
     :style="{ width: '65vw' }"
@@ -145,8 +153,8 @@
       await supportStore.addSupport(data)
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Support boost logged successfully',
+        summary: t('common.success'),
+        detail: t('messages.supportCreated'),
         life: 3000
       })
       showSupportDialog.value = false
@@ -154,8 +162,8 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to log support boost',
+        summary: t('common.error'),
+        detail: t('messages.supportFailed'),
         life: 3000
       })
     }

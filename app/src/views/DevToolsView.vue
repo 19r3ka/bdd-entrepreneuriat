@@ -12,7 +12,7 @@
 
           <div class="flex flex-column gap-3">
             <div class="flex align-items-center gap-2">
-              <label for="entrepreneurCount" class="font-semibold w-10rem">Entrepreneurs:</label>
+              <label for="entrepreneurCount" class="font-semibold w-10rem">{{ t('devTools.entrepreneursLabel') }}</label>
               <InputNumber
                 v-model="entrepreneurCount"
                 inputId="entrepreneurCount"
@@ -23,7 +23,7 @@
             </div>
 
             <div class="flex align-items-center gap-2">
-              <label for="businessCount" class="font-semibold w-10rem">Businesses:</label>
+              <label for="businessCount" class="font-semibold w-10rem">{{ t('devTools.businessesLabel') }}</label>
               <InputNumber
                 v-model="businessCount"
                 inputId="businessCount"
@@ -35,7 +35,7 @@
             </div>
 
             <div class="flex align-items-center gap-2">
-              <label for="supportCount" class="font-semibold w-10rem">Supports:</label>
+              <label for="supportCount" class="font-semibold w-10rem">{{ t('devTools.supportsLabel') }}</label>
               <InputNumber
                 v-model="supportCount"
                 inputId="supportCount"
@@ -47,7 +47,7 @@
             </div>
 
             <div class="flex align-items-center gap-2">
-              <label for="quickWinCount" class="font-semibold w-10rem">Quick Wins:</label>
+              <label for="quickWinCount" class="font-semibold w-10rem">{{ t('devTools.quickWinsLabel') }}</label>
               <InputNumber
                 v-model="quickWinCount"
                 inputId="quickWinCount"
@@ -60,7 +60,7 @@
 
             <div class="flex align-items-center gap-2">
               <label for="momentumMetricCount" class="font-semibold w-10rem"
-                >Momentum Metrics:</label
+                >{{ t('devTools.momentumMetricsLabel') }}</label
               >
               <InputNumber
                 v-model="momentumMetricCount"
@@ -76,7 +76,7 @@
               <h4 class="m-0 mb-3">Geodata Settings</h4>
               <div class="flex flex-column gap-3">
                 <div class="flex align-items-center gap-2">
-                  <label for="epicenterLat" class="font-semibold w-10rem">Epicenter Lat:</label>
+                  <label for="epicenterLat" class="font-semibold w-10rem">{{ t('devTools.epicenterLatLabel') }}</label>
                   <InputNumber
                     v-model="epicenterLat"
                     inputId="epicenterLat"
@@ -89,7 +89,7 @@
                   />
                 </div>
                 <div class="flex align-items-center gap-2">
-                  <label for="epicenterLng" class="font-semibold w-10rem">Epicenter Lng:</label>
+                  <label for="epicenterLng" class="font-semibold w-10rem">{{ t('devTools.epicenterLngLabel') }}</label>
                   <InputNumber
                     v-model="epicenterLng"
                     inputId="epicenterLng"
@@ -102,7 +102,7 @@
                   />
                 </div>
                 <div class="flex align-items-center gap-2">
-                  <label for="seedRadius" class="font-semibold w-10rem">Radius (km):</label>
+                  <label for="seedRadius" class="font-semibold w-10rem">{{ t('devTools.radiusLabel') }}</label>
                   <InputNumber
                     v-model="seedRadius"
                     inputId="seedRadius"
@@ -116,7 +116,7 @@
 
             <div class="flex align-items-center gap-2 mt-2">
               <Checkbox v-model="clearDb" binary inputId="clearDb" />
-              <label for="clearDb">Clear existing database before seeding</label>
+              <label for="clearDb">{{ t('devTools.clearDbLabel') }}</label>
             </div>
 
             <div class="mt-2">
@@ -132,9 +132,9 @@
         </div>
 
         <div class="mb-6">
-          <h3>Database Info</h3>
-          <p><strong>Database Name:</strong> BusinessTrackerDB</p>
-          <p><strong>Version:</strong> 4</p>
+          <h3>{{ t('devTools.databaseInfoTitle') }}</h3>
+          <p><strong>{{ t('devTools.databaseNameLabel') }}:</strong> BusinessTrackerDB</p>
+          <p><strong>{{ t('devTools.versionLabel') }}:</strong> 4</p>
           <p class="text-600 text-sm mt-2">
             <i class="pi pi-info-circle mr-1"></i>
             Businesses are randomly distributed among entrepreneurs (some may have 0, 1, or 2+).
@@ -151,12 +151,14 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import { useToast } from 'primevue/usetoast'
   import Button from 'primevue/button'
   import InputNumber from 'primevue/inputnumber'
   import Checkbox from 'primevue/checkbox'
   import { seedDatabase } from '@/services/seeder'
 
+  const { t } = useI18n()
   const toast = useToast()
   const entrepreneurCount = ref(10)
   const businessCount = ref(15)

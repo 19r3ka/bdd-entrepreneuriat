@@ -84,8 +84,9 @@
     </div>
 
     <!-- User profile on the right -->
-    <div class="flex align-items-center">
-      <Button icon="pi pi-bell" class="p-button-text p-button-rounded p-2 mr-2" />
+    <div class="flex align-items-center gap-3">
+      <LanguageSwitcher />
+      <Button icon="pi pi-bell" class="p-button-text p-button-rounded p-2" />
       <Avatar icon="pi pi-user" shape="circle" size="normal" />
     </div>
   </div>
@@ -98,6 +99,7 @@
   import Ripple from 'primevue/ripple'
   import StyleClass from 'primevue/styleclass'
   import packageJson from '../../package.json'
+  import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 
   // Register PrimeVue directives
   const vRipple = Ripple

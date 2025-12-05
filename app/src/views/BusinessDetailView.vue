@@ -183,16 +183,16 @@
         await supportStore.updateSupport(selectedSupport.value.id, data)
         toast.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Support boost updated successfully',
+          summary: t('common.success'),
+          detail: t('messages.supportUpdated'),
           life: 3000
         })
       } else {
         await supportStore.addSupport(data)
         toast.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Support boost logged successfully',
+          summary: t('common.success'),
+          detail: t('messages.supportCreated'),
           life: 3000
         })
       }
@@ -202,8 +202,8 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save support boost',
+        summary: t('common.error'),
+        detail: t('messages.supportFailed'),
         life: 3000
       })
     }
@@ -229,8 +229,8 @@
         console.error(error)
         toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete support boost',
+          summary: t('common.error'),
+          detail: t('pages.businessDetail.messages.deleteSupportError'),
           life: 3000
         })
       }
@@ -251,14 +251,14 @@
       // Assuming indicatorValues is the property for linked performance reports
       toast.add({
         severity: 'warn',
-        summary: 'Cannot Delete',
-        detail: 'This Quick Win has linked Performance Reports. Please delete them first.',
+        summary: t('pages.businessDetail.messages.cannotDelete'),
+        detail: t('pages.businessDetail.messages.quickWinHasReports'),
         life: 5000
       })
       return
     }
 
-    const name = quickWin?.title || 'Quick Win'
+    const name = quickWin?.title || t('quickWin.singular')
     confirmDelete(name, async () => {
       try {
         await quickWinStore.deleteQuickWin(id)
@@ -268,7 +268,7 @@
         toast.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to delete Quick Win',
+          detail: t('pages.businessDetail.messages.deleteQuickWinError'),
           life: 3000
         })
       }
@@ -296,7 +296,7 @@
         toast.add({
           severity: 'success',
           summary: 'Success',
-          detail: 'Outcome metric updated successfully',
+          detail: t('pages.businessDetail.messages.metricUpdatedSuccess'),
           life: 3000
         })
       } else {
@@ -304,7 +304,7 @@
         toast.add({
           severity: 'success',
           summary: 'Success',
-          detail: 'Outcome metric created successfully',
+          detail: t('pages.businessDetail.messages.metricCreatedSuccess'),
           life: 3000
         })
       }
@@ -314,8 +314,8 @@
       console.error(error)
       toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save outcome metric',
+        summary: t('common.error'),
+        detail: t('messages.metricFailed'),
         life: 3000
       })
     }
@@ -333,21 +333,21 @@
         <template #actions>
           <div class="flex gap-2">
             <Button
-              label="Log Support"
+              :label="$t('common.logSupport')"
               icon="pi pi-heart"
               size="small"
               outlined
               @click="handleAction(BUSINESS_ACTIONS.LOG_INTERVENTION)"
             />
             <Button
-              label="Add Quick Win"
+              :label="$t('common.addQuickWin')"
               icon="pi pi-check-circle"
               size="small"
               outlined
               @click="handleAction(BUSINESS_ACTIONS.LOG_QUICK_WIN)"
             />
             <Button
-              label="Track Performance"
+              :label="$t('pages.businessDetail.actions.trackPerformance')"
               icon="pi pi-chart-line"
               size="small"
               @click="handleAction(BUSINESS_ACTIONS.TRACK_PERFORMANCE)"
@@ -367,31 +367,31 @@
             <Tab :value="BUSINESS_TABS.OVERVIEW">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-id-card"></i>
-                <span class="font-semibold">Overview</span>
+                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.overview') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.REPORTS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-chart-bar"></i>
-                <span class="font-semibold">Reports</span>
+                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.reports') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.SUPPORTS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-heart"></i>
-                <span class="font-semibold">Supports</span>
+                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.supports') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.QUICK_WINS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-check-circle"></i>
-                <span class="font-semibold">Quick Wins</span>
+                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.quickWins') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.OUTCOMES">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-chart-line"></i>
-                <span class="font-semibold">Outcomes</span>
+                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.outcomes') }}</span>
               </div>
             </Tab>
 
@@ -417,7 +417,7 @@
                   <Button
                     icon="pi pi-check-circle"
                     class="p-button-rounded p-button-text p-button-success"
-                    v-tooltip.top="'Add Quick Win'"
+                    v-tooltip.top="$t('pages.businessDetail.actions.addQuickWin')"
                     @click="openQuickWinForm(data.id)"
                   />
                 </template>
@@ -434,7 +434,7 @@
                   <Button
                     icon="pi pi-chart-line"
                     class="p-button-rounded p-button-text p-button-help"
-                    v-tooltip.top="'Add Performance Report'"
+                    v-tooltip.top="$t('pages.businessDetail.actions.addPerformanceReport')"
                     @click="openMomentumForm(data.id)"
                   />
                 </template>
