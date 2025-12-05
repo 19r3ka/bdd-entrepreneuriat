@@ -85,11 +85,11 @@
     <DataTable
       :value="businesses"
       :filters="filters"
-      :globalFilterFields="['name', 'ownerName']"
+      :global-filter-fields="['name', 'ownerName']"
       paginator
       :rows="10"
-      dataKey="id"
-      stripedRows
+      data-key="id"
+      striped-rows
       class="business-modal-table"
       @row-click="(event) => viewBusiness(event.data.id)"
     >

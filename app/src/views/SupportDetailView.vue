@@ -228,14 +228,23 @@
     }
   })
 
+  /**
+   *
+   */
   async function loadSupport() {
     support.value = await supportStore.getSupportById(supportId)
   }
 
+  /**
+   *
+   */
   async function loadQuickWins() {
     linkedQuickWins.value = await quickWinStore.getQuickWinsBySupportId(supportId)
   }
 
+  /**
+   *
+   */
   function addQuickWin() {
     if (support.value) {
       router.push(
@@ -244,16 +253,25 @@
     }
   }
 
+  /**
+   *
+   */
   function formatDate(dateString: string | undefined) {
     if (!dateString) return ''
-    return d(new Date(dateString), 'long')
+    return d(new Date(dateString), 'medium')
   }
 
+  /**
+   *
+   */
   function formatDateTime(dateString: string | undefined) {
     if (!dateString) return ''
     return d(new Date(dateString))
   }
 
+  /**
+   *
+   */
   function handleDelete() {
     showConfirmation(
       'Are you sure you want to delete this support? This action cannot be undone.',

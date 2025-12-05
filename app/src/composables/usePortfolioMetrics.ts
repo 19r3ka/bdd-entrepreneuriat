@@ -5,6 +5,9 @@ import type { Support } from '@/types/monitoring-evaluation/Support'
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
 import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
 
+/**
+ *
+ */
 export function usePortfolioMetrics(
   businesses: () => Business[],
   supports: () => Support[],

@@ -4,6 +4,9 @@ import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetri
 import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
 import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore'
 
+/**
+ *
+ */
 export function usePortfolioHealth(
   businessesRef: MaybeRef<Business[]>,
   metricsRef: MaybeRef<MomentumMetric[]>,
@@ -49,7 +52,7 @@ export function usePortfolioHealth(
     const businesses = toValue(businessesRef)
     if (businesses.length === 0) return 0
     let completedPoints = 0
-    let totalPoints = businesses.length * 7
+    const totalPoints = businesses.length * 7
 
     businesses.forEach((b) => {
       if (b.name) completedPoints++

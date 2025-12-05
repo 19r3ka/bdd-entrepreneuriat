@@ -2,6 +2,9 @@ import { liveQuery } from 'dexie'
 import { db } from './local-db'
 import { supabase } from './supabase'
 
+/**
+ *
+ */
 export async function syncData() {
   console.log('Syncing data...')
 

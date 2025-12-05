@@ -66,49 +66,49 @@
       <template #subtext>
         <div class="text-xs text-500 dark:text-400">
           <button
-            @click="selectedJobsDisagg = 'total'"
             :class="
               selectedJobsDisagg === 'total'
                 ? 'font-bold text-700 dark:text-200'
                 : 'text-500 dark:text-400 hover:text-700'
             "
             class="bg-transparent border-none cursor-pointer p-0"
+            @click="selectedJobsDisagg = 'total'"
           >
             All
           </button>
           <span> / </span>
           <button
-            @click="selectedJobsDisagg = 'women'"
             :class="
               selectedJobsDisagg === 'women'
                 ? 'font-bold text-700 dark:text-200'
                 : 'text-500 dark:text-400 hover:text-700'
             "
             class="bg-transparent border-none cursor-pointer p-0"
+            @click="selectedJobsDisagg = 'women'"
           >
             Women
           </button>
           <span> / </span>
           <button
-            @click="selectedJobsDisagg = 'youth'"
             :class="
               selectedJobsDisagg === 'youth'
                 ? 'font-bold text-700 dark:text-200'
                 : 'text-500 dark:text-400 hover:text-700'
             "
             class="bg-transparent border-none cursor-pointer p-0"
+            @click="selectedJobsDisagg = 'youth'"
           >
             Youth
           </button>
           <span> / </span>
           <button
-            @click="selectedJobsDisagg = 'disability'"
             :class="
               selectedJobsDisagg === 'disability'
                 ? 'font-bold text-700 dark:text-200'
                 : 'text-500 dark:text-400 hover:text-700'
             "
             class="bg-transparent border-none cursor-pointer p-0"
+            @click="selectedJobsDisagg = 'disability'"
           >
             Dis.
           </button>

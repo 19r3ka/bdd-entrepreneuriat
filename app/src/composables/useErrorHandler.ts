@@ -6,9 +6,15 @@ import { useToast } from 'primevue/usetoast'
 // Define the shapes of errors we expect to handle
 export type AppError = Error | string | { message: string; code?: string }
 
+/**
+ *
+ */
 export function useErrorHandler() {
   const toast: ToastServiceMethods = useToast()
 
+  /**
+   *
+   */
   function normalizeError(error: AppError, customMessage?: string): string {
     if (customMessage) return customMessage
 
@@ -24,6 +30,9 @@ export function useErrorHandler() {
     return 'An unexpected error occurred'
   }
 
+  /**
+   *
+   */
   function handleApiError(error: AppError, customMessage?: string): void {
     const message = normalizeError(error, customMessage)
 
@@ -37,6 +46,9 @@ export function useErrorHandler() {
     console.error('API Error:', error)
   }
 
+  /**
+   *
+   */
   function handleValidationError(errors: AppError[] | AppError, customMessage?: string): void {
     const message = normalizeError(
       typeof errors === 'string' || errors instanceof Error || 'message' in (errors as any)
@@ -59,6 +71,9 @@ export function useErrorHandler() {
     }
   }
 
+  /**
+   *
+   */
   function handleGenericError(error: AppError, customMessage?: string): void {
     const message = normalizeError(error, customMessage)
 

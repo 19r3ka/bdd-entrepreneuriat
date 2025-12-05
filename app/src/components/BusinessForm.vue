@@ -6,21 +6,18 @@
         <h1 class="m-0">{{ isEdit ? $t('pages.businesses.edit') : $t('pages.businesses.new') }}</h1>
 
         <BaseForm
+          v-slot="{
+            defineField,
+            canSubmit,
+            isSubmitting,
+            rawErrors,
+            setFieldValue
+          }"
           :schema="schema"
           :initial-values="initialValues"
           :on-submit="handleSubmit"
           :unique-checks="uniqueChecks"
           validate-on-blur
-          v-slot="{
-            defineField,
-            canSubmit,
-            isSubmitting,
-            isValid,
-            isDirty,
-            errors,
-            rawErrors,
-            setFieldValue
-          }"
         >
           <Message
             v-if="Array.isArray(rawErrors.value) && rawErrors.value.length > 0"
@@ -66,9 +63,9 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <EntrepreneurAutoComplete
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :placeholder="$t('placeholders.search')"
                     :class="{ 'p-invalid': hasError }"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -84,11 +81,11 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <Select
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :options="businessAreaOptions"
-                    optionLabel="name"
-                    optionValue="name"
+                    option-label="name"
+                    option-value="name"
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -103,11 +100,11 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <Select
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :options="businessAreaOptions"
-                    optionLabel="name"
-                    optionValue="name"
+                    option-label="name"
+                    option-value="name"
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -122,11 +119,11 @@
                 <template #input="{ modelValue, updateModelValue, hasError, errorText }">
                   <AvatarUpload
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :label="$t('common.logo')"
-                    altText="Logo"
-                    :hasError="hasError"
-                    :errorMessage="errorText"
+                    alt-text="Logo"
+                    :has-error="hasError"
+                    :error-message="errorText"
+                    @update:model-value="updateModelValue"
                   />
                 </template>
               </FormField>
@@ -171,10 +168,10 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :max-date="maxDate"
-                    showIcon
+                    show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -189,10 +186,10 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :max-date="maxDate"
-                    showIcon
+                    show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -207,10 +204,10 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :max-date="maxDate"
-                    showIcon
+                    show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -220,21 +217,7 @@
 
           <!-- Contact Information -->
           <Section :title="$t('common.contactInformation')">
-            <div class="formgrid grid">
-              <FormField
-                name="contact.email"
-                :label="$t('common.email')"
-                v-bind="defineField('contact.email')"
-                type="email"
-                field-class="col-12 md:col-6"
-              />
-              <FormField
-                name="contact.telephone"
-                :label="$t('common.telephone')"
-                v-bind="defineField('contact.telephone')"
-                field-class="col-12 md:col-6"
-              />
-            </div>
+            <ContactInfoFields :define-field="defineField" />
           </Section>
 
           <!-- Online Presence -->
@@ -247,39 +230,12 @@
                 v-bind="defineField('onlinePresence')"
                 field-class="col-12 md:col-6"
               />
-
-              <!-- LinkedIn -->
-              <FormField
-                name="socialMedia.linkedin"
-                :label="$t('common.socialMedia.linkedin')"
-                v-bind="defineField('socialMedia.linkedin')"
-                field-class="col-12 md:col-6"
-              />
-
-              <!-- Twitter -->
-              <FormField
-                name="socialMedia.twitter"
-                :label="$t('common.socialMedia.twitter')"
-                v-bind="defineField('socialMedia.twitter')"
-                field-class="col-12 md:col-6"
-              />
-
-              <!-- Facebook -->
-              <FormField
-                name="socialMedia.facebook"
-                :label="$t('common.socialMedia.facebook')"
-                v-bind="defineField('socialMedia.facebook')"
-                field-class="col-12 md:col-6"
-              />
-
-              <!-- Instagram -->
-              <FormField
-                name="socialMedia.instagram"
-                :label="$t('common.socialMedia.instagram')"
-                v-bind="defineField('socialMedia.instagram')"
-                field-class="col-12 md:col-6"
-              />
             </div>
+            <SocialMediaFields
+              :define-field="defineField"
+              show-facebook
+              show-instagram
+            />
           </Section>
 
           <!-- Submit -->
@@ -302,7 +258,6 @@
 <script setup lang="ts">
   import Button from 'primevue/button'
   import DatePicker from 'primevue/datepicker'
-  import InputText from 'primevue/inputtext'
   import Message from 'primevue/message'
   import Select from 'primevue/select'
   import Toast from 'primevue/toast'
@@ -324,7 +279,9 @@
   import { businessAreaOptions } from '@/constants/businessAreas'
   import { useBusinessStore } from '@/stores/useBusinessStore'
   import type { Business } from '@/types/business'
-  import InteractiveMap from '@/components/InteractiveMap.vue' // Import InteractiveMap
+  import InteractiveMap from '@/components/InteractiveMap.vue'
+  import ContactInfoFields from '@/components/common/ContactInfoFields.vue'
+  import SocialMediaFields from '@/components/common/SocialMediaFields.vue'
 
   const props = defineProps<{
     isEdit: boolean
@@ -353,6 +310,9 @@
     return []
   })
 
+  /**
+   *
+   */
   async function handleSubmit(data: any) {
     if (!data.socialMedia.linkedin) {
       data.socialMedia.linkedin = null

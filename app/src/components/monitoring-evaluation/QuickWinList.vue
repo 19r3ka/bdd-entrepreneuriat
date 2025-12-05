@@ -1,5 +1,6 @@
 <template>
   <ResourceDataTable
+    v-model:filters="filters"
     resource-name="quickWins"
     :title="$t('pages.quickWins.title')"
     data-key="id"
@@ -7,7 +8,6 @@
     :columns="columns"
     :loading="loading"
     :filter-mode="'advanced'"
-    v-model:filters="filters"
     :global-filter-fields="['title', 'resultSummary', 'tags']"
     @add="onAdd"
     @view="onView"
@@ -74,11 +74,11 @@
   })
 
   const columns = computed(() => [
-    { field: 'title', header: t('quickWins.title'), sortable: true, dataType: 'text' as const },
+    { field: 'title', header: t('pages.quickWins.title'), sortable: true, dataType: 'text' as const },
     { field: 'businessId', header: t('business.label'), sortable: true, dataType: 'text' as const },
-    { field: 'achievedOn', header: t('quickWins.achievedOn'), sortable: true, dataType: 'date' as const },
-    { field: 'indicators', header: t('quickWins.indicators') },
-    { field: 'tags', header: t('quickWins.tags') }
+    { field: 'achievedOn', header: t('pages.quickWins.achievedOn'), sortable: true, dataType: 'date' as const },
+    { field: 'indicators', header: t('pages.quickWins.indicators') },
+    { field: 'tags', header: t('pages.quickWins.tags') }
   ])
 
   onMounted(async () => {
@@ -90,29 +90,47 @@
     loading.value = false
   })
 
+  /**
+   *
+   */
   function getBusinessName(businessId: string) {
     const business = businessStore.businesses.find((b) => b.id === businessId)
     return business ? business.name : t('common.unknownBusiness')
   }
 
+  /**
+   *
+   */
   function getBusinessId(businessId: string) {
     return businessStore.businesses.find((b) => b.id === businessId)
   }
 
+  /**
+   *
+   */
   function onAdd() {
     emit('create')
   }
 
+  /**
+   *
+   */
   function onView(id: string) {
     router.push(`/quick-wins/${id}`)
   }
 
+  /**
+   *
+   */
   function onEdit(id: string) {
     emit('edit', id)
   }
 
   const { confirmDelete } = useConfirmation()
 
+  /**
+   *
+   */
   function onDelete(id: string) {
     const quickWin = quickWins.value.find((qw) => qw.id === id)
     const name = quickWin?.title || t('quickWins.label')

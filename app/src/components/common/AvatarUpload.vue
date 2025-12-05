@@ -21,6 +21,9 @@
   const modelValueRef = toRef(props, 'modelValue')
   const { resolvedSrc: previewSrc } = useImageResolver(modelValueRef)
 
+  /**
+   *
+   */
   function onFileSelect(event: FileUploadSelectEvent) {
     const file = event.files[0]
     if (file) {
@@ -28,6 +31,9 @@
     }
   }
 
+  /**
+   *
+   */
   function clearAvatar() {
     emit('update:modelValue', null)
   }
@@ -39,10 +45,10 @@
       mode="basic"
       accept="image/*"
       :auto="true"
-      :customUpload="true"
-      :chooseLabel="chooseLabel"
-      @select="onFileSelect"
+      :custom-upload="true"
+      :choose-label="chooseLabel"
       :class="{ 'p-invalid': hasError }"
+      @select="onFileSelect"
     />
     <div v-if="previewSrc" class="mt-2 flex align-items-center gap-2">
       <img
@@ -55,8 +61,8 @@
         severity="danger"
         text
         rounded
-        @click="clearAvatar"
         aria-label="Remove avatar"
+        @click="clearAvatar"
       />
     </div>
     <small v-if="hasError" class="p-error">{{ errorMessage }}</small>

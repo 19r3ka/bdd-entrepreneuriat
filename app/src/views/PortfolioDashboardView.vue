@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
+  import { onMounted } from 'vue'
   import { storeToRefs } from 'pinia'
   import { useBusinessStore } from '@/stores/useBusinessStore'
   import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
@@ -8,9 +8,7 @@
   import { useSupportStore } from '@/stores/useSupportStore'
   import { useActivityLogStore } from '@/stores/useActivityLogStore'
   import { useRouter } from 'vue-router'
-  import PortfolioHealthSummary from '@/components/dashboard/PortfolioHealthSummary.vue'
   import MaturityPortfolioView from '@/components/dashboard/MaturityPortfolioView.vue'
-  import AggregatedKPICards from '@/components/dashboard/AggregatedKPICards.vue'
   import ActivityAlertsWidget from '@/components/dashboard/ActivityAlertsWidget.vue'
   import RegionalDistributionWithList from '@/components/dashboard/RegionalDistributionWithList.vue'
   import ExecutiveSummaryBar from '@/components/dashboard/ExecutiveSummaryBar.vue'
@@ -82,8 +80,8 @@
       b.name,
       b.registrationNumber || '',
       b.primaryBusinessArea || '',
-      b.registrationDate ? d(new Date(b.registrationDate), 'long') : '',
-      b.supportStartDate ? d(new Date(b.supportStartDate), 'long') : '',
+      b.registrationDate ? d(new Date(b.registrationDate), 'medium') : '',
+      b.supportStartDate ? d(new Date(b.supportStartDate), 'medium') : '',
       t('common.active') // Placeholder
     ])
 

@@ -43,24 +43,24 @@
 
       <div class="flex gap-4 text-sm font-medium">
         <button
-          @click="activeFilter = 'ALL'"
           class="bg-transparent border-none cursor-pointer pb-2 border-bottom-2 transition-colors"
           :class="
             activeFilter === 'ALL'
               ? 'border-primary text-primary'
               : 'border-transparent text-500 hover:text-700'
           "
+          @click="activeFilter = 'ALL'"
         >
           All Activity
         </button>
         <button
-          @click="activeFilter = 'INCOMPLETE'"
           class="bg-transparent border-none cursor-pointer pb-2 border-bottom-2 transition-colors flex align-items-center gap-2"
           :class="
             activeFilter === 'INCOMPLETE'
               ? 'border-primary text-primary'
               : 'border-transparent text-500 hover:text-700'
           "
+          @click="activeFilter = 'INCOMPLETE'"
         >
           Incomplete Profiles
           <span class="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 border-round-xl">
@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <DataTable :value="filteredData" :rows="5" responsiveLayout="scroll">
+    <DataTable :value="filteredData" :rows="5" responsive-layout="scroll">
       <Column header="ENTITY" class="w-5">
         <template #body="slotProps">
           <div class="flex align-items-center gap-3">

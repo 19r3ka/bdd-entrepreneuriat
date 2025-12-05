@@ -52,13 +52,13 @@
         <button
           v-for="tab in ['ALL', 'SUPPORTS', 'MEASUREMENTS']"
           :key="tab"
-          @click="activeTab = tab as any"
           class="pb-3 border-b-[3px] font-bold transition-colors"
           :class="
             activeTab === tab
               ? 'border-primary text-primary'
               : 'border-transparent text-text-medium-light hover:text-text-light'
           "
+          @click="activeTab = tab as any"
         >
           {{ tab.charAt(0) + tab.slice(1).toLowerCase().replace('_', ' ') }}
         </button>

@@ -11,13 +11,13 @@
     <!-- Mobile menu button -->
     <a
       v-ripple
-      class="cursor-pointer block lg:hidden text-700 p-ripple"
       v-styleclass="{
         selector: '@next',
         enterClass: 'hidden',
         leaveToClass: 'hidden',
         hideOnOutsideClick: true
       }"
+      class="cursor-pointer block lg:hidden text-700 p-ripple"
     >
       <i class="pi pi-bars text-4xl"></i>
     </a>
@@ -27,8 +27,8 @@
       <ul class="list-none p-0 m-0 flex lg:align-items-center select-none">
         <li class="mx-3">
           <router-link
-            to="/"
             v-ripple
+            to="/"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>{{ $t('common.dashboard') }}</span>
@@ -36,8 +36,8 @@
         </li>
         <li class="mx-3">
           <router-link
-            to="/entrepreneurs"
             v-ripple
+            to="/entrepreneurs"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>{{ $t('pages.entrepreneurs.title') }}</span>
@@ -45,8 +45,8 @@
         </li>
         <li class="mx-3">
           <router-link
-            to="/businesses"
             v-ripple
+            to="/businesses"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>{{ $t('pages.businesses.title') }}</span>
@@ -55,8 +55,8 @@
 
         <li class="mx-3">
           <router-link
-            to="/supports"
             v-ripple
+            to="/supports"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>{{ $t('common.supports') }}</span>
@@ -64,17 +64,17 @@
         </li>
         <li class="mx-3">
           <router-link
-            to="/quick-wins"
             v-ripple
+            to="/quick-wins"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>{{ $t('pages.quickWins.title') }}</span>
           </router-link>
         </li>
-        <li class="mx-3" v-if="isDev">
+        <li v-if="isDev" class="mx-3">
           <router-link
-            to="/dev-tools"
             v-ripple
+            to="/dev-tools"
             class="text-900 text-sm font-medium leading-normal p-ripple no-underline hover:text-900"
           >
             <span>Dev Tools</span>
@@ -106,7 +106,7 @@
   const vStyleclass = StyleClass
 
   // App name from package.json
-  const appName = computed(() => packageJson.name || 'Entrepreneur App')
+  const appName = computed(() => (packageJson as any).displayName || packageJson.name || 'Entrepreneur App')
 
   // Check if running in development mode
   const isDev = computed(() => import.meta.env.DEV)

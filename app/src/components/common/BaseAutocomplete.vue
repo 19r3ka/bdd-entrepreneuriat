@@ -6,16 +6,16 @@
     <AutoComplete
       :id="id"
       :model-value="modelValue"
-      @update:model-value="onUpdate"
       :suggestions="suggestions"
-      :optionLabel="optionLabel"
-      :forceSelection="forceSelection"
+      :option-label="optionLabel"
+      :force-selection="forceSelection"
       class="w-full"
-      :inputClass="inputClass"
+      :input-class="inputClass"
       :placeholder="placeholder"
-      @complete="onComplete"
       :class="{ 'p-invalid': hasError }"
       :dropdown="dropdown"
+      @update:model-value="onUpdate"
+      @complete="onComplete"
     />
     <small v-if="hasError" class="p-error">
       {{ errorMessage }}
@@ -60,10 +60,16 @@
   )
   const errorMessage = computed(() => props.error?._errors?.[0])
 
+  /**
+   *
+   */
   function onUpdate(value: any) {
     emit('update:modelValue', value)
   }
 
+  /**
+   *
+   */
   function onComplete(event: AutoCompleteCompleteEvent) {
     emit('complete', event)
   }

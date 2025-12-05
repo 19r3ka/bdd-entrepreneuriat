@@ -10,11 +10,11 @@
 
         <BaseForm
           ref="formRef"
-          :schema="schema"
-          :initialValues="initialValues"
-          :onSubmit="handleSubmit"
-          :uniqueChecks="uniqueChecks as any"
           v-slot="{ defineField, canSubmit, isSubmitting }"
+          :schema="schema"
+          :initial-values="initialValues"
+          :on-submit="handleSubmit"
+          :unique-checks="uniqueChecks as any"
         >
           <!-- Personal Information -->
           <Section :title="$t('common.personalInformation')">
@@ -43,11 +43,11 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <Select
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :options="genderOptions"
-                    optionLabel="label"
-                    optionValue="value"
+                    option-label="label"
+                    option-value="value"
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -62,10 +62,10 @@
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :max-date="maxDate"
-                    showIcon
+                    show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
+                    @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -82,11 +82,11 @@
                 <template #input="{ modelValue, updateModelValue, hasError, errorText }">
                   <AvatarUpload
                     :model-value="modelValue"
-                    @update:model-value="updateModelValue"
                     :label="$t('common.avatar')"
-                    :altText="`${defineField('firstName').modelValue.value} ${defineField('lastName').modelValue.value}`"
-                    :hasError="hasError"
-                    :errorMessage="errorText"
+                    :alt-text="`${defineField('firstName').modelValue.value} ${defineField('lastName').modelValue.value}`"
+                    :has-error="hasError"
+                    :error-message="errorText"
+                    @update:model-value="updateModelValue"
                   />
                 </template>
               </FormField>
@@ -112,21 +112,7 @@
 
           <!-- Contact Information -->
           <Section :title="$t('common.contactInformation')">
-            <div class="formgrid grid">
-              <FormField
-                name="contact.email"
-                :label="$t('common.email')"
-                v-bind="defineField('contact.email')"
-                required
-                field-class="col-12 md:col-6"
-              />
-              <FormField
-                name="contact.telephone"
-                :label="$t('common.telephone')"
-                v-bind="defineField('contact.telephone')"
-                field-class="col-12 md:col-6"
-              />
-            </div>
+            <ContactInfoFields :define-field="defineField" required />
 
             <!-- Geolocation Map with Address -->
             <Section :title="$t('common.location')" class="mt-4">
@@ -142,26 +128,10 @@
 
           <!-- Social Media -->
           <Section :title="$t('common.socialDigitalPresence')">
-            <div class="formgrid grid">
-              <FormField
-                name="personalWebsite"
-                :label="$t('common.personalWebsite')"
-                v-bind="defineField('personalWebsite')"
-                field-class="col-12 md:col-6"
-              />
-              <FormField
-                name="socialMedia.linkedin"
-                :label="$t('common.socialMedia.linkedin')"
-                v-bind="defineField('socialMedia.linkedin')"
-                field-class="col-12 md:col-6"
-              />
-              <FormField
-                name="socialMedia.twitter"
-                :label="$t('common.socialMedia.twitter')"
-                v-bind="defineField('socialMedia.twitter')"
-                field-class="col-12 md:col-6"
-              />
-            </div>
+            <SocialMediaFields
+              :define-field="defineField"
+              show-personal-website
+            />
           </Section>
 
           <!-- Submit -->
@@ -199,13 +169,9 @@
   import Select from 'primevue/select' // Import Select
   import DatePicker from 'primevue/datepicker' // Import DatePicker
   import InteractiveMap from '@/components/InteractiveMap.vue' // Import InteractiveMap
+  import ContactInfoFields from '@/components/common/ContactInfoFields.vue'
+  import SocialMediaFields from '@/components/common/SocialMediaFields.vue'
 
-  // Helper function to set field values in the form
-  const setFieldValue = (path: string, value: any) => {
-    if (formRef.value) {
-      formRef.value.setFieldValue(path, value)
-    }
-  }
 
   const props = defineProps<{
     isEdit: boolean
@@ -231,8 +197,9 @@
           lat: props.initialValues.location.latitude,
           lng: props.initialValues.location.longitude,
           name:
-            `${props.initialValues.firstName} ${props.initialValues.lastName}` ||
-            'Entrepreneur Location'
+            (props.initialValues.firstName && props.initialValues.lastName)
+              ? `${props.initialValues.firstName} ${props.initialValues.lastName}`
+              : 'Entrepreneur Location'
         }
       ]
     }
@@ -248,7 +215,7 @@
   ]
 
   // markSlugAsManual comes from slug logic (function), not a ref
-  const markSlugAsManual = (val: string) => {
+  const markSlugAsManual = () => {
     if (formRef.value?.values) {
       const { markSlugAsManual: markManual } = useSlugLogic(formRef.value.values)
       markManual()
@@ -270,6 +237,9 @@
     }
   }
 
+  /**
+   *
+   */
   async function handleSubmit(data: any) {
     try {
       if (props.isEdit) {

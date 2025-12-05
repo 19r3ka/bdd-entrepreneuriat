@@ -139,13 +139,13 @@
                 <button
                   v-for="opt in disaggOptions"
                   :key="opt.value"
-                  @click="selectedDisagg = opt.value"
                   class="p-1 text-xs border-round cursor-pointer transition-colors border-none"
                   :class="
                     selectedDisagg === opt.value
                       ? 'bg-purple-100 text-purple-700 font-semibold'
                       : 'bg-transparent text-500 hover:bg-surface-100'
                   "
+                  @click="selectedDisagg = opt.value"
                 >
                   {{ opt.label }}
                 </button>

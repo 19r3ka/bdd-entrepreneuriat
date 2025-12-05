@@ -20,13 +20,15 @@ const i18n = createI18n({
         month: 'short',
         day: 'numeric'
       },
+      medium: {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      },
       long: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-        hour: 'numeric',
-        minute: 'numeric'
+        day: 'numeric'
       }
     },
     fr: {
@@ -35,13 +37,15 @@ const i18n = createI18n({
         month: 'short',
         day: 'numeric'
       },
+      medium: {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      },
       long: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-        hour: 'numeric',
-        minute: 'numeric'
+        day: 'numeric'
       }
     }
   },

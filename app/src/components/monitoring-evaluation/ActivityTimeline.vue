@@ -156,6 +156,9 @@
     )
   })
 
+  /**
+   *
+   */
   function getItemColor(item: { type: 'support' | 'quickWin'; data: any }) {
     if (item.type === 'quickWin') return '#00BCD4' // Cyan
     // Support colors based on type
@@ -166,6 +169,9 @@
     return '#607D8B'
   }
 
+  /**
+   *
+   */
   function getItemIcon(item: { type: 'support' | 'quickWin'; data: any }) {
     if (item.type === 'quickWin') return 'pi pi-check-circle'
     // Support icons
@@ -178,6 +184,9 @@
     return 'pi pi-heart'
   }
 
+  /**
+   *
+   */
   function handleView(item: { type: 'support' | 'quickWin'; data: any }) {
     if (item.type === 'support') {
       emit('view-support', item.data.id)
@@ -186,6 +195,9 @@
     }
   }
 
+  /**
+   *
+   */
   function handleEdit(item: { type: 'support' | 'quickWin'; data: any }) {
     if (item.type === 'support') {
       emit('edit-support', item.data.id)

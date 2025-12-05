@@ -32,6 +32,9 @@ export interface AlertItem {
   actionLabel: string
 }
 
+/**
+ *
+ */
 export function useActivityFeed(
   businesses: Ref<Business[]>,
   entrepreneurs: Ref<Entrepreneur[]>,

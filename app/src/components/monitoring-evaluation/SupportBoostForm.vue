@@ -1,9 +1,9 @@
 <template>
   <BaseForm
+    v-slot="{ defineField, canSubmit, isSubmitting, errors, setFieldValue, values }"
     :schema="SupportBoostSchema"
     :initial-values="initialValues"
     :on-submit="onSubmit"
-    v-slot="{ defineField, canSubmit, isSubmitting, errors, setFieldValue, values }"
   >
     <div class="formgrid grid">
       <!-- Title -->
@@ -27,9 +27,9 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <BusinessAutocomplete
             :model-value="modelValue"
-            @update:model-value="updateModelValue"
             :placeholder="$t('placeholders.selectBusiness')"
             :class="{ 'p-invalid': hasError }"
+            @update:model-value="updateModelValue"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -46,12 +46,12 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <Select
             :model-value="modelValue"
-            @update:model-value="updateModelValue"
             :options="boostTypeOptions"
-            optionLabel="label"
-            optionValue="value"
+            option-label="label"
+            option-value="value"
             :placeholder="$t('support.selectType')"
             :class="['w-full', { 'p-invalid': hasError }]"
+            @update:model-value="updateModelValue"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -68,12 +68,12 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <Select
             :model-value="modelValue"
-            @update:model-value="updateModelValue"
             :options="modalityOptions"
-            optionLabel="label"
-            optionValue="value"
+            option-label="label"
+            option-value="value"
             :placeholder="$t('support.selectModality')"
             :class="['w-full', { 'p-invalid': hasError }]"
+            @update:model-value="updateModelValue"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -90,6 +90,9 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <DatePicker
             :model-value="modelValue ? new Date(modelValue) : null"
+            show-icon
+            date-format="mm/dd/yy"
+            :class="['w-full', { 'p-invalid': hasError }]"
             @update:model-value="
               (value: Date | Date[] | (Date | null)[] | null | undefined) => {
                 const date = Array.isArray(value) ? value[0] : value
@@ -98,9 +101,6 @@
                 )
               }
             "
-            showIcon
-            dateFormat="mm/dd/yy"
-            :class="['w-full', { 'p-invalid': hasError }]"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -116,6 +116,9 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <DatePicker
             :model-value="modelValue ? new Date(modelValue) : null"
+            show-icon
+            date-format="mm/dd/yy"
+            :class="['w-full', { 'p-invalid': hasError }]"
             @update:model-value="
               (value: Date | Date[] | (Date | null)[] | null | undefined) => {
                 const date = Array.isArray(value) ? value[0] : value
@@ -124,9 +127,6 @@
                 )
               }
             "
-            showIcon
-            dateFormat="mm/dd/yy"
-            :class="['w-full', { 'p-invalid': hasError }]"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -143,12 +143,12 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <Select
             :model-value="modelValue"
-            @update:model-value="updateModelValue"
             :options="channelOptions"
-            optionLabel="label"
-            optionValue="value"
+            option-label="label"
+            option-value="value"
             :placeholder="$t('support.selectChannel')"
             :class="['w-full', { 'p-invalid': hasError }]"
+            @update:model-value="updateModelValue"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -165,12 +165,12 @@
         <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
           <Select
             :model-value="modelValue"
-            @update:model-value="updateModelValue"
             :options="genderMarkerOptions"
-            optionLabel="label"
-            optionValue="value"
+            option-label="label"
+            option-value="value"
             :placeholder="$t('support.selectMarker')"
             :class="['w-full', { 'p-invalid': hasError }]"
+            @update:model-value="updateModelValue"
             @blur="onBlur && onBlur()"
           />
         </template>
@@ -201,9 +201,9 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <InputNumber
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :placeholder="$t('support.valuePlaceholder')"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -219,12 +219,12 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :options="unitOptions"
-                  optionLabel="label"
-                  optionValue="value"
+                  option-label="label"
+                  option-value="value"
                   :placeholder="$t('support.selectUnit')"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -337,44 +337,44 @@
   }
 
   const boostTypeOptions = computed(() => [
-    { label: t('support.boostTypes.financial_grant'), value: 'financial_grant' },
-    { label: t('support.boostTypes.financial_match'), value: 'financial_match' },
-    { label: t('support.boostTypes.training'), value: 'training' },
-    { label: t('support.boostTypes.advisory_mentoring'), value: 'advisory_mentoring' },
-    { label: t('support.boostTypes.equipment_infrastructure'), value: 'equipment_infrastructure' },
-    { label: t('support.boostTypes.workspace_access'), value: 'workspace_access' },
-    { label: t('support.boostTypes.policy_advocacy'), value: 'policy_advocacy' },
-    { label: t('support.boostTypes.partnership_linkage'), value: 'partnership_linkage' },
-    { label: t('support.boostTypes.market_access'), value: 'market_access' },
-    { label: t('support.boostTypes.digitalization_support'), value: 'digitalization_support' }
+    { label: t('pages.support.boostTypes.financial_grant'), value: 'financial_grant' },
+    { label: t('pages.support.boostTypes.financial_match'), value: 'financial_match' },
+    { label: t('pages.support.boostTypes.training'), value: 'training' },
+    { label: t('pages.support.boostTypes.advisory_mentoring'), value: 'advisory_mentoring' },
+    { label: t('pages.support.boostTypes.equipment_infrastructure'), value: 'equipment_infrastructure' },
+    { label: t('pages.support.boostTypes.workspace_access'), value: 'workspace_access' },
+    { label: t('pages.support.boostTypes.policy_advocacy'), value: 'policy_advocacy' },
+    { label: t('pages.support.boostTypes.partnership_linkage'), value: 'partnership_linkage' },
+    { label: t('pages.support.boostTypes.market_access'), value: 'market_access' },
+    { label: t('pages.support.boostTypes.digitalization_support'), value: 'digitalization_support' }
   ])
 
   const modalityOptions = computed(() => [
-    { label: t('support.modalities.DIM'), value: 'DIM' },
-    { label: t('support.modalities.NIM'), value: 'NIM' },
-    { label: t('support.modalities.hybrid'), value: 'hybrid' }
+    { label: t('pages.support.modalities.DIM'), value: 'DIM' },
+    { label: t('pages.support.modalities.NIM'), value: 'NIM' },
+    { label: t('pages.support.modalities.hybrid'), value: 'hybrid' }
   ])
 
   const channelOptions = computed(() => [
-    { label: t('support.channels.in-person'), value: 'in-person' },
-    { label: t('support.channels.online'), value: 'online' },
-    { label: t('support.channels.hybrid'), value: 'hybrid' }
+    { label: t('pages.support.channels.in-person'), value: 'in-person' },
+    { label: t('pages.support.channels.online'), value: 'online' },
+    { label: t('pages.support.channels.hybrid'), value: 'hybrid' }
   ])
 
   const unitOptions = computed(() => [
-    { label: t('support.units.currency'), value: 'currency' },
-    { label: t('support.units.sessions'), value: 'sessions' },
-    { label: t('support.units.hours'), value: 'hours' },
-    { label: t('support.units.participants'), value: 'participants' },
-    { label: t('support.units.items'), value: 'items' },
-    { label: t('support.units.linkages'), value: 'linkages' },
-    { label: t('support.units.docs'), value: 'docs' }
+    { label: t('pages.support.units.currency'), value: 'currency' },
+    { label: t('pages.support.units.sessions'), value: 'sessions' },
+    { label: t('pages.support.units.hours'), value: 'hours' },
+    { label: t('pages.support.units.participants'), value: 'participants' },
+    { label: t('pages.support.units.items'), value: 'items' },
+    { label: t('pages.support.units.linkages'), value: 'linkages' },
+    { label: t('pages.support.units.docs'), value: 'docs' }
   ])
 
   const genderMarkerOptions = computed(() => [
-    { label: t('support.genderMarkers.GEN0'), value: 'GEN0' },
-    { label: t('support.genderMarkers.GEN1'), value: 'GEN1' },
-    { label: t('support.genderMarkers.GEN2'), value: 'GEN2' },
-    { label: t('support.genderMarkers.GEN3'), value: 'GEN3' }
+    { label: t('pages.support.genderMarkers.GEN0'), value: 'GEN0' },
+    { label: t('pages.support.genderMarkers.GEN1'), value: 'GEN1' },
+    { label: t('pages.support.genderMarkers.GEN2'), value: 'GEN2' },
+    { label: t('pages.support.genderMarkers.GEN3'), value: 'GEN3' }
   ])
 </script>

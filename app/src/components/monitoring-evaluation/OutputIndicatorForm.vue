@@ -33,12 +33,12 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :options="categoryOptions"
-                  optionLabel="label"
-                  optionValue="value"
+                  option-label="label"
+                  option-value="value"
                   :placeholder="$t('outputIndicator.placeholders.category')"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -55,12 +55,12 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :options="unitOptions"
-                  optionLabel="label"
-                  optionValue="value"
+                  option-label="label"
+                  option-value="value"
                   :placeholder="$t('outputIndicator.placeholders.unit')"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -101,13 +101,13 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <AutoComplete
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   multiple
                   :suggestions="filteredSdgs"
-                  @complete="searchSdgs"
                   dropdown
                   placeholder="e.g. 8.3"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @complete="searchSdgs"
                   @blur="onBlur && onBlur()"
                 />
               </template>

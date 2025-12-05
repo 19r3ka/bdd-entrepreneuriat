@@ -3,10 +3,10 @@
     <Toast />
     <h1 class="m-0">{{ isEdit ? $t('goalForm.edit') : $t('goalForm.new') }}</h1>
     <BaseForm
+      v-slot="{ defineField, canSubmit, isSubmitting }"
       :schema="IndicatorDefinitionSchema"
       :initial-values="initialValues"
       :on-submit="handleSubmit"
-      v-slot="{ defineField, canSubmit, isSubmitting }"
     >
       <Section :title="$t('goalForm.details')">
         <div class="formgrid grid">
@@ -21,10 +21,10 @@
             <template #input="{ modelValue, updateModelValue, hasError }">
               <BusinessAutocomplete
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 label="Select Business"
                 placeholder="Search for a business..."
                 :error="{ _errors: hasError ? ['Business is required'] : [] }"
+                @update:model-value="updateModelValue"
               />
             </template>
           </FormField>
@@ -39,12 +39,12 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="indicatorTypeOptions"
-                optionLabel="label"
-                optionValue="value"
+                option-label="label"
+                option-value="value"
                 :placeholder="$t('goalForm.selectType')"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -80,9 +80,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 mode="decimal"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -98,9 +98,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Calendar
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
-                dateFormat="yy-mm-dd"
+                date-format="yy-mm-dd"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -116,9 +116,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 mode="decimal"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -134,9 +134,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Calendar
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
-                dateFormat="yy-mm-dd"
+                date-format="yy-mm-dd"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -219,6 +219,9 @@
     }))
   )
 
+  /**
+   *
+   */
   async function handleSubmit(data: any) {
     try {
       if (props.isEdit) {

@@ -1,13 +1,13 @@
 <template>
   <ResourceDataTable
+    v-model:filters="tableFilters"
     :data="filteredData"
     :columns="columns"
-    dataKey="businessId"
-    resourceName="reports"
+    data-key="businessId"
+    resource-name="reports"
     :title="$t('pages.reports.title')"
-    :globalFilterFields="[]"
-    v-model:filters="tableFilters"
-    filterMode="advanced"
+    :global-filter-fields="[]"
+    filter-mode="advanced"
     @export-csv="handleExportCSV"
     @view="handleViewBusiness"
   >
@@ -19,8 +19,8 @@
           <Button
             :label="$t('reporting.export.csv')"
             icon="pi pi-download"
-            @click="exportAllCSV"
             class="p-button-success"
+            @click="exportAllCSV"
           />
         </div>
 

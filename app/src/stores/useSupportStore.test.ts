@@ -164,7 +164,7 @@ describe('useSupportStore', () => {
     }
     const addedSupport = await store.addSupport(supportToAdd)
 
-    const updates = { title: 'Updated policy advice', genderMarker: 'GEN1' as 'GEN1' }
+    const updates = { title: 'Updated policy advice', genderMarker: 'GEN1' as const }
     await store.updateSupport(addedSupport!.id, updates)
 
     const updatedSupport = await store.getSupportById(addedSupport!.id)

@@ -1,3 +1,6 @@
+/**
+ *
+ */
 export function toCsv(data: any[], columns: { key: string; label: string }[], filename: string) {
   const getNestedValue = (obj: any, path: string) => {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj)

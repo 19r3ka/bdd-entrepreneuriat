@@ -127,6 +127,9 @@ export const mockToast = {
 };
 
 // Mock PrimeVue confirm and toast services
+/**
+ *
+ */
 export function setupPrimeVueMocks() {
   // Mock PrimeVue confirm service
   vi.mock('primevue/confirm', () => ({

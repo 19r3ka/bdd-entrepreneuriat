@@ -8,9 +8,9 @@
       <!-- Hero Card -->
       <QuickWinHeroCard
         :quick-win="quickWin"
+        class="mb-4"
         @edit="editQuickWin"
         @delete="handleDelete"
-        class="mb-4"
       />
 
       <!-- Business and Support Links Row -->
@@ -65,7 +65,7 @@
               <div v-if="quickWin.indicatorValues && quickWin.indicatorValues.length > 0">
                 <DataTable
                   :value="quickWin.indicatorValues"
-                  responsiveLayout="scroll"
+                  responsive-layout="scroll"
                   class="p-datatable-sm"
                 >
                   <Column

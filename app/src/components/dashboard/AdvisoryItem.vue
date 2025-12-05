@@ -17,8 +17,8 @@
     <span>
       <strong class="text-800 dark:text-100">{{ dimension }} ({{ level }}):</strong>
       <button
-        @click="emit('click')"
         class="bg-transparent border-none p-0 mx-1 text-blue-600 dark:text-blue-400 font-semibold cursor-pointer hover:underline"
+        @click="emit('click')"
       >
         {{ count }} businesses
       </button>

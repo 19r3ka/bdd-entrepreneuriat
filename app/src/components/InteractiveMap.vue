@@ -6,8 +6,8 @@
     <template v-else>
       <div v-if="isEditable" class="search-bar">
         <input
-          type="text"
           v-model="searchQuery"
+          type="text"
           placeholder="Search for an address..."
           @input="debouncedSearch"
         />
@@ -25,8 +25,8 @@
         ref="mapRef"
         :zoom="zoom"
         :center="center"
-        @ready="onMapReady"
         style="height: 100%; width: 100%"
+        @ready="onMapReady"
       >
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

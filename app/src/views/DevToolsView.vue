@@ -15,10 +15,10 @@
               <label for="entrepreneurCount" class="font-semibold w-10rem">{{ t('devTools.entrepreneursLabel') }}</label>
               <InputNumber
                 v-model="entrepreneurCount"
-                inputId="entrepreneurCount"
+                input-id="entrepreneurCount"
                 :min="0"
                 :max="100"
-                showButtons
+                show-buttons
               />
             </div>
 
@@ -26,10 +26,10 @@
               <label for="businessCount" class="font-semibold w-10rem">{{ t('devTools.businessesLabel') }}</label>
               <InputNumber
                 v-model="businessCount"
-                inputId="businessCount"
+                input-id="businessCount"
                 :min="0"
                 :max="200"
-                showButtons
+                show-buttons
               />
               <small class="text-500">(distributed among entrepreneurs)</small>
             </div>
@@ -38,10 +38,10 @@
               <label for="supportCount" class="font-semibold w-10rem">{{ t('devTools.supportsLabel') }}</label>
               <InputNumber
                 v-model="supportCount"
-                inputId="supportCount"
+                input-id="supportCount"
                 :min="0"
                 :max="200"
-                showButtons
+                show-buttons
               />
               <small class="text-500">(distributed among businesses)</small>
             </div>
@@ -50,10 +50,10 @@
               <label for="quickWinCount" class="font-semibold w-10rem">{{ t('devTools.quickWinsLabel') }}</label>
               <InputNumber
                 v-model="quickWinCount"
-                inputId="quickWinCount"
+                input-id="quickWinCount"
                 :min="0"
                 :max="200"
-                showButtons
+                show-buttons
               />
               <small class="text-500">(~1.5 per business)</small>
             </div>
@@ -64,10 +64,10 @@
               >
               <InputNumber
                 v-model="momentumMetricCount"
-                inputId="momentumMetricCount"
+                input-id="momentumMetricCount"
                 :min="0"
                 :max="200"
-                showButtons
+                show-buttons
               />
               <small class="text-500">(Outcomes)</small>
             </div>
@@ -79,43 +79,43 @@
                   <label for="epicenterLat" class="font-semibold w-10rem">{{ t('devTools.epicenterLatLabel') }}</label>
                   <InputNumber
                     v-model="epicenterLat"
-                    inputId="epicenterLat"
+                    input-id="epicenterLat"
                     :min="-90"
                     :max="90"
-                    :minFractionDigits="4"
-                    :maxFractionDigits="6"
+                    :min-fraction-digits="4"
+                    :max-fraction-digits="6"
                     mode="decimal"
-                    showButtons
+                    show-buttons
                   />
                 </div>
                 <div class="flex align-items-center gap-2">
                   <label for="epicenterLng" class="font-semibold w-10rem">{{ t('devTools.epicenterLngLabel') }}</label>
                   <InputNumber
                     v-model="epicenterLng"
-                    inputId="epicenterLng"
+                    input-id="epicenterLng"
                     :min="-180"
                     :max="180"
-                    :minFractionDigits="4"
-                    :maxFractionDigits="6"
+                    :min-fraction-digits="4"
+                    :max-fraction-digits="6"
                     mode="decimal"
-                    showButtons
+                    show-buttons
                   />
                 </div>
                 <div class="flex align-items-center gap-2">
                   <label for="seedRadius" class="font-semibold w-10rem">{{ t('devTools.radiusLabel') }}</label>
                   <InputNumber
                     v-model="seedRadius"
-                    inputId="seedRadius"
+                    input-id="seedRadius"
                     :min="1"
                     :max="500"
-                    showButtons
+                    show-buttons
                   />
                 </div>
               </div>
             </div>
 
             <div class="flex align-items-center gap-2 mt-2">
-              <Checkbox v-model="clearDb" binary inputId="clearDb" />
+              <Checkbox v-model="clearDb" binary input-id="clearDb" />
               <label for="clearDb">{{ t('devTools.clearDbLabel') }}</label>
             </div>
 
@@ -123,9 +123,9 @@
               <Button
                 label="Seed Database"
                 icon="pi pi-database"
-                @click="handleSeed"
                 :loading="seeding"
                 severity="help"
+                @click="handleSeed"
               />
             </div>
           </div>

@@ -1,9 +1,9 @@
 import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it } from "vitest";
-import { useRouter } from "vue-router";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../src/services/local-db";
 import HomeView from "../../src/views/HomeView.vue";
+import { useEntrepreneurStore } from "../../src/stores/useEntrepreneurStore";
 
 // Mock vue-router
 vi.mock("vue-router", () => ({
@@ -22,8 +22,7 @@ describe("Quick Add Feature Integration", () => {
 	});
 
 	it("should allow quick adding an entrepreneur from the dashboard", async () => {
-		const router = useRouter();
-		const wrapper = mount(HomeView);
+		mount(HomeView);
 
 		// Assuming a quick add form exists on the HomeView (DashboardView)
 		// For now, we will simulate adding an entrepreneur directly via the store

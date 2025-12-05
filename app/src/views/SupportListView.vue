@@ -1,5 +1,6 @@
 <template>
   <ResourceDataTable
+    v-model:filters="filters"
     resource-name="supports"
     :title="$t('pages.supports.title', 'Support Interventions')"
     data-key="id"
@@ -7,7 +8,6 @@
     :columns="columns"
     :loading="loading"
     filter-mode="advanced"
-    v-model:filters="filters"
     :global-filter-fields="['title', 'provider', 'notes']"
     @add="handleAdd"
     @view="handleView"
@@ -82,33 +82,54 @@
     loading.value = false
   })
 
+  /**
+   *
+   */
   function getBusinessName(businessId: string) {
     const business = businessStore.businesses.find((b) => b.id === businessId)
     return business ? business.name : t('common.unknownBusiness')
   }
 
+  /**
+   *
+   */
   function getBusinessId(businessId: string) {
     return businessStore.businesses.find((b) => b.id === businessId)
   }
 
+  /**
+   *
+   */
   function formatQuantity(quantity: any) {
     if (!quantity || !quantity.value) return '-'
     const unit = quantity.unit === 'currency' ? quantity.currency : quantity.unit
     return `${quantity.value} ${unit || ''}`
   }
 
+  /**
+   *
+   */
   function handleAdd() {
     router.push('/supports/new')
   }
 
+  /**
+   *
+   */
   function handleView(id: string) {
     router.push(`/supports/${id}`)
   }
 
+  /**
+   *
+   */
   function handleEdit(id: string) {
     router.push(`/supports/${id}/edit`)
   }
 
+  /**
+   *
+   */
   function handleDelete(id: string) {
     const support = supports.value.find((s) => s.id === id)
     const name = support?.title || 'Support'

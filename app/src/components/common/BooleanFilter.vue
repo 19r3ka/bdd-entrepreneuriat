@@ -4,7 +4,7 @@
       :indeterminate="modelValue === null"
       binary
       :value="modelValue"
-      @update:modelValue="$emit('update:modelValue', $event)"
+      @update:model-value="$emit('update:modelValue', $event)"
     />
     <label class="text-600">{{ $t(label) }}</label>
   </div>

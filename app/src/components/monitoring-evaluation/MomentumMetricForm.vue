@@ -15,7 +15,7 @@
             :class="['w-full', { 'p-invalid': errors.title }]"
             placeholder="e.g. Increased Revenue"
           />
-          <small class="p-error" v-if="errors.title">{{ errors.title }}</small>
+          <small v-if="errors.title" class="p-error">{{ errors.title }}</small>
         </div>
 
         <!-- Row 2: Business & Quick Win -->
@@ -39,21 +39,21 @@
               id="quickWinId"
               v-model="form.quickWinId"
               :options="quickWinOptions"
-              optionLabel="title"
-              optionValue="id"
+              option-label="title"
+              option-value="id"
               placeholder="Search and select a quick win..."
               filter
-              showClear
-              @change="handleQuickWinChange"
+              show-clear
               :disabled="isQuickWinContext"
               class="w-full"
+              @change="handleQuickWinChange"
             />
             <!-- Disabled if form opened from Quick Win context to prevent changing parent -->
           </div>
         </div>
 
         <!-- Row 3: Category & Gender Marker -->
-        <div class="formgrid grid" v-if="!isInherited">
+        <div v-if="!isInherited" class="formgrid grid">
           <div class="field col-12 md:col-6">
             <label for="category" class="font-bold block mb-2"
               >{{ $t('momentumMetric.category', 'Category') }}
@@ -62,14 +62,14 @@
             <Select
               id="category"
               v-model="form.category"
-              @change="updateSuggestions(form.category)"
               :options="categoryOptions"
-              optionLabel="label"
-              optionValue="value"
+              option-label="label"
+              option-value="value"
               :class="['w-full', { 'p-invalid': errors.category }]"
               :placeholder="$t('momentumMetric.placeholders.category', 'Select category')"
+              @change="updateSuggestions(form.category)"
             />
-            <small class="p-error" v-if="errors.category">{{ errors.category }}</small>
+            <small v-if="errors.category" class="p-error">{{ errors.category }}</small>
           </div>
 
           <div class="field col-12 md:col-6">
@@ -80,8 +80,8 @@
               id="genderMarker"
               v-model="form.genderMarker"
               :options="genderMarkerOptions"
-              optionLabel="label"
-              optionValue="value"
+              option-label="label"
+              option-value="value"
               :placeholder="$t('momentumMetric.placeholders.genderMarker', 'Select gender marker')"
               class="w-full"
             />
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Row 3.5: Dimension -->
-        <div class="formgrid grid" v-if="!isInherited">
+        <div v-if="!isInherited" class="formgrid grid">
           <div class="field col-12 md:col-6">
             <label for="dimension" class="font-bold block mb-2">{{
               $t('momentumMetric.dimension', 'Maturity Dimension')
@@ -118,7 +118,7 @@
             />
           </div>
 
-          <div class="field col-12 md:col-4" v-if="!isInherited">
+          <div v-if="!isInherited" class="field col-12 md:col-4">
             <label for="cpdOutputCode" class="font-bold block mb-2">{{
               $t('momentumMetric.cpdOutputCode', 'CPD Output Code')
             }}</label>
@@ -130,7 +130,7 @@
             />
           </div>
 
-          <div class="field col-12 md:col-4" v-if="!isInherited">
+          <div v-if="!isInherited" class="field col-12 md:col-4">
             <label for="spOutcomeCode" class="font-bold block mb-2">{{
               $t('momentumMetric.spOutcomeCode', 'SP Outcome Code')
             }}</label>
@@ -144,7 +144,7 @@
         </div>
 
         <!-- Row 5: IRRF & SDG -->
-        <div class="formgrid grid" v-if="!isInherited">
+        <div v-if="!isInherited" class="formgrid grid">
           <div class="field col-12 md:col-6">
             <label for="irrfIndicatorIds" class="font-bold block mb-2">{{
               $t('momentumMetric.irrfIndicatorIds', 'IRRF Indicator IDs')
@@ -155,9 +155,9 @@
               multiple
               chips
               :suggestions="filteredIrrfIds"
-              @complete="searchIrrfIds"
               placeholder="Select or type IDs..."
               class="w-full"
+              @complete="searchIrrfIds"
             />
           </div>
 
@@ -171,9 +171,9 @@
               multiple
               chips
               :suggestions="filteredSdgs"
-              @complete="searchSdgs"
               placeholder="Select targets..."
               class="w-full"
+              @complete="searchSdgs"
             />
           </div>
         </div>
@@ -187,7 +187,7 @@
             id="contributionNarrative"
             v-model="form.contributionNarrative"
             rows="4"
-            autoResize
+            auto-resize
             placeholder="Describe how the support contributed to this result..."
             class="w-full"
           />
@@ -251,14 +251,14 @@
             :label="$t('common.cancel')"
             icon="pi pi-times"
             text
-            @click="$emit('cancel')"
             class="p-button-secondary"
+            @click="$emit('cancel')"
           />
           <Button
             :label="$t('common.save')"
             icon="pi pi-check"
-            @click="handleSubmit"
             :loading="loading"
+            @click="handleSubmit"
           />
         </div>
       </div>

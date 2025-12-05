@@ -1,13 +1,13 @@
 <template>
   <BaseAutocomplete
     :model-value="selectedBusiness"
-    @update:model-value="onUpdate"
     :suggestions="filtered"
     :label="label"
     :placeholder="placeholder"
     :error="error"
     :field-class="fieldClass"
     input-class="w-full p-3"
+    @update:model-value="onUpdate"
     @complete="search"
   />
 </template>
@@ -44,6 +44,9 @@
     { immediate: true }
   )
 
+  /**
+   *
+   */
   function search(event: { query: string }) {
     const query = event.query.trim().toLowerCase()
     const all = store.businesses
@@ -55,6 +58,9 @@
     filtered.value = !query ? all : all.filter((b) => b.name.toLowerCase().includes(query))
   }
 
+  /**
+   *
+   */
   function onUpdate(value: any) {
     if (value && typeof value === 'object' && 'id' in value) {
       emit('update:modelValue', value.id)

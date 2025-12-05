@@ -1,6 +1,12 @@
 // Global error handler service
+/**
+ *
+ */
 export class ErrorHandler {
   // Handle API errors - this method should be called from components where toast service is available
+  /**
+   *
+   */
   handleApiError(error: unknown, toast?: any, customMessage?: string): void {
     let message = 'An unexpected error occurred'
 
@@ -29,6 +35,9 @@ export class ErrorHandler {
   }
 
   // Handle validation errors from Zod schema
+  /**
+   *
+   */
   handleValidationError(errors: any, toast?: any, customMessage?: string): void {
     const message = customMessage || 'Validation failed'
 
@@ -52,6 +61,9 @@ export class ErrorHandler {
   }
 
   // Handle generic errors
+  /**
+   *
+   */
   handleGenericError(error: unknown, toast?: any, customMessage?: string): void {
     let message = 'An unexpected error occurred'
 

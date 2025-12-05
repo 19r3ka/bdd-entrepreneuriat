@@ -1,4 +1,7 @@
 // src/utils/resolveField.ts
+/**
+ *
+ */
 export function resolveField<T>(
   obj: T,
   path: string,

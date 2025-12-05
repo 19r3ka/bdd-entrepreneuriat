@@ -87,8 +87,8 @@
 
           <div
             v-if="entrepreneur"
-            @click="goToOwner"
             class="flex align-items-center gap-2 mt-1 pt-2 border-top-1 border-200 cursor-pointer hover:surface-100 transition-colors p-1 border-round"
+            @click="goToOwner"
           >
             <span class="text-xs text-500 uppercase font-medium">{{ t('common.owner') }}:</span>
             <div class="flex align-items-center gap-2">

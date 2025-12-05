@@ -17,6 +17,9 @@ const LOME_LAT = 6.1375
 const LOME_LNG = 1.2125
 
 // Generate random coordinates around a center point
+/**
+ *
+ */
 function getRandomLocation(centerLat: number, centerLng: number, radiusKm: number = 10) {
   const r = radiusKm / 111.32 // Convert km to degrees (approx)
   const u = Math.random()
@@ -35,6 +38,9 @@ function getRandomLocation(centerLat: number, centerLng: number, radiusKm: numbe
 
 // Generate Togolese phone number in E.164 format
 // Pattern: +228(2|7|9)XXXXXXX (8 digits total, starting with 2, 7, or 9)
+/**
+ *
+ */
 function generateTogoPhone(): string {
   const firstDigit = faker.helpers.arrayElement(['2', '7', '9'])
   const remainingDigits = faker.string.numeric(7)
@@ -52,6 +58,9 @@ export interface SeedOptions {
   radius?: number
 }
 
+/**
+ *
+ */
 export const seedDatabase = async (options: SeedOptions) => {
   const {
     entrepreneurCount,

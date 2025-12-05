@@ -11,11 +11,17 @@ export const useLanguageStore = defineStore('language', () => {
   const currentLocale = useStorage<'fr' | 'en'>('user-locale', 'fr')
 
   // Initialize
+  /**
+   *
+   */
   function init() {
     setLocale(currentLocale.value)
   }
 
   // Set locale action
+  /**
+   *
+   */
   async function setLocale(locale: 'fr' | 'en') {
     currentLocale.value = locale
     

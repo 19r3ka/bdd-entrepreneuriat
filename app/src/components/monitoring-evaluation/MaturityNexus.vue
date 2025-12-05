@@ -90,7 +90,7 @@
                   </div>
                   <ProgressBar
                     :value="getProgress(levels[item.dimension])"
-                    :showValue="false"
+                    :show-value="false"
                     style="height: 4px"
                     class="mr-2"
                   />

@@ -17,9 +17,9 @@
         }}</label>
         <InputText
           :model-value="indicator.name"
-          @update:model-value="(val) => updateField('name', val)"
           class="w-full font-semibold"
           placeholder="Indicator Name"
+          @update:model-value="(val) => updateField('name', val)"
         />
       </div>
 
@@ -30,11 +30,11 @@
         }}</label>
         <Select
           :model-value="indicator.unit"
-          @update:model-value="(val) => updateField('unit', val)"
           :options="unitOptions"
-          optionLabel="label"
-          optionValue="value"
+          option-label="label"
+          option-value="value"
           class="w-full"
+          @update:model-value="(val) => updateField('unit', val)"
         />
       </div>
 
@@ -44,11 +44,11 @@
         }}</label>
         <InputNumber
           :model-value="indicator.baseline"
-          @update:model-value="(val) => updateField('baseline', val)"
           class="w-full"
-          inputClass="w-full"
-          :minFractionDigits="0"
-          :maxFractionDigits="2"
+          input-class="w-full"
+          :min-fraction-digits="0"
+          :max-fraction-digits="2"
+          @update:model-value="(val) => updateField('baseline', val)"
         />
       </div>
 
@@ -58,11 +58,11 @@
         }}</label>
         <InputNumber
           :model-value="indicator.target"
-          @update:model-value="(val) => updateField('target', val)"
           class="w-full"
-          inputClass="w-full"
-          :minFractionDigits="0"
-          :maxFractionDigits="2"
+          input-class="w-full"
+          :min-fraction-digits="0"
+          :max-fraction-digits="2"
+          @update:model-value="(val) => updateField('target', val)"
         />
       </div>
 
@@ -87,35 +87,35 @@
           <div v-if="indicator.unit === 'boolean'" class="flex-grow-1">
             <Select
               :model-value="reading.value"
-              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
               :options="[
                 { label: 'Yes', value: true },
                 { label: 'No', value: false }
               ]"
-              optionLabel="label"
-              optionValue="value"
+              option-label="label"
+              option-value="value"
               class="w-full"
               placeholder="Select"
+              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
             />
           </div>
           <div v-else class="flex-grow-1">
             <InputNumber
               :model-value="reading.value as number"
-              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
               placeholder="Value"
               class="w-full"
-              inputClass="w-full"
-              :minFractionDigits="0"
-              :maxFractionDigits="2"
+              input-class="w-full"
+              :min-fraction-digits="0"
+              :max-fraction-digits="2"
+              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
             />
           </div>
           <div class="w-10rem">
             <DatePicker
               :model-value="reading.asOf"
-              @update:model-value="(val) => updateReading(rIndex, 'asOf', val)"
               placeholder="Date"
               class="w-full"
-              dateFormat="yy-mm-dd"
+              date-format="yy-mm-dd"
+              @update:model-value="(val) => updateReading(rIndex, 'asOf', val)"
             />
           </div>
           <Button
@@ -133,8 +133,8 @@
           icon="pi pi-plus"
           text
           size="small"
-          @click="addReading"
           class="mt-1"
+          @click="addReading"
         />
       </div>
     </div>

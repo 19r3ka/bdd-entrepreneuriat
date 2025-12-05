@@ -5,7 +5,7 @@
         <span class="text-xl font-bold">{{ $t('pages.supports.title') }}</span>
       </template>
       <template #content>
-        <DataTable :value="supports" responsiveLayout="scroll">
+        <DataTable :value="supports" responsive-layout="scroll">
           <Column field="modality" :header="$t('support.modality')"></Column>
           <Column field="description" :header="$t('common.description')"></Column>
           <Column field="createdAt" :header="$t('common.createdAt')">

@@ -2,7 +2,7 @@
   <div class="surface-ground min-h-screen p-4 md:p-6">
     <div class="max-w-3xl mx-auto">
       <div class="card p-4">
-        <h2 class="mb-4">{{ $t('support.new') }}</h2>
+        <h2 class="mb-4">{{ $t('pages.support.new') }}</h2>
         <SupportBoostForm @submit="handleSubmit" />
       </div>
     </div>

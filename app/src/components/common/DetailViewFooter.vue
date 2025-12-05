@@ -26,6 +26,6 @@
 
   const formatDateTime = (date?: string | Date) => {
     if (!date) return '-'
-    return d(new Date(date))
+    return d(new Date(date), 'long')
   }
 </script>

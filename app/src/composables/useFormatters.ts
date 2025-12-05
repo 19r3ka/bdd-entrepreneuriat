@@ -1,6 +1,9 @@
 // src/composables/useFormatters.ts
 import { useI18n } from 'vue-i18n'
 
+/**
+ *
+ */
 export function useFormatters() {
   const { locale } = useI18n()
 

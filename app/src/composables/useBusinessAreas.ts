@@ -4,6 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { businessAreaOptions } from '@/constants/businessAreas'
 import type { BusinessArea } from '@/types/businessArea'
 
+/**
+ *
+ */
 export function useBusinessAreas() {
   const { t } = useI18n()
 

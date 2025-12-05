@@ -7,12 +7,12 @@
 
     <slot
       name="input"
-      :modelValue="normalizedValue"
-      :updateModelValue="updateModelValue"
-      :onBlur="handleBlur"
-      :hasError="hasError"
-      :errorText="errorText"
-      :inputClass="['w-full', { 'p-invalid': hasError }]"
+      :model-value="normalizedValue"
+      :update-model-value="updateModelValue"
+      :on-blur="handleBlur"
+      :has-error="hasError"
+      :error-text="errorText"
+      :input-class="['w-full', { 'p-invalid': hasError }]"
     >
       <!-- Default rendering if no slot provided -->
       <component
@@ -75,10 +75,16 @@
     isRef(props.modelValue) ? props.modelValue.value : props.modelValue
   )
 
+  /**
+   *
+   */
   function updateModelValue(newValue: any) {
     emit('update:modelValue', newValue)
   }
 
+  /**
+   *
+   */
   function handleBlur(event?: FocusEvent) {
     if (props.onBlur) props.onBlur(event)
   }

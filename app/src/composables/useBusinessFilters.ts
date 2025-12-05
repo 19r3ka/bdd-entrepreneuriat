@@ -2,6 +2,9 @@ import { computed } from 'vue'
 import { useBusinessAreas } from '@/composables/useBusinessAreas'
 import { useBusinessStore } from '@/stores/useBusinessStore'
 
+/**
+ *
+ */
 export function useBusinessFilters() {
   const businessStore = useBusinessStore()
   const { getBusinessAreaLabel } = useBusinessAreas()

@@ -18,12 +18,18 @@
   const { t, d } = useI18n()
 
   // Helper functions internal to this display component
+  /**
+   *
+   */
   function getBusinessAreaName(code?: string) {
     if (!code) return t('common.notAvailable')
     const area = BUSINESS_AREA_MAP.find((a) => a.code === code)
     return area ? area.name : code
   }
 
+  /**
+   *
+   */
   function formatDate(date: string | Date | null | undefined): string {
     if (!date) return t('common.notAvailable')
     return d(new Date(date), 'long')
@@ -61,7 +67,7 @@
               </span>
             </div>
 
-            <div class="col-12 md:col-6 mb-3" v-if="business.secondaryBusinessArea">
+            <div v-if="business.secondaryBusinessArea" class="col-12 md:col-6 mb-3">
               <span class="block text-500 font-medium text-sm">{{
                 $t('common.secondaryBusinessArea')
               }}</span>
@@ -70,7 +76,7 @@
               </span>
             </div>
 
-            <div class="col-12 md:col-6 mb-3" v-if="business.registrationNumber">
+            <div v-if="business.registrationNumber" class="col-12 md:col-6 mb-3">
               <span class="block text-500 font-medium text-sm">{{
                 $t('common.registrationNumber')
               }}</span>
@@ -98,7 +104,7 @@
         </template>
       </Card>
 
-      <Card class="shadow-2" v-if="business.location?.latitude">
+      <Card v-if="business.location?.latitude" class="shadow-2">
         <template #title>
           <span class="text-xl font-bold">{{ $t('common.location') }}</span>
         </template>

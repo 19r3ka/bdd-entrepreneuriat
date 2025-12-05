@@ -1,5 +1,5 @@
 <template>
-  <DetailLayout :heroImage="typeof heroImage === 'string' ? heroImage : undefined">
+  <DetailLayout :hero-image="typeof heroImage === 'string' ? heroImage : undefined">
     <!-- Hero overlay: keep empty or add breadcrumbs/actions if needed -->
     <template #hero>
       <!-- Identity header card, overlapping hero -->
@@ -10,7 +10,7 @@
             :label="fullName"
             shape="circle"
             size="xlarge"
-            customClass="w-8rem h-8rem border-circle border-3 border-white shadow-4 -mt-8 sm:mb-0"
+            custom-class="w-8rem h-8rem border-circle border-3 border-white shadow-4 -mt-8 sm:mb-0"
             :style="{ 'font-size': '2.5rem' }"
           />
           <div class="flex-1 w-full">
@@ -57,11 +57,11 @@
           <template #title>{{ $t('common.personalDetails') }}</template>
           <template #content>
             <div class="grid">
-              <div class="col-12 md:col-6 mb-3" v-if="entrepreneur?.gender">
+              <div v-if="entrepreneur?.gender" class="col-12 md:col-6 mb-3">
                 <span class="block text-500 font-medium text-sm">{{ $t('common.gender') }}</span>
                 <span class="block text-900 text-lg mt-1">{{ entrepreneur.gender }}</span>
               </div>
-              <div class="col-12 md:col-6 mb-3" v-if="calculatedAge !== null">
+              <div v-if="calculatedAge !== null" class="col-12 md:col-6 mb-3">
                 <span class="block text-500 font-medium text-sm">{{ $t('common.age') }}</span>
                 <span class="block text-900 text-lg mt-1"
                   >{{ calculatedAge }} {{ $t('common.years') }}</span
@@ -72,7 +72,7 @@
         </Card>
 
         <!-- Location Map -->
-        <Card class="shadow-2" v-if="entrepreneur?.address">
+        <Card v-if="entrepreneur?.address" class="shadow-2">
           <template #title>{{ $t('common.mapPreview') }}</template>
           <template #content>
             <InteractiveMap :locations="addressLocation" :is-editable="false" />
@@ -84,7 +84,7 @@
           <template #title>{{ $t('pages.entrepreneurs.associatedBusinesses') }}</template>
           <template #content>
             <div v-if="businesses.length" class="grid formgrid">
-              <div class="col-12 md:col-6" v-for="biz in businesses" :key="biz.id">
+              <div v-for="biz in businesses" :key="biz.id" class="col-12 md:col-6">
                 <div
                   class="border-1 surface-border border-round p-3 hover:shadow-3 transition-all cursor-pointer h-full"
                   @click="biz.id && goBusiness(biz.id)"
@@ -99,12 +99,12 @@
                     <div>
                       <div class="font-bold text-900">{{ biz.name }}</div>
                       <div class="text-sm text-500">
-                        {{ biz.primaryBusinessArea || $t('common.notAvailable') }}
+                        {{ biz.primaryBusinessArea ? $t(`businessAreas.${biz.primaryBusinessArea}`) : $t('common.notAvailable') }}
                       </div>
                     </div>
                   </div>
                   <div class="text-600 text-sm">
-                    {{ biz.secondaryBusinessArea || '' }}
+                    {{ biz.secondaryBusinessArea ? $t(`businessAreas.${biz.secondaryBusinessArea}`) : '' }}
                   </div>
                 </div>
               </div>
@@ -220,16 +220,25 @@
     return map
   })
 
+  /**
+   *
+   */
   function onAddBusiness() {
     if (!entrepreneur.value) return
     router.push(`/businesses/new?entrepreneurId=${entrepreneur.value.id}`)
   }
 
+  /**
+   *
+   */
   function onEditProfile() {
     if (!entrepreneur.value) return
     router.push(`/entrepreneurs/${entrepreneur.value.id}/edit`)
   }
 
+  /**
+   *
+   */
   function goBusiness(id: string) {
     router.push(`/businesses/${id}`)
   }

@@ -1,3 +1,6 @@
+/**
+ *
+ */
 export function calculateAge(dateOfBirth: Date | string): number | null {
   if (!dateOfBirth) {
     return null

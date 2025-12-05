@@ -69,7 +69,7 @@
           </div>
           <div class="flex flex-column">
             <span class="text-600 dark:text-400 text-sm font-medium">{{ label }}</span>
-            <span v-if="tooltip" class="text-500 cursor-help ml-1" v-tooltip.top="tooltip">
+            <span v-if="tooltip" v-tooltip.top="tooltip" class="text-500 cursor-help ml-1">
               <i class="pi pi-info-circle text-xs"></i>
             </span>
           </div>

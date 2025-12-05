@@ -15,6 +15,9 @@ export interface ActionItem {
   priority: 'high' | 'medium' | 'low'
 }
 
+/**
+ *
+ */
 export function usePortfolioActions(
   businesses: () => Business[],
   supports: () => Support[],

@@ -11,6 +11,9 @@ import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetri
 import type { ActivityLog } from '@/types/ActivityLog'
 
 // Dexie DB class
+/**
+ *
+ */
 export class LocalDB extends Dexie {
   entrepreneurs!: Table<Entrepreneur, string>
   businesses!: Table<Business, string>
@@ -25,6 +28,9 @@ export class LocalDB extends Dexie {
   momentumMetrics!: Table<MomentumMetric, string>
   activityLogs!: Table<ActivityLog, string>
 
+  /**
+   *
+   */
   constructor() {
     super('BusinessTrackerDB')
 

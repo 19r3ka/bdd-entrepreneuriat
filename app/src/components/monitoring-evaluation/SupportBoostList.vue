@@ -1,5 +1,6 @@
 <template>
   <ResourceDataTable
+    v-model:filters="filters"
     resource-name="supports"
     title="Supports"
     data-key="id"
@@ -7,7 +8,6 @@
     :columns="columns"
     :loading="loading"
     :filter-mode="'advanced'"
-    v-model:filters="filters"
     :global-filter-fields="['title', 'provider', 'notes']"
     @add="onAdd"
     @view="onView"
@@ -83,35 +83,56 @@
     loading.value = false
   })
 
+  /**
+   *
+   */
   function getBusinessName(businessId: string) {
     const business = businessStore.businesses.find((b) => b.id === businessId)
     return business ? business.name : 'Unknown Business'
   }
 
+  /**
+   *
+   */
   function getBusinessId(businessId: string) {
     return businessStore.businesses.find((b) => b.id === businessId)
   }
 
+  /**
+   *
+   */
   function formatQuantity(quantity: any) {
     if (!quantity || !quantity.value) return '-'
     const unit = quantity.unit === 'currency' ? quantity.currency : quantity.unit
     return `${quantity.value} ${unit || ''}`
   }
 
+  /**
+   *
+   */
   function onAdd() {
     emit('create')
   }
 
+  /**
+   *
+   */
   function onView(id: string) {
     router.push(`/supports/${id}`)
   }
 
+  /**
+   *
+   */
   function onEdit(id: string) {
     emit('edit', id)
   }
 
   const { confirmDelete } = useConfirmation()
 
+  /**
+   *
+   */
   function onDelete(id: string) {
     const support = supports.value.find((s) => s.id === id)
     const name = support?.title || 'Support'

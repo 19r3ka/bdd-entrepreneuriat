@@ -1,11 +1,11 @@
 <template>
   <ResourceDataTable
+    v-model:filters="filters"
     :data="entrepreneurs"
     :columns="columns"
-    dataKey="id"
-    v-model:filters="filters"
-    :globalFilterFields="globalFilterFields"
-    resourceName="entrepreneurs"
+    data-key="id"
+    :global-filter-fields="globalFilterFields"
+    resource-name="entrepreneurs"
     :title="$t('pages.entrepreneurs.title')"
     @add="addEntrepreneur"
     @view="viewEntrepreneur"
@@ -21,7 +21,7 @@
         :label="`${data.firstName} ${data.lastName}`"
         shape="circle"
         size="normal"
-        customClass="mr-2"
+        custom-class="mr-2"
       />
     </template>
 

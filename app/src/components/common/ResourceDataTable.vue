@@ -3,16 +3,16 @@
     <div class="col-12">
       <div class="card">
         <DataTable
+          v-model:filters="filters as any"
+          v-model:selection="selectedItems"
           :value="data"
           paginator
           :rows="10"
-          v-model:filters="filters as any"
-          :filterDisplay="filterMode === 'advanced' ? 'menu' : 'row'"
-          :dataKey="dataKey"
-          :globalFilterFields="globalFilterFields"
-          v-model:selection="selectedItems"
-          :rowHover="true"
-          :resizableColumns="true"
+          :filter-display="filterMode === 'advanced' ? 'menu' : 'row'"
+          :data-key="dataKey"
+          :global-filter-fields="globalFilterFields"
+          :row-hover="true"
+          :resizable-columns="true"
         >
           <!-- Header -->
           <template #header>
@@ -30,7 +30,7 @@
               <div class="flex justify-content-between align-items-center">
                 <IconField
                   v-if="filters && filters.global"
-                  iconPosition="left"
+                  icon-position="left"
                   class="w-full md:w-20rem"
                 >
                   <InputIcon class="pi pi-search" />
@@ -54,15 +54,15 @@
                       :label="$t('common.deleteSelected')"
                       icon="pi pi-trash"
                       class="p-button-danger"
-                      @click="confirmDeleteSelected"
                       :disabled="selectedIds.size === 0"
+                      @click="confirmDeleteSelected"
                     />
                     <Button
                       :label="$t('common.exportCsv')"
                       icon="pi pi-file-excel"
                       class="p-button-success"
-                      @click="exportCSV"
                       :disabled="selectedIds.size === 0"
+                      @click="exportCSV"
                     />
                     <Button
                       :label="$t('common.cancel')"
@@ -80,7 +80,7 @@
           </template>
 
           <!-- Multi-select -->
-          <Column v-if="isMultiSelect" selectionMode="multiple" headerStyle="width: 3rem" />
+          <Column v-if="isMultiSelect" selection-mode="multiple" header-style="width: 3rem" />
 
           <!-- Dynamic columns -->
           <Column
@@ -89,15 +89,15 @@
             :field="col.field"
             :header="col.header"
             :sortable="col.sortable"
-            :showFilterMenu="Boolean(filters && filters[col.filterField || col.field])"
-            :filterField="col.filterField || col.field"
+            :show-filter-menu="Boolean(filters && filters[col.filterField || col.field])"
+            :filter-field="col.filterField || col.field"
           >
             <template #body="slotProps">
               <slot :name="`col-${col.field}`" :data="slotProps.data">
                 <template v-if="col.dataType === 'date'">
                   {{
                     resolveFieldData(slotProps.data, col.field)
-                      ? d(new Date(resolveFieldData(slotProps.data, col.field) as string), 'long')
+                      ? d(new Date(resolveFieldData(slotProps.data, col.field) as string), 'medium')
                       : '-'
                   }}
                 </template>
@@ -118,8 +118,8 @@
             <template v-if="filterMode === 'basic'" #filter="{ filterModel, filterCallback }">
               <slot
                 :name="`filter-${col.filterField || col.field}`"
-                :filterModel="filterModel"
-                :filterCallback="filterCallback"
+                :filter-model="filterModel"
+                :filter-callback="filterCallback"
               >
                 <!-- Prefer select options when provided -->
                 <SelectFilter
@@ -133,7 +133,7 @@
                   v-else-if="col.dataType === 'text' || !col.dataType"
                   v-model="filterModel.value"
                   :placeholder="$t('placeholders.searchAll')"
-                  @update:modelValue="filterCallback()"
+                  @update:model-value="filterCallback()"
                 />
 
                 <BooleanFilter
@@ -147,7 +147,7 @@
                 <Calendar
                   v-else-if="col.dataType === 'date'"
                   v-model="filterModel.value as any"
-                  dateFormat="mm/dd/yy"
+                  date-format="mm/dd/yy"
                   placeholder="mm/dd/yyyy"
                   @date-select="filterCallback()"
                   @input="filterCallback()"
@@ -165,25 +165,25 @@
 
           <!-- Actions column -->
           <Column :header="$t('common.actions')" style="width: 8rem" :exportable="false">
-            <template #body="{ data }">
-              <slot name="actions" :data="data">
-                <slot name="prepend-actions" :data="data"></slot>
+            <template #body="{ data: rowData }">
+              <slot name="actions" :data="rowData">
+                <slot name="prepend-actions" :data="rowData"></slot>
                 <Button
                   icon="pi pi-eye"
                   class="p-button-rounded p-button-text"
-                  @click="emit('view', (data as Record<string, unknown>)[dataKey] as string)"
+                  @click="emit('view', (rowData as Record<string, unknown>)[dataKey] as string)"
                 />
                 <Button
                   icon="pi pi-pencil"
                   class="p-button-rounded p-button-text p-button-secondary"
-                  @click="emit('edit', (data as Record<string, unknown>)[dataKey] as string)"
+                  @click="emit('edit', (rowData as Record<string, unknown>)[dataKey] as string)"
                 />
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
-                  @click="emit('delete', (data as Record<string, unknown>)[dataKey] as string)"
+                  @click="emit('delete', (rowData as Record<string, unknown>)[dataKey] as string)"
                 />
-                <slot name="append-actions" :data="data"></slot>
+                <slot name="append-actions" :data="rowData"></slot>
               </slot>
             </template>
           </Column>

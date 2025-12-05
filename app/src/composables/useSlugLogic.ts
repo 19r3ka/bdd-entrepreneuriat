@@ -1,6 +1,9 @@
 // @/composables/useSlugLogic.ts
 import { ref, watch } from 'vue'
 
+/**
+ *
+ */
 export function sanitizeSlug(str: string): string {
   return str
     .toLowerCase()
@@ -10,6 +13,9 @@ export function sanitizeSlug(str: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/**
+ *
+ */
 export function useSlugLogic(formValues: { firstName: string; lastName: string; slug: string }) {
   const slugManuallyEdited = ref(false)
 
@@ -27,14 +33,23 @@ export function useSlugLogic(formValues: { firstName: string; lastName: string; 
     { immediate: true }
   )
 
+  /**
+   *
+   */
   function markSlugAsManual() {
     slugManuallyEdited.value = true
   }
 
+  /**
+   *
+   */
   function resetSlugManualEdit() {
     slugManuallyEdited.value = false
   }
 
+  /**
+   *
+   */
   function generateSlug(firstName: string, lastName: string): string {
     const nameParts = [firstName, lastName].filter(Boolean)
     return nameParts.length > 0 ? sanitizeSlug(nameParts.join('-')) : ''

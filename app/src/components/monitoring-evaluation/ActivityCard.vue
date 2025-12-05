@@ -83,8 +83,8 @@
           text
           rounded
           severity="secondary"
-          @click.stop="$emit('edit')"
           :aria-label="$t('common.edit')"
+          @click.stop="$emit('edit')"
         />
       </div>
     </template>

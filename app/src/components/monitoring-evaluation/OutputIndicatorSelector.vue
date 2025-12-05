@@ -7,12 +7,12 @@
         <AutoComplete
           v-model="selectedIndicator"
           :suggestions="filteredIndicators"
-          @complete="searchIndicators"
-          optionLabel="name"
+          option-label="name"
           :placeholder="placeholder || $t('outputIndicator.selector.placeholder')"
           class="w-full"
           dropdown
-          forceSelection
+          force-selection
+          @complete="searchIndicators"
           @item-select="onSelect"
         >
           <template #option="{ option }">

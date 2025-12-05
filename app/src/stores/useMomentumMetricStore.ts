@@ -8,6 +8,9 @@ import { serializeForDb, deserializeFromDb } from '@/utils/db-serialization'
 export const useMomentumMetricStore = defineStore('momentumMetric', () => {
   const metrics = ref<MomentumMetric[]>([])
 
+  /**
+   *
+   */
   async function addMetric(
     metric: Omit<MomentumMetric, 'momentumMetricId' | 'createdAt' | 'updatedAt'>
   ) {
@@ -25,6 +28,9 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
     return newMetric
   }
 
+  /**
+   *
+   */
   async function updateMetric(id: string, updates: Partial<MomentumMetric>) {
     const updated = {
       ...updates,
@@ -46,16 +52,25 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
     }
   }
 
+  /**
+   *
+   */
   async function deleteMetric(id: string) {
     await db.momentumMetrics.delete(id)
     metrics.value = metrics.value.filter((m) => m.momentumMetricId !== id)
   }
 
+  /**
+   *
+   */
   async function getMetricById(id: string) {
     const metric = await db.momentumMetrics.get(id)
     return metric ? deserializeFromDb(metric) : undefined
   }
 
+  /**
+   *
+   */
   async function getMetricsByBusinessId(businessId: string) {
     const result = await db.momentumMetrics
       .where('businessId')
@@ -65,6 +80,9 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
     return result.map((m) => deserializeFromDb(m))
   }
 
+  /**
+   *
+   */
   async function getMetricsByQuickWinId(quickWinId: string) {
     const result = await db.momentumMetrics
       .where('quickWinId')
@@ -74,6 +92,9 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
     return result.map((m) => deserializeFromDb(m))
   }
 
+  /**
+   *
+   */
   async function fetchAll() {
     const result = await db.momentumMetrics.toArray()
     metrics.value = result.map((m) => deserializeFromDb(m))

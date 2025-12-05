@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { db } from '@/services/local-db'
 import type { LocalDB } from '@/services/local-db'
 
+/**
+ *
+ */
 export function useStorage(bucket: string) {
   const loading = ref(false)
   const error = ref<Error | null>(null)

@@ -1,6 +1,9 @@
 import { ref, watch, type Ref } from 'vue'
 import { useStorage } from './useStorage'
 
+/**
+ *
+ */
 export function useImageResolver(src: Ref<string | File | null | undefined>) {
   const resolvedSrc = ref<string | null>(null)
   const { getFileUrl } = useStorage('avatars')

@@ -10,6 +10,9 @@ interface CrudStoreOptions<T> {
   db: any // Dexie db instance
 }
 
+/**
+ *
+ */
 export function useCrudStore<T extends Record<string, any>>({
   schema,
   tableName,
@@ -174,6 +177,9 @@ export function useCrudStore<T extends Record<string, any>>({
 
   const getById = (id: string) => items.value.find((i) => i.id === id)
 
+  /**
+   *
+   */
   function search<T extends Record<string, any>>(
     query: string,
     fields: (keyof T)[] = ['name' as keyof T],

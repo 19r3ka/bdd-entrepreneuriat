@@ -25,8 +25,14 @@ import { z } from 'zod'
 export const optionalString = <T extends z.ZodType<string>>(constraintSchema: T) =>
   z.preprocess((val) => (val === '' ? undefined : val), constraintSchema.optional())
 
+/**
+ *
+ */
 export const capitalize = (word: string) => word.replace(/\b\w/g, (c) => c.toUpperCase())
 
+/**
+ *
+ */
 export const generateInitials = (name: string): string => {
   if (!name) {
     return ''
@@ -54,6 +60,9 @@ const COLOR_CLASSES = [
   'bg-purple-500'
 ]
 
+/**
+ *
+ */
 export const getRandomColorClass = (str: string): string => {
   if (!str) {
     return 'bg-gray-500'

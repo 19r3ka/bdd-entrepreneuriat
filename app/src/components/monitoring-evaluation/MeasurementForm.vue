@@ -3,10 +3,10 @@
     <Toast />
     <h1 class="m-0">{{ isEdit ? $t('measurementForm.edit') : $t('measurementForm.new') }}</h1>
     <BaseForm
+      v-slot="{ defineField, canSubmit, isSubmitting }"
       :schema="MeasurementSchema"
       :initial-values="initialValues"
       :on-submit="handleSubmit"
-      v-slot="{ defineField, canSubmit, isSubmitting }"
     >
       <Section :title="$t('measurementForm.details')">
         <div class="formgrid grid">
@@ -30,13 +30,13 @@
             <template #input="{ modelValue, updateModelValue, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="availableIndicators"
-                optionLabel="label"
-                optionValue="value"
+                option-label="label"
+                option-value="value"
                 placeholder="Select a goal"
                 :disabled="!selectedBusinessId"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
               />
             </template>
           </FormField>
@@ -51,9 +51,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 mode="decimal"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -69,9 +69,9 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Calendar
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
-                dateFormat="yy-mm-dd"
+                date-format="yy-mm-dd"
                 :class="{ 'p-invalid': hasError }"
+                @update:model-value="updateModelValue"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -89,10 +89,10 @@
                 <FileUpload
                   mode="basic"
                   name="evidence"
-                  :chooseLabel="$t('measurementForm.uploadEvidence')"
-                  :customUpload="true"
-                  @uploader="onUpload($event, updateModelValue)"
+                  :choose-label="$t('measurementForm.uploadEvidence')"
+                  :custom-upload="true"
                   :auto="true"
+                  @uploader="onUpload($event, updateModelValue)"
                 />
                 <small v-if="modelValue" class="text-green-500"
                   >File uploaded (ID: {{ modelValue }})</small
@@ -221,6 +221,9 @@
     reader.readAsDataURL(file)
   }
 
+  /**
+   *
+   */
   async function handleSubmit(data: any) {
     try {
       if (props.isEdit) {

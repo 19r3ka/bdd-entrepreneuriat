@@ -88,7 +88,7 @@
           <Tab value="0">{{ $t('pages.dashboard.activity.recent') }}</Tab>
           <Tab value="1">
             {{ $t('pages.dashboard.activity.alerts') }}
-            <Badge :value="alerts.length" severity="warn" class="ml-2" v-if="alerts.length > 0" />
+            <Badge v-if="alerts.length > 0" :value="alerts.length" severity="warn" class="ml-2" />
           </Tab>
         </TabList>
         <TabPanels>

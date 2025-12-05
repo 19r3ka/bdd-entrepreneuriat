@@ -5,10 +5,10 @@
       {{ isEdit ? 'Edit Support Intervention' : 'New Support Intervention' }}
     </h1>
     <BaseForm
+      v-slot="{ defineField, canSubmit, isSubmitting }"
       :schema="SupportBoostSchema"
       :initial-values="initialValues"
       :on-submit="handleSubmit"
-      v-slot="{ defineField, canSubmit, isSubmitting }"
     >
       <Section title="Intervention Details">
         <div class="formgrid grid">
@@ -23,10 +23,10 @@
             <template #input="{ modelValue, updateModelValue, hasError }">
               <BusinessAutocomplete
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 label="Select Business"
                 placeholder="Search for a business..."
                 :error="{ _errors: hasError ? ['Business is required'] : [] }"
+                @update:model-value="updateModelValue"
               />
             </template>
           </FormField>
@@ -41,12 +41,12 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <DatePicker
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
-                showIcon
-                dateFormat="yy-mm-dd"
+                show-icon
+                date-format="yy-mm-dd"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -61,14 +61,14 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="SupportModalityOptions"
-                optionLabel="label"
-                optionValue="value"
+                option-label="label"
+                option-value="value"
                 placeholder="Select a modality"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -84,14 +84,14 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 mode="decimal"
-                :minFractionDigits="0"
-                :maxFractionDigits="2"
+                :min-fraction-digits="0"
+                :max-fraction-digits="2"
                 suffix=" hrs"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -130,12 +130,12 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="sesRiskCategoryOptions"
                 placeholder="Select a SES risk category"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -150,12 +150,12 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="genderMarkerOptions"
                 placeholder="Select a gender marker"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -177,14 +177,14 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="FinanceInstrumentOptions"
-                optionLabel="label"
-                optionValue="value"
+                option-label="label"
+                option-value="value"
                 placeholder="Select an instrument"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -198,14 +198,14 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Select
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 :options="FinanceSourceOptions"
-                optionLabel="label"
-                optionValue="value"
+                option-label="label"
+                option-value="value"
                 placeholder="Select a source"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -219,13 +219,13 @@
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
                 :model-value="modelValue"
-                @update:model-value="updateModelValue"
                 mode="currency"
                 currency="USD"
                 locale="en-US"
                 :class="{ 'p-invalid': hasError }"
-                @blur="onBlur && onBlur()"
                 class="w-full"
+                @update:model-value="updateModelValue"
+                @blur="onBlur && onBlur()"
               />
             </template>
           </FormField>
@@ -309,6 +309,9 @@
     }))
   )
 
+  /**
+   *
+   */
   async function handleSubmit(data: any) {
     try {
       if (props.isEdit) {

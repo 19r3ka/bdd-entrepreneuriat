@@ -1,12 +1,11 @@
 import { render, fireEvent, screen } from '@testing-library/vue';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import SupportForm from '@/components/monitoring-evaluation/SupportForm.vue';
-import { useSupportStore } from '@/stores/useSupportStore';
-import { SupportSchema } from '@/schemas/monitoring-evaluation/Support';
+import SupportForm from '../../src/components/monitoring-evaluation/SupportForm.vue';
+import { useSupportStore } from '../../src/stores/useSupportStore';
 import { createI18n } from 'vue-i18n';
-import en from '@/locales/en.json';
-import fr from '@/locales/fr.json';
+import en from '../../src/locales/en.json';
+import fr from '../../src/locales/fr.json';
 
 const i18n = createI18n({
   legacy: false, // for composition api
@@ -50,7 +49,7 @@ describe('SupportForm.vue', () => {
 
   it('submits the form with the correct data for creating a new support intervention', async () => {
     const supportStore = useSupportStore();
-    const addSupportSpy = vi.spyOn(supportStore, 'addSupport');
+    vi.spyOn(supportStore, 'addSupport');
 
     render(SupportForm, {
       props: {
@@ -77,7 +76,7 @@ describe('SupportForm.vue', () => {
     // We will assume the BaseForm works and test the submission logic.
     // Let's directly call the submit handler for this test, assuming form is valid.
 
-    const { emitted } = render(SupportForm, {
+    render(SupportForm, {
       props: {
         isEdit: false,
         initialValues: { ...initialValues, description: 'New test description', theoryOfChange: 'New test theory' },

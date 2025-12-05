@@ -9,9 +9,9 @@
         <div class="font-bold text-xl text-900">{{ metric.title }}</div>
       </div>
       <Tag
+        v-if="metric.genderMarker"
         :value="metric.genderMarker"
         :severity="getGenderSeverity(metric.genderMarker)"
-        v-if="metric.genderMarker"
       />
     </div>
 
@@ -27,8 +27,8 @@
 
         <!-- Sparkline -->
         <div
-          class="h-2rem w-full bg-surface-50 border-round overflow-hidden relative"
           v-if="indicator.readings && indicator.readings.length > 1"
+          class="h-2rem w-full bg-surface-50 border-round overflow-hidden relative"
         >
           <svg class="w-full h-full" preserveAspectRatio="none">
             <polyline

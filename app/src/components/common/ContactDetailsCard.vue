@@ -143,11 +143,17 @@
   })
 
   // Click handlers (placeholders for analytics or custom flows)
+  /**
+   *
+   */
   function onClickMail() {
     if (!mailtoHref.value) return
     window.location.href = mailtoHref.value
   }
 
+  /**
+   *
+   */
   function onClickTel() {
     if (!telHref.value) return
     window.location.href = telHref.value

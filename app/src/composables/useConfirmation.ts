@@ -1,6 +1,9 @@
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 
+/**
+ *
+ */
 export const useConfirmation = () => {
   const confirm = useConfirm()
   const toast = useToast()

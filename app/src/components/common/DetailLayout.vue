@@ -33,6 +33,9 @@
     }
   })
 
+  /**
+   *
+   */
   async function fetchRandomImage() {
     isLoading.value = true
     try {
@@ -50,6 +53,9 @@
     }
   }
 
+  /**
+   *
+   */
   async function validateAndSetImage(url: string | null | undefined) {
     if (!url) {
       await fetchRandomImage()

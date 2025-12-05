@@ -230,7 +230,7 @@
         toast.add({
           severity: 'error',
           summary: t('common.error'),
-          detail: t('pages.businessDetail.messages.deleteSupportError'),
+          detail: t('pages.dashboard.businessDetail.messages.deleteSupportError'),
           life: 3000
         })
       }
@@ -251,8 +251,8 @@
       // Assuming indicatorValues is the property for linked performance reports
       toast.add({
         severity: 'warn',
-        summary: t('pages.businessDetail.messages.cannotDelete'),
-        detail: t('pages.businessDetail.messages.quickWinHasReports'),
+        summary: t('pages.dashboard.businessDetail.messages.cannotDelete'),
+        detail: t('pages.dashboard.businessDetail.messages.quickWinHasReports'),
         life: 5000
       })
       return
@@ -268,7 +268,7 @@
         toast.add({
           severity: 'error',
           summary: 'Error',
-          detail: t('pages.businessDetail.messages.deleteQuickWinError'),
+          detail: t('pages.dashboard.businessDetail.messages.deleteQuickWinError'),
           life: 3000
         })
       }
@@ -296,7 +296,7 @@
         toast.add({
           severity: 'success',
           summary: 'Success',
-          detail: t('pages.businessDetail.messages.metricUpdatedSuccess'),
+          detail: t('pages.dashboard.businessDetail.messages.metricUpdatedSuccess'),
           life: 3000
         })
       } else {
@@ -304,7 +304,7 @@
         toast.add({
           severity: 'success',
           summary: 'Success',
-          detail: t('pages.businessDetail.messages.metricCreatedSuccess'),
+          detail: t('pages.dashboard.businessDetail.messages.metricCreatedSuccess'),
           life: 3000
         })
       }
@@ -324,7 +324,7 @@
 
 <template>
   <div class="surface-ground min-h-screen p-4 md:p-6">
-    <div class="max-w-7xl mx-auto" v-if="business">
+    <div v-if="business" class="max-w-7xl mx-auto">
       <BusinessIdentityHeader
         :business="business"
         :entrepreneur="associatedEntrepreneur"
@@ -347,7 +347,7 @@
               @click="handleAction(BUSINESS_ACTIONS.LOG_QUICK_WIN)"
             />
             <Button
-              :label="$t('pages.businessDetail.actions.trackPerformance')"
+              :label="$t('pages.dashboard.businessDetail.actions.trackPerformance')"
               icon="pi pi-chart-line"
               size="small"
               @click="handleAction(BUSINESS_ACTIONS.TRACK_PERFORMANCE)"
@@ -367,31 +367,31 @@
             <Tab :value="BUSINESS_TABS.OVERVIEW">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-id-card"></i>
-                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.overview') }}</span>
+                <span class="font-semibold">{{ $t('pages.dashboard.businessDetail.tabs.overview') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.REPORTS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-chart-bar"></i>
-                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.reports') }}</span>
+                <span class="font-semibold">{{ $t('pages.dashboard.businessDetail.tabs.reports') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.SUPPORTS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-heart"></i>
-                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.supports') }}</span>
+                <span class="font-semibold">{{ $t('pages.dashboard.businessDetail.tabs.supports') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.QUICK_WINS">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-check-circle"></i>
-                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.quickWins') }}</span>
+                <span class="font-semibold">{{ $t('pages.dashboard.businessDetail.tabs.quickWins') }}</span>
               </div>
             </Tab>
             <Tab :value="BUSINESS_TABS.OUTCOMES">
               <div class="flex align-items-center gap-2">
                 <i class="pi pi-chart-line"></i>
-                <span class="font-semibold">{{ $t('pages.businessDetail.tabs.outcomes') }}</span>
+                <span class="font-semibold">{{ $t('pages.dashboard.businessDetail.tabs.outcomes') }}</span>
               </div>
             </Tab>
 
@@ -415,9 +415,9 @@
               >
                 <template #append-actions="{ data }">
                   <Button
+                    v-tooltip.top="$t('pages.dashboard.businessDetail.actions.addQuickWin')"
                     icon="pi pi-check-circle"
                     class="p-button-rounded p-button-text p-button-success"
-                    v-tooltip.top="$t('pages.businessDetail.actions.addQuickWin')"
                     @click="openQuickWinForm(data.id)"
                   />
                 </template>
@@ -432,9 +432,9 @@
               >
                 <template #append-actions="{ data }">
                   <Button
+                    v-tooltip.top="$t('pages.dashboard.businessDetail.actions.addPerformanceReport')"
                     icon="pi pi-chart-line"
                     class="p-button-rounded p-button-text p-button-help"
-                    v-tooltip.top="$t('pages.businessDetail.actions.addPerformanceReport')"
                     @click="openMomentumForm(data.id)"
                   />
                 </template>

@@ -82,11 +82,17 @@
     })
   })
 
+  /**
+   *
+   */
   function formatDate(dateStr: string) {
     if (!dateStr) return ''
     return d(new Date(dateStr), 'long')
   }
 
+  /**
+   *
+   */
   function formatType(type: string) {
     return type
       .split('_')
@@ -94,12 +100,18 @@
       .join(' ')
   }
 
+  /**
+   *
+   */
   function formatQuantity(quantity: any) {
     if (!quantity || !quantity.value) return ''
     const unit = quantity.unit === 'currency' ? quantity.currency : quantity.unit
     return `${quantity.value} ${unit || ''}`
   }
 
+  /**
+   *
+   */
   function getColor(type: string) {
     // Simple color mapping based on type
     if (type.includes('financial')) return '#9C27B0'
@@ -108,6 +120,9 @@
     return '#607D8B'
   }
 
+  /**
+   *
+   */
   function getIcon(type: string) {
     if (type.includes('financial')) return 'pi pi-dollar'
     if (type.includes('training')) return 'pi pi-book'

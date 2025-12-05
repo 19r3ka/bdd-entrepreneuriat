@@ -6,6 +6,9 @@ interface GeocodeResult {
   display_name: string
 }
 
+/**
+ *
+ */
 export async function searchAddress(query: string): Promise<GeocodeResult[]> {
   const params = new URLSearchParams({
     q: query,
@@ -26,6 +29,9 @@ export async function searchAddress(query: string): Promise<GeocodeResult[]> {
   return results
 }
 
+/**
+ *
+ */
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   const params = new URLSearchParams({
     lat: lat.toString(),

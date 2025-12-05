@@ -2,12 +2,12 @@
   <Select
     :value="modelValue"
     :options="options"
-    optionLabel="label"
-    optionValue="value"
+    option-label="label"
+    option-value="value"
     :placeholder="placeholder"
     class="w-full"
-    showClear
-    @update:modelValue="$emit('update:modelValue', $event)"
+    show-clear
+    @update:model-value="$emit('update:modelValue', $event)"
   />
 </template>
 

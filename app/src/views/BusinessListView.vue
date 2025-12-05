@@ -1,13 +1,13 @@
 <template>
   <ResourceDataTable
+    v-model:filters="filters"
     :data="businesses"
     :columns="columns"
-    dataKey="id"
-    v-model:filters="filters"
-    :globalFilterFields="globalFilterFields"
-    resourceName="businesses"
+    data-key="id"
+    :global-filter-fields="globalFilterFields"
+    resource-name="businesses"
     :title="$t('pages.businesses.title')"
-    filterMode="advanced"
+    filter-mode="advanced"
     @add="handleAddBusiness"
     @view="handleViewBusiness"
     @edit="handleEditBusiness"
@@ -22,7 +22,7 @@
         :label="data.name || ''"
         shape="circle"
         size="normal"
-        customClass="mr-2"
+        custom-class="mr-2"
       />
     </template>
 
@@ -34,7 +34,7 @@
     <!-- Owner -->
     <template #col-ownerName="{ data }">
       <div v-if="data.ownerName">
-        <a @click="goToEntrepreneurProfile(data.entrepreneurId)" class="text-capitalize owner-link">
+        <a class="text-capitalize owner-link" @click="goToEntrepreneurProfile(data.entrepreneurId)">
           {{ data.ownerName }}
         </a>
       </div>
@@ -97,16 +97,16 @@
     <template #filter-supportStartDate="{ filterModel }">
       <DatePicker
         v-model="filterModel.value"
-        dateFormat="mm/dd/yy"
+        date-format="mm/dd/yy"
         :placeholder="$t('placeholders.selectDate')"
       />
     </template>
     <template #prepend-actions="{ data }">
       <Button
+        v-tooltip.top="'Log Support'"
         icon="pi pi-heart"
         class="p-button-rounded p-button-text p-button-sm mr-1"
         @click="openSupportDialog(data.id)"
-        v-tooltip.top="'Log Support'"
       />
     </template>
   </ResourceDataTable>
@@ -168,11 +168,17 @@
   const showSupportDialog = ref(false)
   const selectedBusinessId = ref<string | undefined>(undefined)
 
+  /**
+   *
+   */
   function openSupportDialog(businessId: string) {
     selectedBusinessId.value = businessId
     showSupportDialog.value = true
   }
 
+  /**
+   *
+   */
   function truncateBusinessArea(label: string, maxLength: number = 40): string {
     if (!label || label.length <= maxLength) return label
     return label.substring(0, maxLength) + '...'
@@ -268,16 +274,28 @@
   function handleAddBusiness() {
     router.push('/businesses/new')
   }
+  /**
+   *
+   */
   function handleViewBusiness(id: string) {
     if (id) router.push(`/businesses/${id}`)
   }
+  /**
+   *
+   */
   function goToEntrepreneurProfile(id: string) {
     if (id) router.push(`/entrepreneurs/${id}`)
   }
+  /**
+   *
+   */
   function handleEditBusiness(id: string) {
     if (id) router.push(`/businesses/${id}/edit`)
   }
 
+  /**
+   *
+   */
   function handleDelete(id: string) {
     const business = businesses.value.find((b) => b.id === id)
     const name = business?.name || t('common.business')

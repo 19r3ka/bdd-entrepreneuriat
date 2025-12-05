@@ -33,7 +33,7 @@
       </div>
 
       <div class="flex flex-col gap-3">
-        <Accordion :activeIndex="0" class="maturity-accordion">
+        <Accordion :active-index="0" class="maturity-accordion">
           <AccordionTab v-for="score in scores" :key="score.axis">
             <template #header>
               <div class="w-full pr-4">
@@ -48,7 +48,7 @@
                 </div>
                 <ProgressBar
                   :value="getProgress(score.axis).percentage"
-                  :showValue="false"
+                  :show-value="false"
                   class="!h-1.5 !bg-primary/20"
                   :pt="{ value: { class: '!bg-primary' } }"
                 />

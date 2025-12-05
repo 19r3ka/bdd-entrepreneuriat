@@ -34,15 +34,15 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <DatePicker
                   :model-value="modelValue ? new Date(modelValue) : null"
+                  show-icon
+                  date-format="yy-mm-dd"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  :max-date="new Date()"
                   @update:model-value="
                     (date) =>
                       updateModelValue(date instanceof Date ? date.toISOString().split('T')[0] : '')
                   "
-                  showIcon
-                  dateFormat="yy-mm-dd"
-                  :class="['w-full', { 'p-invalid': hasError }]"
                   @blur="onBlur && onBlur()"
-                  :maxDate="new Date()"
                 />
               </template>
             </FormField>
@@ -57,11 +57,11 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <BusinessAutocomplete
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :placeholder="$t('quickWin.placeholders.business')"
                   :class="{ 'p-invalid': hasError }"
-                  @blur="onBlur && onBlur()"
                   :disabled="!!props.businessId"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
                 />
               </template>
             </FormField>
@@ -75,17 +75,17 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
+                  :options="QuickWinCategories"
+                  option-label="label"
+                  option-value="value"
+                  :placeholder="$t('momentumMetric.placeholders.category', 'Select category')"
+                  :class="['w-full', { 'p-invalid': hasError }]"
                   @update:model-value="
                     (val) => {
                       updateModelValue(val)
                       updateSuggestions(val)
                     }
                   "
-                  :options="QuickWinCategories"
-                  optionLabel="label"
-                  optionValue="value"
-                  :placeholder="$t('momentumMetric.placeholders.category', 'Select category')"
-                  :class="['w-full', { 'p-invalid': hasError }]"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -98,10 +98,10 @@
           <div class="flex justify-content-between align-items-center mb-4">
             <p class="text-600 m-0">Track measurable results with indicators</p>
             <OutputIndicatorSelector
+              :placeholder="$t('quickWin.addIndicator')"
               @select="
                 (indicator) => addIndicator(indicator, values.indicatorValues, setFieldValue)
               "
-              :placeholder="$t('quickWin.addIndicator')"
             />
           </div>
 
@@ -154,8 +154,8 @@
                       { label: 'Yes', value: true },
                       { label: 'No', value: false }
                     ]"
-                    optionLabel="label"
-                    optionValue="value"
+                    option-label="label"
+                    option-value="value"
                     @change="
                       () =>
                         updateIndicatorValue(
@@ -175,6 +175,7 @@
                   <InputText
                     v-model="item.notes"
                     :placeholder="$t('quickWin.placeholders.indicatorNotes')"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -185,7 +186,6 @@
                           setFieldValue
                         )
                     "
-                    class="w-full"
                   />
                 </div>
               </div>
@@ -199,6 +199,9 @@
                   <InputNumber
                     v-if="isNumericUnit(item.indicatorId)"
                     v-model="item.baseline"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="2"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -209,13 +212,11 @@
                           setFieldValue
                         )
                     "
-                    :minFractionDigits="0"
-                    :maxFractionDigits="2"
-                    class="w-full"
                   />
                   <InputText
                     v-else
                     v-model="item.baseline"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -226,7 +227,6 @@
                           setFieldValue
                         )
                     "
-                    class="w-full"
                   />
                 </div>
                 <div class="field col-12 md:col-4">
@@ -234,6 +234,9 @@
                   <InputNumber
                     v-if="isNumericUnit(item.indicatorId)"
                     v-model="item.target"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="2"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -244,13 +247,11 @@
                           setFieldValue
                         )
                     "
-                    :minFractionDigits="0"
-                    :maxFractionDigits="2"
-                    class="w-full"
                   />
                   <InputText
                     v-else
                     v-model="item.target"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -261,7 +262,6 @@
                           setFieldValue
                         )
                     "
-                    class="w-full"
                   />
                 </div>
                 <div class="field col-12 md:col-4">
@@ -271,6 +271,9 @@
                   <InputNumber
                     v-if="isNumericUnit(item.indicatorId)"
                     v-model="item.currentValue"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="2"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -281,13 +284,11 @@
                           setFieldValue
                         )
                     "
-                    :minFractionDigits="0"
-                    :maxFractionDigits="2"
-                    class="w-full"
                   />
                   <InputText
                     v-else
                     v-model="item.currentValue"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -298,7 +299,6 @@
                           setFieldValue
                         )
                     "
-                    class="w-full"
                   />
                 </div>
                 <div class="field col-12">
@@ -308,6 +308,7 @@
                   <InputText
                     v-model="item.notes"
                     :placeholder="$t('quickWin.placeholders.indicatorNotes')"
+                    class="w-full"
                     @input="
                       (e) =>
                         updateIndicatorValue(
@@ -318,7 +319,6 @@
                           setFieldValue
                         )
                     "
-                    class="w-full"
                   />
                 </div>
               </div>
@@ -342,15 +342,15 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :options="businessSupports"
-                  optionLabel="title"
-                  optionValue="id"
+                  option-label="title"
+                  option-value="id"
                   :placeholder="$t('quickWin.placeholders.selectSupport')"
                   :class="['w-full', { 'p-invalid': hasError }]"
-                  @blur="onBlur && onBlur()"
-                  showClear
+                  show-clear
                   :disabled="!!props.supportBoostId"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
                 />
               </template>
             </FormField>
@@ -364,12 +364,12 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <Select
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   :options="genderMarkerOptions"
-                  optionLabel="label"
-                  optionValue="value"
+                  option-label="label"
+                  option-value="value"
                   :placeholder="$t('quickWin.placeholders.genderMarker')"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
                   @blur="onBlur && onBlur()"
                 />
               </template>
@@ -384,12 +384,12 @@
               <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                 <AutoComplete
                   :model-value="modelValue"
-                  @update:model-value="updateModelValue"
                   multiple
                   chips
                   :suggestions="filteredTags"
-                  @complete="searchTags"
                   :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @complete="searchTags"
                   @blur="onBlur && onBlur()"
                 />
               </template>

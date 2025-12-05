@@ -35,10 +35,16 @@ interface FieldError {
 type FormErrors<T> = Partial<Record<string, FieldError>>
 
 // ------------------ Helpers ------------------
+/**
+ *
+ */
 function getNestedValue(obj: any, path: string): any {
   return path.split('.').reduce((current, key) => current?.[key], obj)
 }
 
+/**
+ *
+ */
 function setNestedValue(obj: any, path: string, value: any): void {
   const keys = path.split('.')
   const lastKey = keys.pop()!
@@ -49,6 +55,9 @@ function setNestedValue(obj: any, path: string, value: any): void {
   target[lastKey] = value
 }
 
+/**
+ *
+ */
 function mapIssuesToErrors<T>(issues: z.core.$ZodIssue[]): FormErrors<T> {
   const newErrors: FormErrors<T> = {}
   issues.forEach((issue) => {
@@ -59,6 +68,9 @@ function mapIssuesToErrors<T>(issues: z.core.$ZodIssue[]): FormErrors<T> {
   return newErrors
 }
 
+/**
+ *
+ */
 function getDuplicateMessageKey(fieldPath: string, fallbackKey?: string): string {
   if (fallbackKey) return fallbackKey
   if (DUPLICATE_VALIDATION_KEYS[fieldPath]) return DUPLICATE_VALIDATION_KEYS[fieldPath]
@@ -70,6 +82,9 @@ function getDuplicateMessageKey(fieldPath: string, fallbackKey?: string): string
 }
 
 // safeClone: accepts reactive proxies or plain objects and returns a plain deep clone
+/**
+ *
+ */
 function safeClone<T>(value: T): T {
   try {
     const raw = toRaw(value as unknown as Record<string, unknown>) as T
@@ -80,6 +95,9 @@ function safeClone<T>(value: T): T {
   }
 }
 
+/**
+ *
+ */
 function deepCloneWithDates(obj: any): any {
   if (obj === null || typeof obj !== 'object') return obj
   if (obj instanceof Date) return new Date(obj.getTime())
@@ -92,6 +110,9 @@ function deepCloneWithDates(obj: any): any {
 }
 
 // ------------------ Uniqueness Check ------------------
+/**
+ *
+ */
 function checkUniqueness(
   fieldPath: string,
   values: any,
@@ -115,6 +136,9 @@ function checkUniqueness(
 }
 
 // ------------------ Main Composable ------------------
+/**
+ *
+ */
 export function useValidationForm<T extends ZodSchema>(options: UseValidationFormOptions<T>) {
   const {
     initialValues,
@@ -144,6 +168,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
   const rawErrors = ref<z.core.$ZodIssue[]>([])
 
   // ------------------ Validation ------------------
+  /**
+   *
+   */
   function validateField(fieldPath: string): boolean {
     const result = validationSchema.safeParse(values.value)
 
@@ -166,6 +193,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
     return !errors.value[fieldPath]
   }
 
+  /**
+   *
+   */
   function validateForm(): boolean {
     const result = validationSchema.safeParse(values.value)
     if (result.success) {
@@ -188,6 +218,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
   }
 
   // ------------------ Field Handlers ------------------
+  /**
+   *
+   */
   function handleFieldChange(fieldPath: string, value: unknown): void {
     setNestedValue(values.value, fieldPath, value)
     isDirty.value = true
@@ -195,11 +228,17 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
     if (validateOnChange) validateField(fieldPath)
   }
 
+  /**
+   *
+   */
   function handleFieldBlur(fieldPath: string): void {
     touchedFields.value.add(fieldPath)
     if (validateOnBlur) validateField(fieldPath)
   }
 
+  /**
+   *
+   */
   function defineField(fieldPath: keyof FormValues | string) {
     const path = String(fieldPath)
     return {
@@ -212,6 +251,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
   }
 
   // ------------------ Programmatic Helpers ------------------
+  /**
+   *
+   */
   function setInitialValues(newInitial: Partial<FormValues> | FormValues): void {
     // normalize incoming (avoids structuredClone errors when caller passed a reactive/ref/component)
     const incoming = normalizeIncoming(newInitial)
@@ -234,6 +276,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
   }
 
   // small helper: ensure incoming is a plain serializable object
+  /**
+   *
+   */
   function normalizeIncoming(incoming: Partial<FormValues> | FormValues): Partial<FormValues> {
     try {
       return safeClone(incoming) as Partial<FormValues>
@@ -243,6 +288,9 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
     }
   }
 
+  /**
+   *
+   */
   function resetForm(): void {
     values.value = safeClone(initialSnapshot.value) as FormValues
     errors.value = {}
@@ -251,20 +299,32 @@ export function useValidationForm<T extends ZodSchema>(options: UseValidationFor
     isSubmitting.value = false
   }
 
+  /**
+   *
+   */
   function setFieldValue(fieldPath: string, value: unknown): void {
     setNestedValue(values.value, fieldPath, value)
     isDirty.value = true
   }
 
+  /**
+   *
+   */
   function setFieldError(fieldPath: string, error: string): void {
     errors.value[fieldPath] = { _errors: [error] }
   }
 
+  /**
+   *
+   */
   function clearFieldError(fieldPath: string): void {
     delete errors.value[fieldPath]
   }
 
   // ------------------ Submission ------------------
+  /**
+   *
+   */
   async function handleSubmit(
     customOnSubmit?: (values: FormValues) => Promise<void> | void
   ): Promise<void> {

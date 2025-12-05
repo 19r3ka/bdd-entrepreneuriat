@@ -50,6 +50,9 @@
   })
 
   // Helper: create a unique slug from name using store.getBySlug
+  /**
+   *
+   */
   function makeUniqueSlug(baseSlug: string) {
     let candidate = baseSlug
     let i = 1
@@ -59,6 +62,9 @@
     return candidate
   }
 
+  /**
+   *
+   */
   async function submit() {
     if (!form.firstName || !form.lastName || !form.contact.email) return
 

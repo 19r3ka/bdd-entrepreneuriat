@@ -2,9 +2,9 @@
   <SelectButton
     v-model="languageStore.currentLocale"
     :options="locales"
-    optionLabel="label"
-    optionValue="value"
-    :allowEmpty="false"
+    option-label="label"
+    option-value="value"
+    :allow-empty="false"
     aria-label="Language Switcher"
     @change="handleLocaleChange"
   >
@@ -25,6 +25,9 @@
     { label: 'EN', value: 'en' }
   ]
 
+  /**
+   *
+   */
   function handleLocaleChange(event: any) {
     if (event.value) {
       languageStore.setLocale(event.value)
