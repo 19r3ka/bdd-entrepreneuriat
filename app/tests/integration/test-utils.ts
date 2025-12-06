@@ -2,6 +2,10 @@ import { mount, type MountingOptions } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { vi } from 'vitest';
 import type { Component } from 'vue';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
+import { createTestingPinia } from '@pinia/testing';
 
 // Create a default i18n instance for testing
 const i18n = createI18n({
@@ -14,14 +18,64 @@ const i18n = createI18n({
         appName: 'Entrepreneur App',
         dashboard: 'Dashboard',
         reports: 'Reports',
+        generalInformation: 'General Information',
+        location: 'Location',
+        businessInformation: 'Business Information',
+        contactInformation: 'Contact Information',
+        onlinePresenceAndSocialMedia: 'Online Presence and Social Media',
+        required: 'Required',
+        requiredMarker: '*',
+        submit: 'Submit',
+        update: 'Update',
+        name: 'Name',
+        entrepreneurId: 'Entrepreneur ID',
+        primaryBusinessArea: 'Primary Business Area',
+        secondaryBusinessArea: 'Secondary Business Area',
+        logo: 'Logo',
+        registrationNumber: 'Registration Number',
+        registrationDate: 'Registration Date',
+        activityStartDate: 'Activity Start Date',
+        supportStartDate: 'Support Start Date',
+        email: 'Email',
+        telephone: 'Telephone',
+        onlinePresence: 'Online Presence',
+        personalWebsite: 'Personal Website',
+        personalInformation: 'Personal Information',
+        socialDigitalPresence: 'Social & Digital Presence',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        gender: 'Gender',
+        dateOfBirth: 'Date of Birth',
+        avatar: 'Avatar',
+        slug: 'Slug',
+        bio: 'Bio',
+        socialMedia: {
+          linkedin: 'LinkedIn',
+          twitter: 'Twitter',
+          facebook: 'Facebook',
+          instagram: 'Instagram',
+        },
+      },
+      forms: {
+        entrepreneur: {
+          title: 'Entrepreneur Form',
+          locationHelp: 'Location Help',
+        },
       },
       pages: {
         entrepreneurs: {
           title: 'Entrepreneurs',
+          new: 'New Entrepreneur',
+          edit: 'Edit Entrepreneur',
         },
         businesses: {
           title: 'Businesses',
+          new: 'New Business',
+          edit: 'Edit Business',
         },
+      },
+      placeholders: {
+        search: 'Search',
       },
     },
   },
@@ -37,7 +91,15 @@ export function mountWithGlobalComponents<T extends Component>(
   return mount(component, {
     ...options,
     global: {
-      plugins: [i18n],
+      plugins: [
+        i18n, 
+        PrimeVue, 
+        ToastService, 
+        ConfirmationService,
+        createTestingPinia({
+          createSpy: vi.fn,
+        })
+      ],
       components: {
         // PrimeVue components that might be used across components
         Button: {
@@ -125,19 +187,3 @@ export const mockConfirm = {
 export const mockToast = {
   add: vi.fn(),
 };
-
-// Mock PrimeVue confirm and toast services
-/**
- *
- */
-export function setupPrimeVueMocks() {
-  // Mock PrimeVue confirm service
-  vi.mock('primevue/confirm', () => ({
-    useConfirm: () => mockConfirm,
-  }));
-
-  // Mock PrimeVue toast service
-  vi.mock('primevue/toast', () => ({
-    useToast: () => mockToast,
-  }));
-}

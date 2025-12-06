@@ -32,7 +32,7 @@ describe('EntrepreneurForm.vue', () => {
   it('renders form in create mode correctly', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Entrepreneur = {
@@ -62,6 +62,11 @@ describe('EntrepreneurForm.vue', () => {
         initialValues: mockInitialValues,
         schema: mockSchema,
       },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
+      },
     });
 
     // Check for "new entrepreneur" heading
@@ -76,7 +81,7 @@ describe('EntrepreneurForm.vue', () => {
   it('renders form in edit mode correctly', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Entrepreneur = {
@@ -106,6 +111,11 @@ describe('EntrepreneurForm.vue', () => {
         initialValues: mockInitialValues,
         schema: mockSchema,
       },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
+      },
     });
 
     // Check for "edit entrepreneur" heading
@@ -119,7 +129,7 @@ describe('EntrepreneurForm.vue', () => {
   it('renders all form sections', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Entrepreneur = {
@@ -148,6 +158,11 @@ describe('EntrepreneurForm.vue', () => {
         isEdit: false,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 
@@ -160,7 +175,7 @@ describe('EntrepreneurForm.vue', () => {
   it('has required form fields', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Entrepreneur = {
@@ -190,12 +205,17 @@ describe('EntrepreneurForm.vue', () => {
         initialValues: mockInitialValues,
         schema: mockSchema,
       },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
+      },
     });
 
     // Check that required fields are present
-    const firstNameField = wrapper.find('[name="firstName"]');
-    const lastNameField = wrapper.find('[name="lastName"]');
-    const emailField = wrapper.find('[name="contact.email"]');
+    const firstNameField = wrapper.find('[id="firstName"]');
+    const lastNameField = wrapper.find('[id="lastName"]');
+    const emailField = wrapper.find('[id="contact.email"]');
     
     expect(firstNameField.exists()).toBe(true);
     expect(lastNameField.exists()).toBe(true);
@@ -234,6 +254,11 @@ describe('EntrepreneurForm.vue', () => {
         isEdit: false,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 
@@ -276,6 +301,11 @@ describe('EntrepreneurForm.vue', () => {
         isEdit: true,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 

@@ -33,7 +33,7 @@ describe('BusinessForm.vue', () => {
   it('renders form in create mode correctly', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Business = {
@@ -74,6 +74,11 @@ describe('BusinessForm.vue', () => {
         initialValues: mockInitialValues,
         schema: mockSchema,
       },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
+      },
     });
 
     // Check for "new business" heading
@@ -87,7 +92,7 @@ describe('BusinessForm.vue', () => {
   it('renders form in edit mode correctly', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Business = {
@@ -128,6 +133,11 @@ describe('BusinessForm.vue', () => {
         initialValues: mockInitialValues,
         schema: mockSchema,
       },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
+      },
     });
 
     // Check for "edit business" heading
@@ -141,7 +151,7 @@ describe('BusinessForm.vue', () => {
   it('renders all form sections', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Business = {
@@ -181,6 +191,11 @@ describe('BusinessForm.vue', () => {
         isEdit: false,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 
@@ -199,7 +214,7 @@ describe('BusinessForm.vue', () => {
   it('has required form fields', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Business = {
@@ -239,6 +254,11 @@ describe('BusinessForm.vue', () => {
         isEdit: false,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 
@@ -251,7 +271,7 @@ describe('BusinessForm.vue', () => {
   it('renders business area options correctly', () => {
     const mockSchema = {
       parse: vi.fn(),
-      safeParse: vi.fn(),
+      safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
     
     const mockInitialValues: Business = {
@@ -291,6 +311,11 @@ describe('BusinessForm.vue', () => {
         isEdit: false,
         initialValues: mockInitialValues,
         schema: mockSchema,
+      },
+      global: {
+        stubs: {
+          InteractiveMap: true,
+        },
       },
     });
 

@@ -1,5 +1,5 @@
 <template>
-  <Panel toggleable :collapsed="initiallyCollapsed" class="mb-6">
+  <Panel toggleable :collapsed="initiallyCollapsed" class="mb-6 form-section">
     <template #header>
       <div class="flex justify-content-between align-items-center w-full">
         <h2 class="text-900 font-bold text-xl m-0">{{ title }}</h2>
