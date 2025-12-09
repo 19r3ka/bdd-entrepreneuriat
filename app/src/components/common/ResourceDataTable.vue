@@ -19,12 +19,9 @@
             <div class="flex flex-column gap-3">
               <div class="flex justify-content-between align-items-center">
                 <h1 class="m-0">{{ $t(`pages.${resourceName}.title`) }}</h1>
-                <Button
-                  :label="$t('common.add', { resource: resourceName })"
-                  icon="pi pi-plus"
-                  class="p-button-primary"
-                  @click="emit('add')"
-                />
+                <div class="flex gap-2">
+                  <slot name="header-actions"></slot>
+                </div>
               </div>
 
               <div class="flex justify-content-between align-items-center">
@@ -287,6 +284,13 @@
     isMultiSelect.value = false
     selectedItems.value = []
   }
+
+  // Expose selected items to parent components
+  defineExpose({
+    selectedItems,
+    selectedIds,
+    isMultiSelect
+  })
 </script>
 
 <style scoped>

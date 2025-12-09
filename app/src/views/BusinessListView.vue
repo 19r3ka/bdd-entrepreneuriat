@@ -1,5 +1,6 @@
 <template>
   <ResourceDataTable
+    ref="resourceDataTableRef"
     v-model:filters="filters"
     :data="businesses"
     :columns="columns"
@@ -13,7 +14,7 @@
     @edit="handleEditBusiness"
     @delete="handleDelete"
     @delete-selected="confirmDeleteSelected"
-    @export-csv="exportCSV"
+    @export-csv="handleExportCSV"
   >
     <!-- Logo / Avatar -->
     <template #col-logo="{ data }">
@@ -109,6 +110,16 @@
         @click="openSupportDialog(data.id)"
       />
     </template>
+
+    <template #header-actions>
+      <SplitButton
+        :label="$t('pages.businesses.add')"
+        icon="pi pi-plus"
+        :model="actionItems"
+        class="p-button-primary"
+        @click="handleAddBusiness"
+      />
+    </template>
   </ResourceDataTable>
 
   <Dialog
@@ -121,6 +132,16 @@
   >
     <SupportBoostForm :business-id="selectedBusinessId" @submit="handleSupportSubmit" />
   </Dialog>
+
+  <!-- Import Dialog -->
+  <DataImportUpload v-model:visible="showImportDialog" @import-complete="handleImportComplete" />
+
+  <!-- Export Dialog -->
+  <DataExportControl
+    v-model:visible="showExportDialog"
+    :data="exportDataSelected.length > 0 ? exportDataSelected : businesses"
+    default-file-name="businesses_export"
+  />
 </template>
 
 <script setup lang="ts">
@@ -131,6 +152,7 @@
   import Button from 'primevue/button'
   import DatePicker from 'primevue/datepicker'
   import Dialog from 'primevue/dialog'
+  import SplitButton from 'primevue/splitbutton'
   import Tag from 'primevue/tag'
   import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
   import { onMounted, ref, computed } from 'vue'
@@ -142,6 +164,8 @@
   import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
   import SelectFilter from '@/components/common/SelectFilter.vue'
   import TextFilter from '@/components/common/TextFilter.vue'
+  import DataImportUpload from '@/components/import-export/DataImportUpload.vue'
+  import DataExportControl from '@/components/import-export/DataExportControl.vue'
   import { useBusinessAreas } from '@/composables/useBusinessAreas'
   import { useBusinessFilters } from '@/composables/useBusinessFilters'
   import { useConfirmation } from '@/composables/useConfirmation'
@@ -151,6 +175,7 @@
   import { useSupportStore } from '@/stores/useSupportStore'
   import type { Business } from '@/types/business'
   import type { Support } from '@/types/monitoring-evaluation/Support'
+  import type { ImportResult } from '@/composables/useImportExport'
 
   const { t } = useI18n()
   const router = useRouter()
@@ -165,8 +190,43 @@
   const { exportCsv } = useCsv<Business>()
   const vTooltip = Tooltip
 
+  const resourceDataTableRef = ref()
   const showSupportDialog = ref(false)
   const selectedBusinessId = ref<string | undefined>(undefined)
+  const showImportDialog = ref(false)
+  const showExportDialog = ref(false)
+
+  // Computed properties to access the multi-select state from ResourceDataTable
+  const isMultiSelect = computed(() => resourceDataTableRef.value?.isMultiSelect || false)
+  const selectedIds = computed(() => resourceDataTableRef.value?.selectedIds || new Set())
+
+  // Define the menu items for the split button
+  const actionItems = computed(() => [
+    {
+      label: t('importExport.importData'),
+      icon: 'pi pi-upload',
+      command: () => {
+        showImportDialog.value = true
+      }
+    },
+    {
+      label: t('importExport.exportData'),
+      icon: 'pi pi-download',
+      command: () => {
+        triggerExportFromTopButton()
+      },
+      disabled: isMultiSelect.value && selectedIds.value.size === 0
+    }
+  ])
+
+  /**
+   *
+   */
+  function handleImportComplete(result: ImportResult) {
+    console.log('Import complete:', result)
+    // Refresh the business list
+    store.fetchAll()
+  }
 
   /**
    *
@@ -305,16 +365,26 @@
     })
   }
 
-  /** CSV export */
-  const exportCSV = (dataToExport: Business[]) => {
-    if (!dataToExport.length) return
-    const sample = dataToExport[0]
-    const cols = generateCsvColumns(
-      sample,
-      ['avatar', 'id', 'entrepreneur'], // Exclude nested objects
-      [{ key: 'ownerName', label: 'owner' }] // Add ownerName as 'Owner'
-    )
-    exportCsv(dataToExport, cols, 'businesses')
+  // Export functionality - to be used for both bulk and individual export
+  const exportDataSelected = ref<Business[]>([])
+
+  const handleExportCSV = (dataToExport: Business[]) => {
+    exportDataSelected.value = dataToExport
+    showExportDialog.value = true
+  }
+
+  // Handle export from the top "Export Data" button
+  const triggerExportFromTopButton = () => {
+    // Get the currently selected items from the ResourceDataTable
+    const dataTableComponent = resourceDataTableRef.value
+    if (dataTableComponent && dataTableComponent.selectedItems && dataTableComponent.selectedItems.length > 0) {
+      // If there are selected items in the table, export those
+      exportDataSelected.value = dataTableComponent.selectedItems
+    } else {
+      // Otherwise, export all businesses
+      exportDataSelected.value = businesses.value
+    }
+    showExportDialog.value = true
   }
 
   /** Load data */
