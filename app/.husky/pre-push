@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running type-check..."
+cd app && npm run type-check
+
+echo "🧪 Running tests..."
+cd app && npm test -- --run
