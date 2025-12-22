@@ -57,7 +57,7 @@ describe('LocationCard.vue', () => {
     // Should render a map div with default placeholder image
     const mapDiv = wrapper.find('.w-full.h-10rem');
     expect(mapDiv.exists()).toBe(true);
-    
+
     // Check for default placeholder
     expect(mapDiv.attributes('style')).toContain('via.placeholder.com');
   });
@@ -86,10 +86,10 @@ describe('LocationCard.vue', () => {
     // Check for PrimeVue card classes
     expect(wrapper.classes()).toContain('shadow-2');
     expect(wrapper.classes()).toContain('mb-4');
-    
+
     // Check for grid layout
     expect(wrapper.find('.grid').exists()).toBe(true);
-    
+
     // Check for map div classes
     const mapDiv = wrapper.find('.w-full.h-10rem');
     expect(mapDiv.classes()).toContain('border-round');
@@ -121,7 +121,7 @@ describe('LocationCard.vue', () => {
 
     // Check for aria-label on the card
     expect(wrapper.attributes('aria-label')).toBe(title);
-    
+
     // Check for aria-label on the map
     expect(wrapper.find('.w-full.h-10rem').attributes('aria-label')).toBe('Map Preview');
   });
@@ -137,8 +137,8 @@ describe('LocationCard.vue', () => {
     // Check for responsive column classes
     const addressCol = wrapper.find('.col-12.md\\:col-6');
     expect(addressCol.exists()).toBe(true);
-    
-    const mapCol = wrapper.findAll('.col-12.md\\:col-6')[1];  // Second one
+
+    const mapCol = wrapper.findAll('.col-12.md\\:col-6')[1]; // Second one
     expect(mapCol.exists()).toBe(true);
   });
 

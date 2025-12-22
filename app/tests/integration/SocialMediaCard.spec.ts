@@ -27,16 +27,16 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-        username: 'test-user'
+        username: 'test-user',
       },
       {
         name: 'Twitter',
         url: 'https://twitter.com/test',
         icon: 'pi-twitter',
-        username: 'test'
-      }
+        username: 'test',
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -56,9 +56,9 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -95,9 +95,9 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -107,7 +107,7 @@ describe('SocialMediaCard.vue', () => {
     // Check for PrimeVue card classes
     expect(wrapper.classes()).toContain('shadow-2');
     expect(wrapper.classes()).toContain('mb-4');
-    
+
     // Check for flex wrapper for social links
     expect(wrapper.find('.flex').classes()).toContain('flex-wrap');
     expect(wrapper.find('.flex').classes()).toContain('gap-2');
@@ -120,9 +120,9 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -143,9 +143,9 @@ describe('SocialMediaCard.vue', () => {
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
         // No username provided
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -164,21 +164,21 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-        username: 'test-user'
+        username: 'test-user',
       },
       {
         name: 'Twitter',
         url: 'https://twitter.com/test',
         icon: 'pi-twitter',
-        username: 'test'
+        username: 'test',
       },
       {
         name: 'Facebook',
         url: 'https://facebook.com/test',
         icon: 'pi-facebook',
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -188,7 +188,7 @@ describe('SocialMediaCard.vue', () => {
     // Check for all three platforms
     const socialLinks = wrapper.findAll('a');
     expect(socialLinks).toHaveLength(3);
-    
+
     // Check that usernames are only shown for the first two
     expect(wrapper.text()).toContain('test-user');
     expect(wrapper.text()).toContain('test');
@@ -200,9 +200,9 @@ describe('SocialMediaCard.vue', () => {
         name: 'LinkedIn',
         url: 'https://linkedin.com/in/test',
         icon: 'pi-linkedin',
-      }
+      },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaCard, {
       props: {
         socials: socialPlatforms,
@@ -211,7 +211,7 @@ describe('SocialMediaCard.vue', () => {
 
     // Check for aria-label on the card
     expect(wrapper.attributes('aria-label')).toBe('Social Media Links');
-    
+
     // Check for aria attributes on the link
     expect(wrapper.find('a').attributes('aria-label')).toBe('LinkedIn');
     expect(wrapper.find('i').attributes('aria-hidden')).toBe('true');

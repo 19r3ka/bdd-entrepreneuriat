@@ -6,7 +6,7 @@
       </template>
       <template #content>
         <DataTable :value="supports" responsive-layout="scroll">
-          <Column field="modality" :header="$t('support.modality')"></Column>
+          <Column field="modality" :header="$t('pages.support.modality')"></Column>
           <Column field="description" :header="$t('common.description')"></Column>
           <Column field="createdAt" :header="$t('common.createdAt')">
             <template #body="slotProps">
@@ -34,26 +34,26 @@
 </template>
 
 <script setup lang="ts">
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
-  import Button from 'primevue/button'
-  import Card from 'primevue/card'
-  import { useI18n } from 'vue-i18n'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import { useI18n } from 'vue-i18n';
+import type { Support } from '@/types/monitoring-evaluation/Support';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  defineProps<{
-    supports: Support[]
-  }>()
+defineProps<{
+  supports: Support[];
+}>();
 
-  const emit = defineEmits(['edit-support', 'delete-support'])
+const emit = defineEmits(['edit-support', 'delete-support']);
 
-  const editSupport = (support: Support) => {
-    emit('edit-support', support)
-  }
+const editSupport = (support: Support) => {
+  emit('edit-support', support);
+};
 
-  const deleteSupport = (support: Support) => {
-    emit('delete-support', support)
-  }
+const deleteSupport = (support: Support) => {
+  emit('delete-support', support);
+};
 </script>

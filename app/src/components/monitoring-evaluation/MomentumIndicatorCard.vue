@@ -19,7 +19,7 @@
           :model-value="indicator.name"
           class="w-full font-semibold"
           placeholder="Indicator Name"
-          @update:model-value="(val) => updateField('name', val)"
+          @update:model-value="val => updateField('name', val)"
         />
       </div>
 
@@ -34,7 +34,7 @@
           option-label="label"
           option-value="value"
           class="w-full"
-          @update:model-value="(val) => updateField('unit', val)"
+          @update:model-value="val => updateField('unit', val)"
         />
       </div>
 
@@ -48,7 +48,7 @@
           input-class="w-full"
           :min-fraction-digits="0"
           :max-fraction-digits="2"
-          @update:model-value="(val) => updateField('baseline', val)"
+          @update:model-value="val => updateField('baseline', val)"
         />
       </div>
 
@@ -62,7 +62,7 @@
           input-class="w-full"
           :min-fraction-digits="0"
           :max-fraction-digits="2"
-          @update:model-value="(val) => updateField('target', val)"
+          @update:model-value="val => updateField('target', val)"
         />
       </div>
 
@@ -89,13 +89,13 @@
               :model-value="reading.value"
               :options="[
                 { label: 'Yes', value: true },
-                { label: 'No', value: false }
+                { label: 'No', value: false },
               ]"
               option-label="label"
               option-value="value"
               class="w-full"
               placeholder="Select"
-              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
+              @update:model-value="val => updateReading(rIndex, 'value', val)"
             />
           </div>
           <div v-else class="flex-grow-1">
@@ -106,7 +106,7 @@
               input-class="w-full"
               :min-fraction-digits="0"
               :max-fraction-digits="2"
-              @update:model-value="(val) => updateReading(rIndex, 'value', val)"
+              @update:model-value="val => updateReading(rIndex, 'value', val)"
             />
           </div>
           <div class="w-10rem">
@@ -115,7 +115,14 @@
               placeholder="Date"
               class="w-full"
               date-format="yy-mm-dd"
-              @update:model-value="(val) => updateReading(rIndex, 'asOf', val)"
+              @update:model-value="
+                val =>
+                  updateReading(
+                    rIndex,
+                    'asOf',
+                    Array.isArray(val) ? (val[0] as Date | null) : (val as Date | null)
+                  )
+              "
             />
           </div>
           <Button
@@ -142,53 +149,57 @@
 </template>
 
 <script setup lang="ts">
-  import { defineProps, defineEmits } from 'vue'
-  import InputText from 'primevue/inputtext'
-  import Select from 'primevue/select'
-  import InputNumber from 'primevue/inputnumber'
-  import Button from 'primevue/button'
-  import DatePicker from 'primevue/datepicker'
+import { defineProps, defineEmits } from 'vue';
+import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
+import InputNumber from 'primevue/inputnumber';
+import Button from 'primevue/button';
+import DatePicker from 'primevue/datepicker';
 
-  const props = defineProps<{
-    indicator: {
-      name: string
-      unit: string
-      baseline?: number
-      target?: number
-      readings: {
-        value: number | boolean | undefined | null
-        asOf: Date
-      }[]
-    }
-    unitOptions: any[]
-  }>()
+const props = defineProps<{
+  indicator: {
+    name: string;
+    unit: string;
+    baseline?: number;
+    target?: number;
+    readings: {
+      value: number | boolean | string | undefined | null;
+      asOf: Date;
+    }[];
+  };
+  unitOptions: { label: string; value: string }[];
+}>();
 
-  const emit = defineEmits<{
-    (e: 'update', indicator: any): void
-    (e: 'remove'): void
-  }>()
+const emit = defineEmits<{
+  (e: 'update', indicator: typeof props.indicator): void;
+  (e: 'remove'): void;
+}>();
 
-  const updateField = (field: string, value: any) => {
-    emit('update', { ...props.indicator, [field]: value })
-  }
+const updateField = (field: string, value: string | number | null | undefined) => {
+  emit('update', { ...props.indicator, [field]: value });
+};
 
-  const updateReading = (index: number, field: string, value: any) => {
-    const newReadings = [...props.indicator.readings]
-    newReadings[index!] = { ...newReadings[index!]!, [field]: value }
-    emit('update', { ...props.indicator, readings: newReadings })
-  }
+const updateReading = (
+  index: number,
+  field: string,
+  value: number | boolean | string | Date | null
+) => {
+  const newReadings = [...props.indicator.readings];
+  newReadings[index!] = { ...newReadings[index!]!, [field]: value };
+  emit('update', { ...props.indicator, readings: newReadings });
+};
 
-  const addReading = () => {
-    const newReadings: Array<{value: number | boolean | null | undefined, asOf: Date}> = [
-      ...(props.indicator.readings || []),
-      { value: undefined, asOf: new Date() }
-    ]
-    emit('update', { ...props.indicator, readings: newReadings })
-  }
+const addReading = () => {
+  const newReadings: Array<{ value: number | boolean | string | null | undefined; asOf: Date }> = [
+    ...(props.indicator.readings || []),
+    { value: undefined, asOf: new Date() },
+  ];
+  emit('update', { ...props.indicator, readings: newReadings });
+};
 
-  const removeReading = (index: number) => {
-    const newReadings = [...props.indicator.readings]
-    newReadings.splice(index, 1)
-    emit('update', { ...props.indicator, readings: newReadings })
-  }
+const removeReading = (index: number) => {
+  const newReadings = [...props.indicator.readings];
+  newReadings.splice(index, 1);
+  emit('update', { ...props.indicator, readings: newReadings });
+};
 </script>

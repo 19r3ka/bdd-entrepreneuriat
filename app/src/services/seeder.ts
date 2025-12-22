@@ -1,65 +1,673 @@
-import { faker } from '@faker-js/faker'
-import { v4 as uuidv4 } from 'uuid'
-import { db } from './local-db'
-import type { Entrepreneur } from '@/types/entrepreneur'
-import type { Business } from '@/types/business'
-import { EntrepreneurSchema } from '@/schemas/entrepreneur'
-import { BusinessSchema } from '@/schemas/business'
+/* eslint-disable */
+import { faker } from '@faker-js/faker';
+import { v4 as uuidv4 } from 'uuid';
+import { db } from './local-db';
+import type { Entrepreneur } from '@/types/entrepreneur';
+import type { Business } from '@/types/business';
+import { EntrepreneurSchema } from '@/schemas/entrepreneur';
+import { BusinessSchema } from '@/schemas/business';
+import { SupportBoostSchema, type Support } from '@/schemas/monitoring-evaluation/Support';
+import { QuickWinSchema, type QuickWin } from '@/schemas/monitoring-evaluation/QuickWin';
 import {
-  MaturityDimensions,
-  MaturityCatalog,
-  type MaturityDimension,
-  type MilestoneDefinition
-} from '@/constants/maturityCatalog'
+  MomentumMetricSchema,
+  type MomentumMetric,
+} from '@/schemas/monitoring-evaluation/MomentumMetric';
+import { generateMockData, generateTogoPhone } from '@/utils/mock-data-generator';
+import { MaturityCatalog, type MaturityDimension } from '@/constants/maturityCatalog';
+import {
+  GENDER_OPTIONS,
+  BOOST_TYPE_OPTIONS,
+  MODALITY_OPTIONS,
+  CHANNEL_OPTIONS,
+  GENDER_MARKER_OPTIONS,
+  SUPPORT_QUANTITY_UNIT_OPTIONS,
+  QUICK_WIN_CATEGORY_OPTIONS,
+  DIMENSION_OPTIONS,
+} from '@/schemas/enums';
+import { VALID_BUSINESS_AREA_CODES } from '@/constants/businessAreaCodes';
 
-// Lomé, Togo coordinates
-const LOME_LAT = 6.1375
-const LOME_LNG = 1.2125
+// Location constants
+const LOME_LAT = 6.1375;
+const LOME_LNG = 1.2125;
+const KM_TO_DEGREES_FACTOR = 111.32;
+const LAT_LNG_CONVERSION_FACTOR = 180;
+const COORDINATE_RANDOMNESS_FACTOR = 2;
+const DEFAULT_RADIUS = 15;
 
-// Generate random coordinates around a center point
+// Probability thresholds
+const PROB = {
+  DEMOGRAPHICS: 0.3,
+  BIO: 0.2,
+  ADDRESS: 0.4,
+  ACTIVITY_START_DATE: 0.7,
+  BUSINESS_TELEPHONE: 0.8,
+  SECONDARY_BUSINESS_AREA: 0.3,
+  REGISTRATION_NUMBER: 0.6,
+  REGISTRATION_DATE: 0.7,
+  SOCIAL_MEDIA: 0.4,
+  RICH_DATA_BUSINESSES: 0.4,
+} as const;
+
 /**
- *
+ * Constants for simulation logic to eliminate magic numbers
  */
-function getRandomLocation(centerLat: number, centerLng: number, radiusKm: number = 10) {
-  const r = radiusKm / 111.32 // Convert km to degrees (approx)
-  const u = Math.random()
-  const v = Math.random()
-  const w = r * Math.sqrt(u)
-  const t = 2 * Math.PI * v
-  const x = w * Math.cos(t)
-  const y = w * Math.sin(t)
+const SIM_SETTINGS = {
+  REVENUE: {
+    MIN: 1_000_000,
+    MAX: 5_000_000,
+    READING_COUNT: 6,
+    GROWTH_STEP: 0.05,
+    VOLATILITY: 0.1,
+    VOLATILITY_OFFSET: 0.05,
+    DAYS_WINDOW: 180,
+    DAYS_STEP: 30,
+    TARGET_MULT: 1.5,
+  },
+  JOBS: {
+    MIN_VAL: 1,
+    MAX_VAL: 5,
+    DISABILITY_MAX: 2,
+    TARGET_TOTAL: 10,
+  },
+  MARKET: {
+    TARGET: 100_000,
+    VAL_MIN: 10_000,
+    VAL_MAX: 50_000,
+    YEARS_PAST: 1,
+  },
+  PROFIT: {
+    BASELINE: 5,
+    TARGET: 20,
+    VAL_MAX: 25,
+  },
+} as const;
 
-  // Adjust for longitude shrinking as latitude increases
-  const newLat = x + centerLat
-  const newLng = y / Math.cos(centerLat * (Math.PI / 180)) + centerLng
-
-  return { latitude: newLat, longitude: newLng }
-}
-
-// Generate Togolese phone number in E.164 format
-// Pattern: +228(2|7|9)XXXXXXX (8 digits total, starting with 2, 7, or 9)
-/**
- *
+/** * Configuration constants to eliminate magic strings and numbers
  */
-function generateTogoPhone(): string {
-  const firstDigit = faker.helpers.arrayElement(['2', '7', '9'])
-  const remainingDigits = faker.string.numeric(7)
-  return `+228${firstDigit}${remainingDigits}`
-}
+const METRIC_CONFIGS = {
+  REVENUE: {
+    title: 'Monthly Revenue Growth',
+    indicatorName: 'Monthly Revenue',
+    category: 'performance',
+    rbmLevel: 'outcome',
+    dimension: 'Finance',
+    unit: 'currency',
+    irrf: ['IRRF-1.1.2'],
+    sdg: ['8.3'],
+  },
+  EMPLOYMENT: {
+    title: 'Employment Creation',
+    indicatorName: 'Full-time Jobs Created',
+    category: 'employment_inclusion',
+    rbmLevel: 'outcome',
+    dimension: 'Formalization',
+    unit: 'count',
+    irrf: ['IRRF-2.3.1'],
+    sdg: ['8.5'],
+  },
+  MARKET: {
+    title: 'Export Sales Expansion',
+    indicatorName: 'Export Sales Volume',
+    category: 'market_integration',
+    rbmLevel: 'outcome',
+    dimension: 'Market',
+    unit: 'currency',
+    irrf: ['IRRF-MKT-3A'],
+    sdg: ['17.11'],
+  },
+  PROFIT: {
+    title: 'Net Profit Margin',
+    indicatorName: 'Net Profit Margin',
+    category: 'performance',
+    rbmLevel: 'outcome',
+    dimension: 'Finance',
+    unit: 'percent',
+    irrf: ['IRRF-FIN-1A'],
+    sdg: ['8.2'],
+  },
+} as const;
 
 export interface SeedOptions {
-  entrepreneurCount: number
-  businessCount: number
-  supportCount: number
-  quickWinCount: number
-  momentumMetricCount?: number
-  clear: boolean
-  epicenter?: { latitude: number; longitude: number }
-  radius?: number
+  entrepreneurCount: number;
+  businessCount: number;
+  supportCount: number;
+  quickWinCount: number;
+  momentumMetricCount?: number;
+  clear: boolean;
+  epicenter?: { latitude: number; longitude: number };
+  radius?: number;
+}
+
+interface ValidationError {
+  type: string;
+  index: number | string;
+  error: unknown;
+}
+
+interface LocationCoords {
+  latitude: number;
+  longitude: number;
+}
+
+interface IndicatorConfig {
+  name: string;
+  unit: string;
+  baseline: number;
+  target: number;
+  readings: any[];
 }
 
 /**
- *
+ * Utility to format dates consistently
+ */
+
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+/**
+ * Core factory to build the momentum metric structure (DRY)
+ */
+function buildMetric(
+  businessId: string,
+  type: keyof typeof METRIC_CONFIGS,
+  indicators: IndicatorConfig[]
+): MomentumMetric {
+  const config = METRIC_CONFIGS[type];
+  const now = new Date().toISOString();
+
+  const formattedIndicators = indicators.map(ind => ({
+    id: uuidv4(), // Use 'id' instead of 'indicatorId' for BaseIndicatorSchema
+    type: 'momentum' as const,
+    name: ind.name,
+    unit: ind.unit as any,
+    baseline: ind.baseline,
+    target: ind.target,
+    readings: ind.readings,
+    currency: ind.unit === 'currency' ? 'XOF' : undefined,
+    // Removed 'history' as it is not in MomentumIndicatorSchema
+  }));
+
+  const metricData = {
+    momentumMetricId: uuidv4(),
+    businessId,
+    title: config.title,
+    category: config.category as any,
+    rbmLevel: config.rbmLevel as any,
+    dimension: config.dimension as any,
+    indicators: formattedIndicators,
+    irrfIndicatorIds: [...config.irrf],
+    sdgTargets: [...config.sdg],
+    createdAt: now,
+    updatedAt: now,
+    evidenceIds: [],
+    contributionNarrative: '',
+  };
+
+  return MomentumMetricSchema.parse(metricData);
+}
+
+/**
+ * Generates random coordinates within a radius around a center point
+ */
+function getRandomLocation(
+  centerLat: number,
+  centerLng: number,
+  radiusKm: number = 10
+): LocationCoords {
+  const r = radiusKm / KM_TO_DEGREES_FACTOR;
+  const u = Math.random();
+  const v = Math.random();
+  const w = r * Math.sqrt(u);
+  const t = COORDINATE_RANDOMNESS_FACTOR * Math.PI * v;
+  const x = w * Math.cos(t);
+  const y = w * Math.sin(t);
+
+  const newLat = x + centerLat;
+  const newLng = y / Math.cos(centerLat * (Math.PI / LAT_LNG_CONVERSION_FACTOR)) + centerLng;
+
+  // Clamp values to valid coordinate ranges to ensure schema compliance
+  return {
+    latitude: Math.max(-90, Math.min(90, newLat)),
+    longitude: Math.max(-180, Math.min(180, newLng)),
+  };
+}
+
+/**
+ * Generates entrepreneur data with optional fields based on probability
+ */
+function generateEntrepreneur(index: number): Entrepreneur {
+  const sex = faker.person.sexType();
+  const firstName = faker.person.firstName(sex);
+  const lastName = faker.person.lastName();
+  const email = faker.internet.email({ firstName, lastName });
+  const entrepreneurId = uuidv4();
+
+  const entrepreneurOverrides = {
+    id: () => entrepreneurId,
+    firstName: () => firstName,
+    lastName: () => lastName,
+    slug: () => faker.helpers.slugify(`${firstName} ${lastName}-${index}`).toLowerCase(),
+    contact: () => ({
+      email,
+      telephone: generateTogoPhone(),
+    }),
+    gender: () => faker.helpers.arrayElement(GENDER_OPTIONS),
+    ...(faker.number.float() < PROB.DEMOGRAPHICS && {
+      demographics: () => ({
+        gender: sex,
+        ageGroup: faker.helpers.arrayElement(['18-24', '25-34', '35-44', '45-54', '55+']),
+        educationLevel: faker.helpers.arrayElement([
+          'none',
+          'primary',
+          'secondary',
+          'university',
+          'vocational',
+        ]),
+      }),
+    }),
+    ...(faker.number.float() < PROB.BIO && {
+      bio: () => faker.lorem.paragraph(),
+    }),
+    ...(faker.number.float() < PROB.ADDRESS && {
+      address: () => ({
+        street: faker.location.streetAddress(),
+        city: faker.location.city(),
+        state: faker.location.state(),
+        postalCode: faker.location.zipCode(),
+        country: faker.location.country(),
+        coordinates: {
+          // Explicitly constrain coordinates to avoid validation errors
+          latitude: Number(faker.location.latitude({ min: -90, max: 90 })),
+          longitude: Number(faker.location.longitude({ min: -180, max: 180 })),
+        },
+      }),
+    }),
+  };
+
+  const baseData = generateMockData(
+    EntrepreneurSchema,
+    'entrepreneur',
+    entrepreneurOverrides
+  ) as Record<string, unknown>;
+  const entrepreneurData = {
+    ...baseData,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return EntrepreneurSchema.parse(entrepreneurData) as Entrepreneur;
+}
+
+/**
+ * Generates business data with location and optional fields
+ */
+function generateBusiness(
+  index: number,
+  entrepreneurIds: string[],
+  epicenter?: { latitude: number; longitude: number },
+  radius?: number
+): Business {
+  const entrepreneurId = faker.helpers.arrayElement(entrepreneurIds);
+  const centerLat = epicenter?.latitude || LOME_LAT;
+  const centerLng = epicenter?.longitude || LOME_LNG;
+  const genRadius = radius || DEFAULT_RADIUS;
+  const location = getRandomLocation(centerLat, centerLng, genRadius);
+
+  const businessOverrides = {
+    id: () => uuidv4(),
+    entrepreneurId: () => entrepreneurId,
+    name: () => faker.company.name(),
+    primaryBusinessArea: () => faker.helpers.arrayElement(VALID_BUSINESS_AREA_CODES),
+    activityStartDate: () =>
+      faker.number.float() < PROB.ACTIVITY_START_DATE ? faker.date.past({ years: 3 }) : null,
+    supportStartDate: () => faker.date.past({ years: 2 }),
+    location: () => ({
+      street: faker.location.streetAddress(),
+      city: 'Lomé',
+      state: 'Maritime',
+      postalCode: faker.location.zipCode(),
+      country: 'Togo',
+      coordinates: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    }),
+    contact: () => ({
+      email: faker.internet.email(),
+      ...(faker.number.float() < PROB.BUSINESS_TELEPHONE && {
+        telephone: generateTogoPhone(),
+      }),
+    }),
+    ...(faker.number.float() < PROB.SECONDARY_BUSINESS_AREA && {
+      secondaryBusinessArea: () => faker.helpers.arrayElement(VALID_BUSINESS_AREA_CODES),
+    }),
+    ...(faker.number.float() < PROB.REGISTRATION_NUMBER && {
+      registrationNumber: () => faker.string.alphanumeric(10).toUpperCase(),
+    }),
+    ...(faker.number.float() < PROB.REGISTRATION_DATE && {
+      registrationDate: () => faker.date.past({ years: 5 }),
+    }),
+    ...(faker.number.float() < PROB.SOCIAL_MEDIA && {
+      socialMedia: () => ({
+        ...(faker.datatype.boolean() && {
+          facebook: `https://facebook.com/${faker.lorem.slug()}`,
+        }),
+        ...(faker.datatype.boolean() && { whatsapp: generateTogoPhone() }),
+      }),
+    }),
+    maturityLevels: () => ({
+      Digital: faker.number.int({ min: 1, max: 4 }),
+      Finance: faker.number.int({ min: 1, max: 4 }),
+      Market: faker.number.int({ min: 1, max: 4 }),
+      Green: faker.number.int({ min: 1, max: 4 }),
+      Formalization: faker.number.int({ min: 1, max: 4 }),
+    }),
+  };
+
+  const baseData = generateMockData(BusinessSchema, 'business', businessOverrides) as Record<
+    string,
+    unknown
+  >;
+  const businessData = {
+    ...baseData,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return BusinessSchema.parse(businessData) as Business;
+}
+
+/**
+ * Generates support boost data
+ */
+function generateSupport(businessIds: string[]): Support {
+  const businessId = faker.helpers.arrayElement(businessIds);
+
+  // Pre-calculate dates to ensure endDate is strictly after startDate
+  const startDate = faker.date.past({ years: 1 });
+  const endDate = new Date(
+    startDate.getTime() + faker.number.int({ min: 2, max: 90 }) * 24 * 60 * 60 * 1000
+  );
+
+  const unit = faker.helpers.arrayElement(SUPPORT_QUANTITY_UNIT_OPTIONS);
+  const isCurrency = unit === 'currency';
+
+  const supportOverrides = {
+    id: () => uuidv4(),
+    businessId: () => businessId,
+    title: () =>
+      faker.helpers.arrayElement([
+        'Business Training Workshop',
+        'Financial Literacy Program',
+        'Marketing Support',
+        'Technology Upgrade Grant',
+        'Mentorship Program',
+        'Market Access Support',
+        'Equipment Grant',
+        'Business Development Service',
+      ]),
+    boostType: () => faker.helpers.arrayElement(BOOST_TYPE_OPTIONS),
+    modality: () => faker.helpers.arrayElement(MODALITY_OPTIONS),
+    channel: () => faker.helpers.arrayElement(CHANNEL_OPTIONS),
+    dimension: () => faker.helpers.arrayElement(DIMENSION_OPTIONS),
+    startDate: () => startDate,
+    endDate: () => endDate,
+    provider: () => faker.company.name(),
+    quantity: () => ({
+      value: faker.number.int({ min: 100, max: 10000 }),
+      unit: unit,
+      currency: isCurrency ? 'XOF' : undefined,
+    }),
+    genderMarker: () => faker.helpers.arrayElement(GENDER_MARKER_OPTIONS),
+    notes: () => faker.lorem.sentence(),
+  };
+
+  const baseData = generateMockData(SupportBoostSchema, 'support', supportOverrides) as Record<
+    string,
+    unknown
+  >;
+  const supportData = {
+    ...baseData,
+    createdBy: faker.person.fullName(), // Ensure createdBy is a string
+    updatedBy: faker.person.fullName(), // Ensure updatedBy is a string
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return SupportBoostSchema.parse(supportData) as Support;
+}
+
+/**
+ * Generates quick win data with indicator values
+ */
+function generateQuickWin(businesses: Business[], supports: Record<string, unknown>[]): QuickWin {
+  const business = faker.helpers.arrayElement(businesses);
+  const businessSupports = supports.filter(s => s.businessId === business.id);
+  const linkedSupport =
+    businessSupports.length > 0 && faker.datatype.boolean()
+      ? faker.helpers.arrayElement(businessSupports)
+      : undefined;
+
+  const numIndicators = faker.number.int({ min: 1, max: 3 });
+  const indicatorValues = [];
+
+  for (let j = 0; j < numIndicators; j++) {
+    const indicatorType = faker.helpers.arrayElement(['count', 'currency', 'percent', 'boolean']);
+    indicatorValues.push({
+      indicatorId: uuidv4(), // Use UUID for indicatorId
+      baseline: indicatorType === 'boolean' ? 0 : faker.number.int({ min: 0, max: 100 }),
+      target: indicatorType === 'boolean' ? 1 : faker.number.int({ min: 100, max: 200 }),
+      currentValue:
+        indicatorType === 'boolean'
+          ? faker.datatype.boolean()
+          : indicatorType === 'currency'
+            ? faker.number.int({ min: 10000, max: 500000 })
+            : faker.number.int({ min: 50, max: 250 }),
+      currency: indicatorType === 'currency' ? 'XOF' : undefined,
+      notes: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+    });
+  }
+
+  const dimension =
+    (linkedSupport?.dimension as string) || faker.helpers.arrayElement(DIMENSION_OPTIONS);
+  const milestones = MaturityCatalog[dimension as MaturityDimension];
+  // Fallback to level 1 if something goes wrong
+  const milestone = faker.helpers.arrayElement(milestones)?.level || 1;
+
+  const quickWinData = {
+    id: uuidv4(),
+    businessId: business.id,
+    supportBoostId: linkedSupport?.id as string | undefined,
+    title: faker.company.catchPhrase(),
+    achievedOn: faker.date.past(),
+    resultSummary: faker.lorem.paragraph(),
+    indicatorValues,
+    tags: faker.helpers.arrayElements(
+      ['Innovation', 'Growth', 'Digital', 'Green', 'Youth', 'Women'],
+      faker.number.int({ min: 1, max: 3 })
+    ),
+    genderMarker: faker.helpers.arrayElement(GENDER_MARKER_OPTIONS),
+    dimension: dimension as any,
+    milestone: milestone,
+    category: faker.helpers.arrayElement(QUICK_WIN_CATEGORY_OPTIONS),
+    rbmLevel: 'output' as const,
+    evidenceIds: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return QuickWinSchema.parse(quickWinData) as QuickWin;
+}
+
+/**
+ * Generates momentum metric with multiple readings
+ */
+export function generateMomentumMetrics(businesses: Business[]): MomentumMetric[] {
+  const richDataCount = Math.floor(businesses.length * PROB.RICH_DATA_BUSINESSES);
+
+  return businesses.slice(0, richDataCount).flatMap(business => {
+    // Safety Guard: Skip businesses without a valid ID
+    if (!business?.id) return [];
+
+    const metrics: MomentumMetric[] = [];
+    const bizId = business.id;
+
+    // 1. Revenue Growth
+    const revSettings = SIM_SETTINGS.REVENUE;
+    const revenueBase = faker.number.int({ min: revSettings.MIN, max: revSettings.MAX });
+    const revenueReadings = Array.from({ length: revSettings.READING_COUNT }, (_, j) => ({
+      value: Math.round(
+        revenueBase *
+          (1 +
+            j * revSettings.GROWTH_STEP +
+            (Math.random() * revSettings.VOLATILITY - revSettings.VOLATILITY_OFFSET))
+      ),
+      asOf: faker.date
+        .recent({ days: revSettings.DAYS_WINDOW - j * revSettings.DAYS_STEP })
+        .toISOString()
+        .split('T')[0],
+    }));
+
+    metrics.push(
+      buildMetric(bizId, 'REVENUE', [
+        {
+          name: METRIC_CONFIGS.REVENUE.indicatorName,
+          unit: METRIC_CONFIGS.REVENUE.unit,
+          baseline: revenueBase,
+          target: Math.round(revenueBase * revSettings.TARGET_MULT),
+          readings: revenueReadings,
+        },
+      ])
+    );
+
+    // 2. Employment
+    const jobSettings = SIM_SETTINGS.JOBS;
+    const jobsReadings: any[] = [
+      {
+        value: faker.number.int({ min: jobSettings.MIN_VAL, max: jobSettings.MAX_VAL }),
+        asOf: getTodayStr(),
+        disagg: { gender: 'Woman' },
+      },
+      {
+        value: faker.number.int({ min: jobSettings.MIN_VAL, max: jobSettings.MAX_VAL }),
+        asOf: getTodayStr(),
+        disagg: { ageBand: '15-24' },
+      },
+    ];
+    if (faker.datatype.boolean()) {
+      jobsReadings.push({
+        value: faker.number.int({ min: jobSettings.MIN_VAL, max: jobSettings.DISABILITY_MAX }),
+        asOf: getTodayStr(),
+        disagg: { disability: true },
+      });
+    }
+
+    metrics.push(
+      buildMetric(bizId, 'EMPLOYMENT', [
+        {
+          name: METRIC_CONFIGS.EMPLOYMENT.indicatorName,
+          unit: METRIC_CONFIGS.EMPLOYMENT.unit,
+          baseline: 0,
+          target: jobSettings.TARGET_TOTAL,
+          readings: jobsReadings,
+        },
+      ])
+    );
+
+    // 3. Optional Market Expansion
+    const mktSettings = SIM_SETTINGS.MARKET;
+    if (faker.datatype.boolean()) {
+      metrics.push(
+        buildMetric(bizId, 'MARKET', [
+          {
+            name: METRIC_CONFIGS.MARKET.indicatorName,
+            unit: METRIC_CONFIGS.MARKET.unit,
+            baseline: 0,
+            target: mktSettings.TARGET,
+            readings: [
+              {
+                value: 0,
+                asOf: faker.date
+                  .past({ years: mktSettings.YEARS_PAST })
+                  .toISOString()
+                  .split('T')[0],
+              },
+              {
+                value: faker.number.int({ min: mktSettings.VAL_MIN, max: mktSettings.VAL_MAX }),
+                asOf: getTodayStr(),
+              },
+            ],
+          },
+        ])
+      );
+    }
+
+    // 4. Optional Profitability
+    const profSettings = SIM_SETTINGS.PROFIT;
+    if (faker.datatype.boolean()) {
+      metrics.push(
+        buildMetric(bizId, 'PROFIT', [
+          {
+            name: METRIC_CONFIGS.PROFIT.indicatorName,
+            unit: METRIC_CONFIGS.PROFIT.unit,
+            baseline: profSettings.BASELINE,
+            target: profSettings.TARGET,
+            readings: [
+              {
+                value: profSettings.BASELINE,
+                asOf: faker.date
+                  .past({ years: mktSettings.YEARS_PAST })
+                  .toISOString()
+                  .split('T')[0],
+              },
+              {
+                value: faker.number.int({ min: profSettings.BASELINE, max: profSettings.VAL_MAX }),
+                asOf: getTodayStr(),
+              },
+            ],
+          },
+        ])
+      );
+    }
+
+    return metrics;
+  });
+}
+
+/**
+ * Clears all database tables
+ */
+async function clearDatabase(): Promise<void> {
+  await db.transaction(
+    'rw',
+    [
+      db.entrepreneurs,
+      db.businesses,
+      db.supports,
+      db.maturityAssessments,
+      db.indicatorDefinitions,
+      db.measurements,
+      db.outputIndicators,
+      db.quickWins,
+      db.momentumMetrics,
+    ],
+    async () => {
+      await Promise.all([
+        db.entrepreneurs.clear(),
+        db.businesses.clear(),
+        db.supports.clear(),
+        db.maturityAssessments.clear(),
+        db.indicatorDefinitions.clear(),
+        db.measurements.clear(),
+        db.outputIndicators.clear(),
+        db.quickWins.clear(),
+        db.momentumMetrics.clear(),
+      ]);
+    }
+  );
+}
+
+/**
+ * Seeds database with mock data
  */
 export const seedDatabase = async (options: SeedOptions) => {
   const {
@@ -69,523 +677,68 @@ export const seedDatabase = async (options: SeedOptions) => {
     quickWinCount,
     clear,
     epicenter,
-    radius
-  } = options
+    radius,
+  } = options;
 
-  // Clear database if requested
   if (clear) {
-    await db.transaction(
-      'rw',
-      [
-        db.entrepreneurs,
-        db.businesses,
-        db.supports,
-        db.maturityAssessments,
-        db.indicatorDefinitions,
-        db.measurements,
-        db.outputIndicators,
-        db.quickWins,
-        db.momentumMetrics
-      ],
-      async () => {
-        await db.entrepreneurs.clear()
-        await db.businesses.clear()
-        await db.supports.clear()
-        await db.maturityAssessments.clear()
-        await db.indicatorDefinitions.clear()
-        await db.measurements.clear()
-        await db.outputIndicators.clear()
-        await db.quickWins.clear()
-        await db.momentumMetrics.clear()
-      }
-    )
+    await clearDatabase();
   }
 
-  const entrepreneurs: Entrepreneur[] = []
-  const businesses: Business[] = []
-  const supports: any[] = []
-  const errors: Array<{ type: string; index: number | string; error: any }> = []
+  const entrepreneurs: Entrepreneur[] = [];
+  const businesses: Business[] = [];
+  const supports: Support[] = [];
+  const quickWins: QuickWin[] = [];
+  const errors: ValidationError[] = [];
 
   // Generate entrepreneurs
   for (let i = 0; i < entrepreneurCount; i++) {
-    const sex = faker.person.sexType()
-    const firstName = faker.person.firstName(sex)
-    const lastName = faker.person.lastName()
-    const email = faker.internet.email({ firstName, lastName })
-
-    const entrepreneurId = uuidv4()
-
-    // Create entrepreneur data with varied optional field completeness
-    const entrepreneurData = {
-      id: entrepreneurId,
-      firstName,
-      lastName,
-      slug: faker.helpers.slugify(`${firstName} ${lastName}-${i}`).toLowerCase(),
-      contact: {
-        email,
-        telephone: generateTogoPhone()
-      },
-      // Only 30% have demographics
-      ...(faker.number.float() < 0.3 && {
-        demographics: {
-          gender: sex,
-          ageGroup: faker.helpers.arrayElement(['18-24', '25-34', '35-44', '45-54', '55+']),
-          educationLevel: faker.helpers.arrayElement([
-            'none',
-            'primary',
-            'secondary',
-            'university',
-            'vocational'
-          ])
-        }
-      }),
-      // Only 20% have bio
-      ...(faker.number.float() < 0.2 && {
-        bio: faker.lorem.paragraph()
-      }),
-      // Only 40% have address
-      ...(faker.number.float() < 0.4 && {
-        address: faker.location.streetAddress()
-      }),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-
-    // Validate entrepreneur data
     try {
-      const validatedEntrepreneur = EntrepreneurSchema.parse(entrepreneurData) as Entrepreneur
-      entrepreneurs.push(validatedEntrepreneur)
+      entrepreneurs.push(generateEntrepreneur(i));
     } catch (error) {
-      errors.push({ type: 'entrepreneur', index: i, error })
-      console.error(`Entrepreneur ${i} validation failed:`, error)
+      errors.push({ type: 'entrepreneur', index: i, error });
+      console.error(`Entrepreneur ${i} validation failed:`, error);
     }
   }
 
-  // Generate businesses - distribute among entrepreneurs
-  // Some entrepreneurs may have 0, 1, or 2 businesses
-  const entrepreneurIds = entrepreneurs.map((e) => e.id)
-  if (entrepreneurIds.length > 0) {
-    for (let i = 0; i < businessCount; i++) {
-      // Pick a random entrepreneur
-      const entrepreneurId = faker.helpers.arrayElement(entrepreneurIds)
+  // Generate businesses
+  const entrepreneurIds = entrepreneurs.map(e => e.id).filter((id): id is string => !!id);
+  if (!entrepreneurIds?.length)
+    return { entrepreneurs, businesses, supports, quickWins, momentumMetrics: [], errors };
 
-      // Use provided epicenter or default to Lomé
-      const centerLat = epicenter?.latitude || LOME_LAT
-      const centerLng = epicenter?.longitude || LOME_LNG
-      const genRadius = radius || 15
-
-      const location = getRandomLocation(centerLat, centerLng, genRadius)
-
-      const businessData = {
-        id: uuidv4(),
-        entrepreneurId,
-        name: faker.company.name(),
-        primaryBusinessArea: faker.helpers.arrayElement([
-          'A',
-          'B',
-          'C',
-          'D',
-          'E',
-          'F',
-          'G',
-          'H',
-          'I',
-          'J',
-          'K',
-          'L',
-          'M',
-          'N',
-          'O',
-          'P',
-          'Q',
-          'R',
-          'S',
-          'T',
-          'U'
-        ]),
-        // Only 70% have activityStartDate - this affects profile completeness!
-        activityStartDate: faker.number.float() < 0.7 ? faker.date.past({ years: 3 }) : null,
-        supportStartDate: faker.date.past({ years: 2 }),
-        location: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          address: faker.location.streetAddress(),
-          city: 'Lomé',
-          region: 'Maritime',
-          country: 'Togo'
-        },
-        contact: {
-          email: faker.internet.email(),
-          // Only 80% have telephone - affects profile completeness!
-          ...(faker.number.float() < 0.8 && {
-            telephone: generateTogoPhone()
-          })
-        },
-        // Only 50% have description (optional field)
-        ...(faker.number.float() < 0.5 && {
-          description: faker.company.catchPhrase()
-        }),
-        // Only 30% have secondary business area (optional field)
-        ...(faker.number.float() < 0.3 && {
-          secondaryBusinessArea: faker.helpers.arrayElement([
-            'A',
-            'B',
-            'C',
-            'D',
-            'E',
-            'F',
-            'G',
-            'H',
-            'I',
-            'J',
-            'K',
-            'L',
-            'M',
-            'N',
-            'O',
-            'P',
-            'Q',
-            'R',
-            'S',
-            'T',
-            'U'
-          ])
-        }),
-        // Only 60% have registration number (optional field)
-        ...(faker.number.float() < 0.6 && {
-          registrationNumber: faker.string.alphanumeric(10).toUpperCase()
-        }),
-        // Only 70% have registration date (optional field)
-        ...(faker.number.float() < 0.7 && {
-          registrationDate: faker.date.past({ years: 5 })
-        }),
-        // Only 40% have social media (optional field)
-        ...(faker.number.float() < 0.4 && {
-          socialMedia: {
-            ...(faker.datatype.boolean() && {
-              facebook: `https://facebook.com/${faker.lorem.slug()}`
-            }),
-            ...(faker.datatype.boolean() && { whatsapp: generateTogoPhone() })
-          }
-        }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        maturityLevels: {
-          Digital: faker.number.int({ min: 1, max: 4 }),
-          Finance: faker.number.int({ min: 1, max: 4 }),
-          Market: faker.number.int({ min: 1, max: 4 }),
-          Green: faker.number.int({ min: 1, max: 4 }),
-          Formalization: faker.number.int({ min: 1, max: 4 })
-        }
-      }
-
-      // Validate business data
-      try {
-        const validatedBusiness = BusinessSchema.parse(businessData) as Business
-        businesses.push(validatedBusiness)
-      } catch (error) {
-        errors.push({ type: 'business', index: i, error })
-        console.error(`Business ${i} validation failed:`, error)
-      }
+  for (let i = 0; i < businessCount; i++) {
+    try {
+      businesses.push(generateBusiness(i, entrepreneurIds, epicenter, radius));
+    } catch (error) {
+      errors.push({ type: 'business', index: i, error });
+      console.error(`Business ${i} validation failed:`, error);
     }
   }
 
-  // Generate supports - distribute among businesses
-  // Not all businesses will have supports
-  const businessIds = businesses.map((b) => b.id)
+  // Generate supports
+  const businessIds = businesses.map(b => b.id).filter((id): id is string => !!id);
   if (businessIds.length > 0 && supportCount > 0) {
     for (let i = 0; i < supportCount; i++) {
-      const businessId = faker.helpers.arrayElement(businessIds)
-
-      const supportData = {
-        id: uuidv4(),
-        businessId,
-        title: faker.helpers.arrayElement([
-          'Business Training Workshop',
-          'Financial Literacy Program',
-          'Marketing Support',
-          'Technology Upgrade Grant',
-          'Mentorship Program',
-          'Market Access Support',
-          'Equipment Grant',
-          'Business Development Service'
-        ]),
-        boostType: faker.helpers.arrayElement([
-          'training',
-          'finance',
-          'mentorship',
-          'infrastructure',
-          'market_access',
-          'technology'
-        ]),
-        modality: faker.helpers.arrayElement(['DIM', 'NIM', 'hybrid']),
-        dimension: faker.helpers.arrayElement(MaturityDimensions),
-        startDate: faker.date.past({ years: 1 }).toISOString().split('T')[0],
-        ...(faker.number.float() < 0.6 && {
-          endDate: faker.date.recent({ days: 30 }).toISOString().split('T')[0]
-        }),
-        ...(faker.number.float() < 0.7 && {
-          provider: faker.company.name()
-        }),
-        ...(faker.number.float() < 0.5 && {
-          channel: faker.helpers.arrayElement(['in-person', 'online', 'hybrid'])
-        }),
-        quantity: {
-          ...(faker.number.float() < 0.6 && {
-            value: faker.number.int({ min: 100, max: 10000 }),
-            unit: faker.helpers.arrayElement(['currency', 'hours', 'sessions', 'participants']),
-            ...(faker.number.float() < 0.5 && { currency: 'XOF' })
-          })
-        },
-        genderMarker: faker.helpers.arrayElement(['GEN0', 'GEN1', 'GEN2', 'GEN3']),
-        ...(faker.number.float() < 0.3 && {
-          notes: faker.lorem.sentence()
-        }),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      try {
+        supports.push(generateSupport(businessIds));
+      } catch (error) {
+        errors.push({ type: 'support', index: i, error });
+        console.error(`Support ${i} validation failed:`, error);
       }
-
-      supports.push(supportData)
     }
   }
 
-  // Generate Quick Wins
-  const quickWins: any[] = []
-
-  for (let i = 0; i < quickWinCount; i++) {
-    if (businesses.length === 0) break
-
-    const business = faker.helpers.arrayElement(businesses)
-    // 50% chance to link to a support if available for this business
-    const businessSupports = supports.filter((s) => s.businessId === business.id)
-    const linkedSupport =
-      businessSupports.length > 0 && faker.datatype.boolean()
-        ? faker.helpers.arrayElement(businessSupports)
-        : undefined
-
-    // Generate 1-3 indicator values directly for this QuickWin
-    const numIndicators = faker.number.int({ min: 1, max: 3 })
-    const indicatorValues = []
-
-    for (let j = 0; j < numIndicators; j++) {
-      const indicatorType = faker.helpers.arrayElement(['count', 'currency', 'percent', 'boolean'])
-      indicatorValues.push({
-        indicatorId: faker.helpers.arrayElement([
-          'revenue_growth',
-          'customer_acquisition',
-          'funding_secured',
-          'staff_hired',
-          'market_share',
-          'digital_adoption',
-          'certification_obtained'
-        ]),
-        baseline: indicatorType === 'boolean' ? 0 : faker.number.int({ min: 0, max: 100 }),
-        target: indicatorType === 'boolean' ? 1 : faker.number.int({ min: 100, max: 200 }),
-        currentValue:
-          indicatorType === 'boolean'
-            ? faker.datatype.boolean()
-            : indicatorType === 'currency'
-              ? faker.number.int({ min: 10000, max: 500000 })
-              : faker.number.int({ min: 50, max: 250 }),
-        notes: faker.datatype.boolean() ? faker.lorem.sentence() : undefined
-      })
-    }
-
-    const dimension = linkedSupport?.dimension || faker.helpers.arrayElement(MaturityDimensions)
-
-    // Pick a random milestone for this dimension
-    const milestones = MaturityCatalog[dimension as MaturityDimension]
-    const milestone = faker.helpers.arrayElement(milestones)
-
-    const quickWin = {
-      id: uuidv4(),
-      businessId: business.id,
-      supportBoostId: linkedSupport?.id,
-      title: faker.company.catchPhrase(),
-      achievedOn: faker.date.past().toISOString(),
-      resultSummary: faker.lorem.paragraph(),
-      indicatorValues,
-      tags: faker.helpers.arrayElements(
-        ['Innovation', 'Growth', 'Digital', 'Green', 'Youth', 'Women'],
-        faker.number.int({ min: 1, max: 3 })
-      ),
-      genderMarker: faker.helpers.arrayElement(['GEN0', 'GEN1', 'GEN2', 'GEN3']),
-      dimension,
-      milestone: (milestone as MilestoneDefinition).level, // Store just the level number
-      category: 'performance' as const, // Add required category field
-      rbmLevel: 'output' as const, // Add required rbmLevel field
-      evidenceIds: [], // Add required evidenceIds field
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-
-    quickWins.push(quickWin)
-  }
-
-  // Generate Momentum Metrics
-  const momentumMetrics: any[] = []
-  const momentumMetricCount = options.momentumMetricCount || 0
-
-  // Generate Momentum Metrics with specific Business Health focus
-  const richDataBusinesses = businesses.slice(0, Math.floor(businesses.length * 0.4)) // 40% get rich data
-
-  for (const business of richDataBusinesses) {
-    // 1. Revenue Growth (Economic)
-    const revenueMetricId = uuidv4()
-    const revenueBase = faker.number.int({ min: 1000000, max: 5000000 })
-    const revenueReadings = []
-    for (let j = 0; j < 6; j++) {
-      revenueReadings.push({
-        value: Math.round(revenueBase * (1 + j * 0.05 + (Math.random() * 0.1 - 0.05))), // Upward trend
-        asOf: faker.date
-          .recent({ days: 180 - j * 30 })
-          .toISOString()
-          .split('T')[0]
-      })
-    }
-
-    momentumMetrics.push({
-      momentumMetricId: revenueMetricId,
-      businessId: business.id,
-      title: 'Monthly Revenue Growth',
-      category: 'performance',
-      rbmLevel: 'outcome',
-      dimension: 'Finance',
-      indicators: [
-        {
-          name: 'Monthly Revenue',
-          unit: 'currency',
-          baseline: revenueBase,
-          target: Math.round(revenueBase * 1.5),
-          readings: revenueReadings
-        }
-      ],
-      irrfIndicatorIds: ['IRRF-1.1.2'],
-      sdgTargets: ['8.3'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    })
-
-    // 2. Jobs Created (Social) - with Disaggregation
-    const jobsMetricId = uuidv4()
-    const jobsBase = faker.number.int({ min: 2, max: 10 })
-    const jobsReadings = []
-    // Create a reading that represents the total, but we'll add disagg metadata if schema allowed
-    // Since schema has disagg object on reading, we create separate readings or one reading with disagg?
-    // The store logic sums up readings if they have disagg.
-    // Let's create specific readings for disaggregated groups to test the store summation logic
-
-    // Reading 1: Women
-    jobsReadings.push({
-      value: faker.number.int({ min: 1, max: 5 }),
-      asOf: new Date().toISOString().split('T')[0],
-      disagg: { gender: 'female' }
-    })
-    // Reading 2: Youth
-    jobsReadings.push({
-      value: faker.number.int({ min: 1, max: 5 }),
-      asOf: new Date().toISOString().split('T')[0],
-      disagg: { ageBand: '15-24' }
-    })
-    // Reading 3: Disability
-    if (faker.datatype.boolean()) {
-      jobsReadings.push({
-        value: faker.number.int({ min: 1, max: 2 }),
-        asOf: new Date().toISOString().split('T')[0],
-        disagg: { disability: true }
-      })
-    }
-
-    momentumMetrics.push({
-      momentumMetricId: jobsMetricId,
-      businessId: business.id,
-      title: 'Employment Creation',
-      category: 'employment_inclusion',
-      rbmLevel: 'outcome',
-      dimension: 'Formalization', // or Social
-      indicators: [
-        {
-          name: 'Full-time Jobs Created',
-          unit: 'count',
-          baseline: 0,
-          target: 10,
-          readings: jobsReadings
-        }
-      ],
-      irrfIndicatorIds: ['IRRF-2.3.1'],
-      sdgTargets: ['8.5'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    })
-
-    // 3. Market Growth (Export/Regional)
-    if (faker.datatype.boolean()) {
-      const marketMetricId = uuidv4()
-      const exportReadings = [
-        { value: 0, asOf: faker.date.past({ years: 1 }).toISOString().split('T')[0] },
-        {
-          value: faker.number.int({ min: 10000, max: 50000 }),
-          asOf: new Date().toISOString().split('T')[0]
-        }
-      ]
-
-      momentumMetrics.push({
-        momentumMetricId: marketMetricId,
-        businessId: business.id,
-        title: 'Export Sales Expansion',
-        category: 'market_integration',
-        rbmLevel: 'outcome',
-        dimension: 'Market',
-        indicators: [
-          {
-            name: 'Export Sales Volume',
-            unit: 'currency',
-            baseline: 0,
-            target: 100000,
-            readings: exportReadings
-          }
-        ],
-        irrfIndicatorIds: ['IRRF-MKT-3A'],
-        sdgTargets: ['17.11'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
-    }
-
-    // 4. Profitability
-    if (faker.datatype.boolean()) {
-      const profitMetricId = uuidv4()
-      const profitReadings = [
-        { value: 5, asOf: faker.date.past({ years: 1 }).toISOString().split('T')[0] },
-        {
-          value: faker.number.int({ min: 10, max: 25 }),
-          asOf: new Date().toISOString().split('T')[0]
-        }
-      ]
-
-      momentumMetrics.push({
-        momentumMetricId: profitMetricId,
-        businessId: business.id,
-        title: 'Net Profit Margin',
-        category: 'performance',
-        rbmLevel: 'outcome',
-        dimension: 'Finance',
-        indicators: [
-          {
-            name: 'Net Profit Margin',
-            unit: 'percent',
-            baseline: 5,
-            target: 20,
-            readings: profitReadings
-          }
-        ],
-        irrfIndicatorIds: ['IRRF-FIN-1A'], // Approximate
-        sdgTargets: ['8.2'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
+  // Generate quick wins
+  for (let i = 0; i < quickWinCount && businesses.length > 0; i++) {
+    try {
+      quickWins.push(generateQuickWin(businesses, supports));
+    } catch (error) {
+      errors.push({ type: 'quickWin', index: i, error });
+      console.error(`Quick win ${i} validation failed:`, error);
     }
   }
+
+  // Generate momentum metrics
+  const momentumMetrics = generateMomentumMetrics(businesses);
 
   // Save all data
   await db.transaction(
@@ -596,16 +749,20 @@ export const seedDatabase = async (options: SeedOptions) => {
       db.supports,
       db.maturityAssessments,
       db.quickWins,
-      db.momentumMetrics
+      db.momentumMetrics,
     ],
     async () => {
-      if (entrepreneurs.length > 0) await db.entrepreneurs.bulkAdd(entrepreneurs)
-      if (businesses.length > 0) await db.businesses.bulkAdd(businesses)
-      if (supports.length > 0) await db.supports.bulkAdd(supports)
-      if (quickWins.length > 0) await db.quickWins.bulkAdd(quickWins)
-      if (momentumMetrics.length > 0) await db.momentumMetrics.bulkAdd(momentumMetrics)
+      await Promise.all(
+        [
+          entrepreneurs.length > 0 && db.entrepreneurs.bulkAdd(entrepreneurs),
+          businesses.length > 0 && db.businesses.bulkAdd(businesses),
+          supports.length > 0 && db.supports.bulkAdd(supports),
+          quickWins.length > 0 && db.quickWins.bulkAdd(quickWins),
+          momentumMetrics.length > 0 && db.momentumMetrics.bulkAdd(momentumMetrics),
+        ].filter(Boolean)
+      );
     }
-  )
+  );
 
   console.log(`Seeding complete:
     - ${entrepreneurs.length} entrepreneurs
@@ -613,7 +770,7 @@ export const seedDatabase = async (options: SeedOptions) => {
     - ${supports.length} supports
     - ${quickWins.length} quick wins
     - ${momentumMetrics.length} momentum metrics
-    - ${errors.length} validation errors`)
+    - ${errors.length} validation errors`);
 
-  return { entrepreneurs, businesses, supports, quickWins, momentumMetrics, errors }
-}
+  return { entrepreneurs, businesses, supports, quickWins, momentumMetrics, errors };
+};

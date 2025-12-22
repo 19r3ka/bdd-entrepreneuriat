@@ -1,54 +1,58 @@
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import { useRouter } from 'vue-router'
-  import type { Business } from '@/types/business'
-  import Dialog from 'primevue/dialog'
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
-  import InputText from 'primevue/inputtext'
-  import IconField from 'primevue/iconfield'
-  import InputIcon from 'primevue/inputicon'
-  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
-  import { FilterMatchMode } from '@primevue/core/api'
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import type { Business } from '@/types/business';
+import Dialog from 'primevue/dialog';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import type { DataTableFilterMeta } from 'primevue/datatable';
 
-  const props = defineProps<{
-    visible: boolean
-    businesses: Business[]
-    dimension: string
-    currentLevel: number
-    nextLevel: number
-  }>()
+const props = defineProps<{
+  visible: boolean;
+  businesses: Business[];
+  dimension: string;
+  currentLevel: number;
+  nextLevel: number;
+}>();
 
-  const emit = defineEmits<{
-    'update:visible': [value: boolean]
-  }>()
+const emit = defineEmits<{
+  'update:visible': [value: boolean];
+}>();
 
-  const router = useRouter()
-  const globalFilterValue = ref('')
+const router = useRouter();
+const globalFilterValue = ref('');
 
-  const filters = ref<any>({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-  })
+const filters = ref<DataTableFilterMeta>({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
 
-  const dialogVisible = computed({
-    get: () => props.visible,
-    set: (value) => emit('update:visible', value)
-  })
+const dialogVisible = computed({
+  get: () => props.visible,
+  set: value => emit('update:visible', value),
+});
 
-  const headerText = computed(() => {
-    const count = props.businesses.length
-    return `${props.dimension} - Level ${props.currentLevel} → ${props.nextLevel} (${count} ${count === 1 ? 'business' : 'businesses'})`
-  })
+const headerText = computed(() => {
+  const count = props.businesses.length;
+  return `${props.dimension} - Level ${props.currentLevel} → ${props.nextLevel} (${count} ${count === 1 ? 'business' : 'businesses'})`;
+});
 
-  const onGlobalFilterChange = () => {
-    filters.value.global.value = globalFilterValue.value || null
+const onGlobalFilterChange = () => {
+  const globalFilter = filters.value.global;
+  if (globalFilter && typeof globalFilter === 'object' && 'value' in globalFilter) {
+    globalFilter.value = globalFilterValue.value || null;
   }
+};
 
-  const viewBusiness = (businessId: string) => {
-    if (businessId) {
-      router.push(`/businesses/${businessId}`)
-    }
+const viewBusiness = (businessId: string) => {
+  if (businessId) {
+    router.push(`/businesses/${businessId}`);
   }
+};
 </script>
 
 <template>
@@ -91,7 +95,7 @@
       data-key="id"
       striped-rows
       class="business-modal-table"
-      @row-click="(event) => viewBusiness(event.data.id)"
+      @row-click="event => viewBusiness(event.data.id)"
     >
       <template #empty>
         <div class="text-center p-3 text-500">No businesses found.</div>
@@ -133,15 +137,15 @@
 </template>
 
 <style scoped>
-  .business-list-modal :deep(.p-dialog-header) {
-    padding-bottom: 1rem;
-  }
+.business-list-modal :deep(.p-dialog-header) {
+  padding-bottom: 1rem;
+}
 
-  .business-modal-table :deep(tbody tr) {
-    cursor: pointer;
-  }
+.business-modal-table :deep(tbody tr) {
+  cursor: pointer;
+}
 
-  .business-modal-table :deep(tbody tr:hover) {
-    background-color: var(--highlight-bg);
-  }
+.business-modal-table :deep(tbody tr:hover) {
+  background-color: var(--highlight-bg);
+}
 </style>

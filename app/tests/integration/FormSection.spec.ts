@@ -19,7 +19,7 @@ describe('FormSection.vue', () => {
   it('renders slot content correctly', () => {
     const title = 'Test Section';
     const slotContent = 'This is the section content';
-    
+
     const wrapper = mountWithGlobalComponents(FormSection, {
       props: {
         title,
@@ -79,7 +79,7 @@ describe('FormSection.vue', () => {
     expect(wrapper.find('h2').classes()).toContain('font-bold');
     expect(wrapper.find('h2').classes()).toContain('text-xl');
     expect(wrapper.find('h2').classes()).toContain('m-0');
-    
+
     // Check for flex container in header
     expect(wrapper.find('.flex').classes()).toContain('justify-content-between');
     expect(wrapper.find('.flex').classes()).toContain('align-items-center');

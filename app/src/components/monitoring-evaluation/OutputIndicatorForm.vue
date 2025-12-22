@@ -1,6 +1,6 @@
 <template>
   <div class="output-indicator-form">
-    <BaseForm :schema="schema" :initial-values="initialValues" @submit="onSubmit">
+    <BaseForm :schema="schema" :initial-values="initialValues" :on-submit="onSubmit">
       <template #default="{ defineField, isSubmitting }">
         <div class="grid formgrid p-fluid">
           <!-- Core Fields -->
@@ -130,139 +130,133 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import BaseForm from '@/components/common/BaseForm.vue'
-  import FormField from '@/components/common/FormField.vue'
-  import Select from 'primevue/select'
-  import Button from 'primevue/button'
-  import AutoComplete from 'primevue/autocomplete'
-  import { OutputIndicatorSchema } from '@/schemas/monitoring-evaluation/OutputIndicator'
-  import type { OutputIndicator } from '@/types/monitoring-evaluation/OutputIndicator'
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import BaseForm from '@/components/common/BaseForm.vue';
+import FormField from '@/components/common/FormField.vue';
+import Select from 'primevue/select';
+import Button from 'primevue/button';
+import AutoComplete from 'primevue/autocomplete';
+import {
+  OutputCategoryEnum,
+  OutputIndicatorSchema,
+} from '@/schemas/monitoring-evaluation/indicators/output'; // Update import path
+import type { OutputIndicator } from '@/schemas/monitoring-evaluation/indicators/output'; // Update import path
+import { IndicatorUnitEnum } from '@/schemas/enums'; // Import IndicatorUnitEnum
 
-  const props = defineProps<{
-    initialData?: Partial<OutputIndicator>
-  }>()
+const props = defineProps<{
+  initialData?: Partial<OutputIndicator>;
+}>();
 
-  const emit = defineEmits<{
-    (e: 'submit', data: Omit<OutputIndicator, 'id' | 'createdAt' | 'updatedAt'>): void
-    (e: 'cancel'): void
-  }>()
+const emit = defineEmits<{
+  (e: 'submit', data: Omit<OutputIndicator, 'id' | 'createdAt' | 'updatedAt'>): void;
+  (e: 'cancel'): void;
+}>();
 
-  const { t } = useI18n()
+const { t } = useI18n();
 
-  // Schema for form validation (omit system fields)
-  const schema = OutputIndicatorSchema.omit({
-    id: true,
-    createdAt: true,
-    createdBy: true,
-    updatedAt: true,
-    updatedBy: true,
-    usageCount: true,
-    isStandard: true
-  })
+// Schema for form validation (omit system fields)
+const schema = OutputIndicatorSchema.omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+  updatedAt: true,
+  updatedBy: true,
+});
 
-  const initialValues = computed(() => ({
-    name: '',
-    description: '',
-    category: undefined,
-    unit: 'count',
-    irrfIndicatorCode: '',
-    cpdOutputCode: '',
-    sdgTargets: [],
-    ...props.initialData
+const initialValues = computed(() => ({
+  name: '',
+  description: '',
+  category: undefined,
+  unit: IndicatorUnitEnum.enum.count, // Set default from enum
+  irrfIndicatorCode: '',
+  cpdOutputCode: '',
+  sdgTargets: [],
+  isStandard: false,
+  usageCount: 0,
+  type: 'output' as const,
+  ...props.initialData,
+}));
+
+const categoryOptions = computed(() =>
+  Object.values(OutputCategoryEnum.enum).map(value => ({
+    label: t(`outputIndicator.categories.${value}`),
+    value,
   }))
+);
 
-  const categoryOptions = [
-    { label: t('outputIndicator.categories.capacity_development'), value: 'capacity_development' },
-    { label: t('outputIndicator.categories.access_to_finance'), value: 'access_to_finance' },
-    { label: t('outputIndicator.categories.market_access'), value: 'market_access' },
-    { label: t('outputIndicator.categories.policy_regulatory'), value: 'policy_regulatory' },
-    {
-      label: t('outputIndicator.categories.innovation_sustainability'),
-      value: 'innovation_sustainability'
-    },
-    {
-      label: t('outputIndicator.categories.digital_transformation'),
-      value: 'digital_transformation'
-    }
-  ]
+const unitOptions = computed(() =>
+  Object.values(IndicatorUnitEnum.enum).map(value => ({
+    label: t(`outputIndicator.units.${value}`),
+    value,
+  }))
+);
 
-  const unitOptions = [
-    { label: t('outputIndicator.units.count'), value: 'count' },
-    { label: t('outputIndicator.units.percent'), value: 'percent' },
-    { label: t('outputIndicator.units.boolean'), value: 'boolean' },
-    { label: t('outputIndicator.units.hours'), value: 'hours' },
-    { label: t('outputIndicator.units.currency'), value: 'currency' },
-    { label: t('outputIndicator.units.index'), value: 'index' },
-    { label: t('outputIndicator.units.text'), value: 'text' }
-  ]
+// SDG Autocomplete
+const sdgList = [
+  '1.1',
+  '1.2',
+  '1.3',
+  '1.4',
+  '1.5',
+  '1.a',
+  '1.b',
+  '5.1',
+  '5.5',
+  '5.a',
+  '5.b',
+  '5.c',
+  '8.1',
+  '8.2',
+  '8.3',
+  '8.4',
+  '8.5',
+  '8.6',
+  '8.7',
+  '8.8',
+  '8.9',
+  '8.10',
+  '8.a',
+  '8.b',
+  '9.1',
+  '9.2',
+  '9.3',
+  '9.4',
+  '9.5',
+  '9.a',
+  '9.b',
+  '9.c',
+  '10.1',
+  '10.2',
+  '10.3',
+  '10.4',
+  '10.5',
+  '10.6',
+  '10.7',
+  '10.a',
+  '10.b',
+  '10.c',
+  '12.1',
+  '12.2',
+  '12.3',
+  '12.4',
+  '12.5',
+  '12.6',
+  '12.7',
+  '12.8',
+  '12.a',
+  '12.b',
+  '12.c',
+  '17.1',
+  '17.17',
+];
+const filteredSdgs = ref<string[]>([]);
 
-  // SDG Autocomplete
-  const sdgList = [
-    '1.1',
-    '1.2',
-    '1.3',
-    '1.4',
-    '1.5',
-    '1.a',
-    '1.b',
-    '5.1',
-    '5.5',
-    '5.a',
-    '5.b',
-    '5.c',
-    '8.1',
-    '8.2',
-    '8.3',
-    '8.4',
-    '8.5',
-    '8.6',
-    '8.7',
-    '8.8',
-    '8.9',
-    '8.10',
-    '8.a',
-    '8.b',
-    '9.1',
-    '9.2',
-    '9.3',
-    '9.4',
-    '9.5',
-    '9.a',
-    '9.b',
-    '9.c',
-    '10.1',
-    '10.2',
-    '10.3',
-    '10.4',
-    '10.5',
-    '10.6',
-    '10.7',
-    '10.a',
-    '10.b',
-    '10.c',
-    '12.1',
-    '12.2',
-    '12.3',
-    '12.4',
-    '12.5',
-    '12.6',
-    '12.7',
-    '12.8',
-    '12.a',
-    '12.b',
-    '12.c',
-    '17.1',
-    '17.17'
-  ]
-  const filteredSdgs = ref<string[]>([])
+const searchSdgs = (event: { query: string }) => {
+  filteredSdgs.value = sdgList.filter(sdg => sdg.includes(event.query));
+};
 
-  const searchSdgs = (event: { query: string }) => {
-    filteredSdgs.value = sdgList.filter((sdg) => sdg.includes(event.query))
-  }
-
-  const onSubmit = async (values: any) => {
-    emit('submit', values)
-  }
+const onSubmit = async (values: Omit<OutputIndicator, 'id' | 'createdAt' | 'updatedAt'>) => {
+  emit('submit', { ...values });
+};
 </script>

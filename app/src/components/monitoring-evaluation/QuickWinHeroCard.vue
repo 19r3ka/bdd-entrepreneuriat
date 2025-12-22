@@ -52,26 +52,27 @@
 </template>
 
 <script setup lang="ts">
-  import Tag from 'primevue/tag'
-  import Button from 'primevue/button'
-  import { useI18n } from 'vue-i18n'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import { useI18n } from 'vue-i18n';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  interface Props {
-    quickWin: QuickWin
-  }
+interface Props {
+  quickWin: QuickWin;
+}
 
-  defineProps<Props>()
+defineProps<Props>();
 
-  const emit = defineEmits<{
-    (e: 'edit'): void
-    (e: 'delete'): void
-  }>()
+defineEmits<{
+  (e: 'edit'): void;
+  (e: 'delete'): void;
+}>();
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '-'
-    return d(new Date(dateStr), 'long')
-  }
+const formatDate = (date?: string | Date) => {
+  if (!date) return '-';
+  const dObj = typeof date === 'string' ? new Date(date) : date;
+  return d(dObj, 'long');
+};
 </script>

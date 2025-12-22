@@ -5,7 +5,7 @@
     <BaseForm
       v-slot="{ defineField, canSubmit, isSubmitting }"
       :schema="MeasurementSchema"
-      :initial-values="initialValues"
+      :initial-values="fullInitialValues"
       :on-submit="handleSubmit"
     >
       <Section :title="$t('measurementForm.details')">
@@ -50,10 +50,10 @@
           >
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <InputNumber
-                :model-value="modelValue"
+                :model-value="modelValue as number | null"
                 mode="decimal"
                 :class="{ 'p-invalid': hasError }"
-                @update:model-value="updateModelValue"
+                @update:model-value="(val: number | null) => updateModelValue(val)"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -68,10 +68,10 @@
           >
             <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
               <Calendar
-                :model-value="modelValue"
+                :model-value="modelValue as Date | null"
                 date-format="yy-mm-dd"
                 :class="{ 'p-invalid': hasError }"
-                @update:model-value="updateModelValue"
+                @update:model-value="(val: Date | null) => updateModelValue(val)"
                 @blur="onBlur && onBlur()"
               />
             </template>
@@ -84,7 +84,7 @@
             required
             field-class="col-12"
           >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+            <template #input="{ modelValue, updateModelValue, hasError }">
               <div class="flex flex-column gap-2">
                 <FileUpload
                   mode="basic"
@@ -92,7 +92,7 @@
                   :choose-label="$t('measurementForm.uploadEvidence')"
                   :custom-upload="true"
                   :auto="true"
-                  @uploader="onUpload($event, updateModelValue)"
+                  @uploader="event => onUpload(event, updateModelValue)"
                 />
                 <small v-if="modelValue" class="text-green-500"
                   >File uploaded (ID: {{ modelValue }})</small
@@ -135,123 +135,152 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch } from 'vue'
-  /**
-   * MeasurementForm Component
-   *
-   * Form for logging measurements against a Goal (Indicator).
-   * Handles file upload for evidence.
-   *
-   * @component
-   * @example
-   * <MeasurementForm
-   *   :indicator-id="indicatorId"
-   *   :is-edit="false"
-   *   :initial-values="{}"
-   *   @success="handleSuccess"
-   *   @cancel="handleCancel"
-   * />
-   */
-  import { useI18n } from 'vue-i18n'
-  import { useToast } from 'primevue/usetoast'
-  import BaseForm from '@/components/common/BaseForm.vue'
-  import FormField from '@/components/common/FormField.vue'
-  import Section from '@/components/common/FormSection.vue'
-  import Button from 'primevue/button'
-  import InputNumber from 'primevue/inputnumber'
-  import Calendar from 'primevue/calendar'
-  import FileUpload from 'primevue/fileupload'
-  import Toast from 'primevue/toast'
-  import Select from 'primevue/select'
-  import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
-  import { useIndicatorStore } from '@/stores/useIndicatorStore'
-  import { MeasurementSchema } from '@/schemas/monitoring-evaluation/Indicator'
-  import type { Measurement } from '@/types/monitoring-evaluation/Indicator'
-  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
-  import { db } from '@/services/local-db'
+import { ref, computed, watch } from 'vue';
+/**
+ * MeasurementForm Component
+ *
+ * Form for logging measurements against a Goal (Indicator).
+ * Handles file upload for evidence.
+ *
+ * @component
+ * @example
+ * <MeasurementForm
+ *   :indicator-id="indicatorId"
+ *   :is-edit="false"
+ *   :initial-values="{}"
+ *   @success="handleSuccess"
+ *   @cancel="handleCancel"
+ * />
+ */
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
+import BaseForm from '@/components/common/BaseForm.vue';
+import FormField from '@/components/common/FormField.vue';
+import Section from '@/components/common/FormSection.vue';
+import Button from 'primevue/button';
+import InputNumber from 'primevue/inputnumber';
+import Calendar from 'primevue/calendar';
+import FileUpload from 'primevue/fileupload';
+import Toast from 'primevue/toast';
+import Select from 'primevue/select';
+import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue';
+import { useIndicatorStore } from '@/stores/useIndicatorStore';
+import {
+  MeasurementSchema,
+  type Measurement as MeasurementSchemaType,
+} from '@/schemas/monitoring-evaluation/Indicator'; // Use MeasurementSchema for type inference
+import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
+import { db } from '@/services/local-db';
 
-  const props = defineProps<{
-    isEdit: boolean
-    initialValues: Partial<Measurement>
-    indicatorId?: string
-    businessId?: string
-  }>()
+const props = defineProps<{
+  isEdit: boolean;
+  initialValues: Partial<MeasurementSchemaType>;
+  indicatorId?: string;
+  businessId?: string;
+}>();
 
-  const emit = defineEmits(['success', 'cancel'])
+const emit = defineEmits(['success', 'cancel']);
 
-  const { t } = useI18n()
-  const toast = useToast()
-  const indicatorStore = useIndicatorStore()
-  const { handleApiError } = useErrorHandler()
+const { t } = useI18n();
+const toast = useToast();
+const indicatorStore = useIndicatorStore();
+const { handleApiError } = useErrorHandler();
 
-  const selectedBusinessId = ref(props.businessId || '')
-  const availableIndicators = computed(() =>
-    indicatorStore.indicators
-      .filter((i) => i.businessId === selectedBusinessId.value)
-      .map((i) => ({ label: i.name, value: i.id }))
-  )
+const selectedBusinessId = ref(props.businessId || '');
+const availableIndicators = computed(() =>
+  indicatorStore.indicators
+    .filter(i => i.businessId === selectedBusinessId.value)
+    .map(i => ({ label: i.name, value: i.id }))
+);
 
-  watch(selectedBusinessId, async (newId) => {
-    if (newId) {
-      // Ensure indicators are loaded for this business
-      // Assuming fetchAll loads all, or we might need a specific fetch
-      // If fetchAll is already called globally, we might have them.
-      // But to be safe/efficient, we might want fetchByBusiness if available.
-      // For now, let's assume fetchAll or rely on store state.
-      // If store doesn't have them, we might need to trigger a fetch.
-      // indicatorStore.fetchByBusiness(newId); // If this action exists
-    }
-  })
+const fullInitialValues = computed(() => ({
+  id: props.initialValues.id || crypto.randomUUID(),
+  indicatorId: props.initialValues.indicatorId || props.indicatorId || '',
+  currentValue: props.initialValues.currentValue ?? 0,
+  dateRecorded: props.initialValues.dateRecorded
+    ? new Date(props.initialValues.dateRecorded)
+    : new Date(),
+  evidenceSource: props.initialValues.evidenceSource || '',
+  contributionNarrative: props.initialValues.contributionNarrative || '',
+  createdAt: props.initialValues.createdAt ? new Date(props.initialValues.createdAt) : new Date(),
+  updatedAt: props.initialValues.updatedAt ? new Date(props.initialValues.updatedAt) : new Date(),
+}));
 
-  const onUpload = async (event: any, updateModelValue: (val: string) => void) => {
-    const file = event.files[0]
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      const base64 = e.target?.result as string
-      const id = crypto.randomUUID()
-      await db.evidenceFiles.add({
-        id,
-        data: base64,
-        type: file.type,
-        name: file.name
-      })
-      updateModelValue(id)
-      toast.add({ severity: 'info', summary: 'Success', detail: 'File uploaded', life: 3000 })
-    }
-    reader.readAsDataURL(file)
+watch(selectedBusinessId, async newId => {
+  if (newId) {
+    // Ensure indicators are loaded for this business
+  }
+});
+
+import type { FileUploadUploaderEvent } from 'primevue/fileupload';
+
+/**
+ *
+ */
+const onUpload = async (
+  event: FileUploadUploaderEvent,
+  updateModelValue: (val: string) => void
+) => {
+  const file = Array.isArray(event.files) ? event.files[0] : event.files;
+
+  if (!file) {
+    // Add check for undefined file
+    toast.add({ severity: 'error', summary: 'Error', detail: 'No file selected', life: 3000 });
+    return;
   }
 
-  /**
-   *
-   */
-  async function handleSubmit(data: any) {
-    try {
-      if (props.isEdit) {
-        await indicatorStore.updateMeasurement(props.initialValues.id!, data)
-        toast.add({
-          severity: 'success',
-          summary: t('common.success'),
-          detail: t('measurementForm.updateSuccess'),
-          life: 3000
-        })
-      } else {
-        await indicatorStore.addMeasurement({
-          ...data,
-          indicatorId: data.indicatorId || props.indicatorId
-        })
-        toast.add({
-          severity: 'success',
-          summary: t('common.success'),
-          detail: t('measurementForm.createSuccess'),
-          life: 3000
-        })
-      }
-      emit('success')
-    } catch (error) {
-      handleApiError(
-        error as AppError,
-        `Failed to ${props.isEdit ? 'update' : 'create'} measurement`
-      )
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const base64 = e.target?.result as string;
+    const id = crypto.randomUUID();
+    await db.evidenceFiles.add({
+      id,
+      data: base64,
+      type: file.type,
+      name: file.name,
+    });
+    updateModelValue(id);
+    toast.add({ severity: 'info', summary: 'Success', detail: 'File uploaded', life: 3000 });
+  };
+  reader.readAsDataURL(file);
+};
+
+/**
+ *
+ */
+async function handleSubmit(data: MeasurementSchemaType) {
+  try {
+    const measurementData = (({ ...rest }) => ({
+      ...rest,
+      dateRecorded: new Date(rest.dateRecorded),
+    }))(data);
+
+    if (props.isEdit) {
+      await indicatorStore.updateMeasurement(props.initialValues.id!, measurementData);
+      toast.add({
+        severity: 'success',
+        summary: t('common.success'),
+        detail: t('measurementForm.updateSuccess'),
+        life: 3000,
+      });
+    } else {
+      await indicatorStore.addMeasurement({
+        ...measurementData,
+        indicatorId: data.indicatorId || props.indicatorId!,
+      });
+      toast.add({
+        severity: 'success',
+        summary: t('common.success'),
+        detail: t('measurementForm.createSuccess'),
+        life: 3000,
+      });
     }
+    emit('success');
+  } catch (error) {
+    handleApiError(
+      error as AppError,
+      `Failed to ${props.isEdit ? 'update' : 'create'} measurement`
+    );
   }
+}
 </script>

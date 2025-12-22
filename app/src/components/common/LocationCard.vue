@@ -34,26 +34,26 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Card from 'primevue/card'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Card from 'primevue/card';
 
-  const props = withDefaults(
-    defineProps<{
-      title?: string
-      address?: string
-      mapImage?: string
-    }>(),
-    {
-      title: undefined,
-      address: undefined,
-      mapImage: undefined
-    }
-  )
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    address?: string;
+    mapImage?: string;
+  }>(),
+  {
+    title: undefined,
+    address: undefined,
+    mapImage: undefined,
+  }
+);
 
-  const { t } = useI18n()
+const { t } = useI18n();
 
-  const defaultMap = 'https://via.placeholder.com/400x200?text=Map+Preview'
+const defaultMap = 'https://via.placeholder.com/400x200?text=Map+Preview';
 
-  const computedTitle = computed(() => props.title ?? t('common.location'))
+const computedTitle = computed(() => props.title ?? t('common.location'));
 </script>

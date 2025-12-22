@@ -13,7 +13,7 @@ describe('BooleanFilter.vue', () => {
 
     // Should have the checkbox
     expect(wrapper.find('.p-checkbox').exists()).toBe(true);
-    
+
     // Should have the label
     expect(wrapper.find('label').text()).toBe('common.active'); // Using mock translation
   });

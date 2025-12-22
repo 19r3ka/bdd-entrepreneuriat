@@ -38,22 +38,22 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import type { SocialMedia } from '@/types/socialMedia'
+import { computed } from 'vue';
+import type { SocialMedia } from '@/types/socialMedia';
 
-  const props = defineProps<{
-    socialMedia: SocialMedia | undefined | null
-  }>()
+const props = defineProps<{
+  socialMedia: SocialMedia | undefined | null;
+}>();
 
-  const hasSocialMedia = computed(() => {
-    if (!props.socialMedia) return false
-    return Object.values(props.socialMedia).some((value) => !!value)
-  })
+const hasSocialMedia = computed(() => {
+  if (!props.socialMedia) return false;
+  return Object.values(props.socialMedia).some(value => !!value);
+});
 </script>
 
 <style scoped>
-  .field p {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-  }
+.field p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
 </style>

@@ -1,121 +1,82 @@
 <script setup lang="ts">
-  import { onMounted } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore'
-  import { useQuickWinStore } from '@/stores/useQuickWinStore'
-  import { useSupportStore } from '@/stores/useSupportStore'
-  import { useActivityLogStore } from '@/stores/useActivityLogStore'
-  import { useRouter } from 'vue-router'
-  import MaturityPortfolioView from '@/components/dashboard/MaturityPortfolioView.vue'
-  import ActivityAlertsWidget from '@/components/dashboard/ActivityAlertsWidget.vue'
-  import RegionalDistributionWithList from '@/components/dashboard/RegionalDistributionWithList.vue'
-  import ExecutiveSummaryBar from '@/components/dashboard/ExecutiveSummaryBar.vue'
-  import SupportPipelineFunnel from '@/components/dashboard/SupportPipelineFunnel.vue'
-  import ImpactTrendsChart from '@/components/dashboard/ImpactTrendsChart.vue'
-  import ActionListWidget from '@/components/dashboard/ActionListWidget.vue'
-  import { usePortfolioMetrics } from '@/composables/usePortfolioMetrics'
-  import { usePortfolioActions, type ActionItem } from '@/composables/usePortfolioActions'
-  import { useI18n } from 'vue-i18n'
+import { onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore';
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
+import { useSupportStore } from '@/stores/useSupportStore';
+import { useActivityLogStore } from '@/stores/useActivityLogStore';
+import { useRouter } from 'vue-router';
+import MaturityPortfolioView from '@/components/dashboard/MaturityPortfolioView.vue';
+import ActivityAlertsWidget from '@/components/dashboard/ActivityAlertsWidget.vue';
+import RegionalDistributionWithList from '@/components/dashboard/RegionalDistributionWithList.vue';
+import ExecutiveSummaryBar from '@/components/dashboard/ExecutiveSummaryBar.vue';
+import SupportPipelineFunnel from '@/components/dashboard/SupportPipelineFunnel.vue';
+import ImpactTrendsChart from '@/components/dashboard/ImpactTrendsChart.vue';
+import ActionListWidget from '@/components/dashboard/ActionListWidget.vue';
+import PartialRecordsWidget from '@/components/dashboard/PartialRecordsWidget.vue';
+import { usePortfolioMetrics } from '@/composables/usePortfolioMetrics';
+import { usePortfolioActions, type ActionItem } from '@/composables/usePortfolioActions';
+import DataExportControl from '@/components/import-export/DataExportControl.vue';
 
-  const { t, d } = useI18n()
+const router = useRouter();
+const businessStore = useBusinessStore();
+const entrepreneurStore = useEntrepreneurStore();
+const metricStore = useMomentumMetricStore();
+const quickWinStore = useQuickWinStore();
+const supportStore = useSupportStore();
+const activityLogStore = useActivityLogStore();
 
-  import Button from 'primevue/button'
+const { businesses } = storeToRefs(businessStore);
+const { entrepreneurs } = storeToRefs(entrepreneurStore);
+const { metrics } = storeToRefs(metricStore);
+const { quickWins } = storeToRefs(quickWinStore);
+const { supports } = storeToRefs(supportStore);
+const { logs } = storeToRefs(activityLogStore);
 
-  const router = useRouter()
-  const businessStore = useBusinessStore()
-  const entrepreneurStore = useEntrepreneurStore()
-  const metricStore = useMomentumMetricStore()
-  const quickWinStore = useQuickWinStore()
-  const supportStore = useSupportStore()
-  const activityLogStore = useActivityLogStore()
+// Import/export functionality
+const showExportDialog = ref(false);
 
-  const { businesses } = storeToRefs(businessStore)
-  const { entrepreneurs } = storeToRefs(entrepreneurStore)
-  const { metrics } = storeToRefs(metricStore)
-  const { quickWins } = storeToRefs(quickWinStore)
-  const { supports } = storeToRefs(supportStore)
-  const { logs } = storeToRefs(activityLogStore)
+// Use the new composable for metrics
+const { pipelineStages, impactTrends } = usePortfolioMetrics(
+  () => businesses.value,
+  () => supports.value,
+  () => quickWins.value,
+  () => metrics.value
+);
 
-  // Use the new composable for metrics
-  const { pipelineStages, impactTrends } = usePortfolioMetrics(
-    () => businesses.value,
-    () => supports.value,
-    () => quickWins.value,
-    () => metrics.value
-  )
+// Use the new composable for actions
+const { urgentActions, opportunities } = usePortfolioActions(
+  () => businesses.value,
+  () => supports.value,
+  () => quickWins.value
+);
 
-  // Use the new composable for actions
-  const { urgentActions, opportunities } = usePortfolioActions(
-    () => businesses.value,
-    () => supports.value,
-    () => quickWins.value
-  )
-
-  const handleActionClick = (action: ActionItem) => {
-    if (action.entityType === 'business' && action.entityId) {
-      router.push({
-        path: `/businesses/${action.entityId}`,
-        query: {
-          actionId: action.id,
-          actionType: action.type,
-          actionTitle: action.title // Optional: for displaying the specific advice title
-        }
-      })
-    }
-    // Add other handlers as needed
+const handleActionClick = (action: ActionItem) => {
+  if (action.entityType === 'business' && action.entityId) {
+    router.push({
+      path: `/businesses/${action.entityId}`,
+      query: {
+        actionId: action.id,
+        actionType: action.type,
+        actionTitle: action.title, // Optional: for displaying the specific advice title
+      },
+    });
   }
+  // Add other handlers as needed
+};
 
-  const exportCSV = () => {
-    const headers = [
-      'Name',
-      'Registration Number',
-      'Primary Sector',
-      'Registration Date',
-      'Support Start Date',
-      'Status'
-    ]
-    const rows = businesses.value.map((b) => [
-      b.name,
-      b.registrationNumber || '',
-      b.primaryBusinessArea || '',
-      b.registrationDate ? d(new Date(b.registrationDate), 'medium') : '',
-      b.supportStartDate ? d(new Date(b.supportStartDate), 'medium') : '',
-      t('common.active') // Placeholder
-    ])
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((r) => r.map((c) => `"${c}"`).join(','))
-    ].join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute(
-        'download',
-        `portfolio_export_${new Date().toISOString().split('T')[0]}.csv`
-      )
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
-  }
-
-  onMounted(async () => {
-    await Promise.all([
-      businessStore.fetchAll(),
-      // entrepreneurStore.fetchAll(), // Handled by businessStore.fetchAll()
-      metricStore.fetchAll(),
-      quickWinStore.fetchAll(),
-      supportStore.fetchAll(),
-      activityLogStore.fetchAll()
-    ])
-  })
+onMounted(async () => {
+  await Promise.all([
+    businessStore.fetchAll(),
+    // entrepreneurStore.fetchAll(), // Handled by businessStore.fetchAll()
+    metricStore.fetchAll(),
+    quickWinStore.fetchAll(),
+    supportStore.fetchAll(),
+    activityLogStore.fetchAll(),
+  ]);
+});
 </script>
 
 <template>
@@ -123,19 +84,19 @@
     <!-- Header -->
     <div class="flex flex-wrap justify-content-between align-items-center gap-4 mb-6">
       <div class="flex flex-column gap-1">
-        <h1 class="text-900 dark:text-white text-4xl font-black m-0">{{ $t('pages.dashboard.portfolioOverview') }}</h1>
+        <h1 class="text-900 dark:text-white text-4xl font-black m-0">
+          {{ $t('pages.dashboard.portfolioOverview') }}
+        </h1>
         <p class="text-500 dark:text-400 text-base font-normal m-0">Maritime, Togo</p>
       </div>
-      <div>
-        <Button
-          :label="$t('pages.dashboard.exportData')"
-          icon="pi pi-download"
-          severity="secondary"
-          outlined
-          @click="exportCSV"
-        />
-      </div>
     </div>
+
+    <!-- Export Dialog -->
+    <DataExportControl
+      v-model:visible="showExportDialog"
+      :data="businesses"
+      default-file-name="portfolio_export"
+    />
 
     <!-- Executive Summary -->
     <div class="mb-6">
@@ -145,6 +106,11 @@
         :quick-wins="quickWins"
         :metrics="metrics"
       />
+    </div>
+
+    <!-- Partial Records Alert -->
+    <div class="mb-6">
+      <PartialRecordsWidget />
     </div>
 
     <!-- Regional Distribution (Map & List) -->
@@ -212,8 +178,8 @@
 </template>
 
 <style scoped>
-  /* Add any specific layout styles if PrimeFlex isn't enough */
-  .layout-dashboard {
-    padding-bottom: 2rem;
-  }
+/* Add any specific layout styles if PrimeFlex isn't enough */
+.layout-dashboard {
+  padding-bottom: 2rem;
+}
 </style>

@@ -1,61 +1,60 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
-  import { useI18n } from 'vue-i18n'
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-  import Card from 'primevue/card'
-  import Tabs from 'primevue/tabs'
-  import TabList from 'primevue/tablist'
-  import Tab from 'primevue/tab'
-  import TabPanels from 'primevue/tabpanels'
-  import TabPanel from 'primevue/tabpanel'
-  import Timeline from 'primevue/timeline'
-  import Tag from 'primevue/tag'
-  import Button from 'primevue/button'
+import Card from 'primevue/card';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import Timeline from 'primevue/timeline';
+import Tag from 'primevue/tag';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  interface Activity {
-    type: 'quick_win' | 'metric' | 'support'
-    date: Date
-    title: string
-    description: string
-    id: string
-    tags?: string[]
-  }
+interface Activity {
+  type: 'quick_win' | 'metric' | 'support';
+  date: Date;
+  title: string;
+  description: string;
+  id: string;
+  tags?: string[];
+}
 
-  const props = defineProps<{
-    activities: Activity[]
-  }>()
+const props = defineProps<{
+  activities: Activity[];
+}>();
 
-  const timelineItems = computed(() => {
-    return props.activities.map((a) => {
-      let colorBase = 'purple'
-      let icon = 'pi pi-gift'
+const timelineItems = computed(() => {
+  return props.activities.map(a => {
+    let colorBase = 'purple';
+    let icon = 'pi pi-gift';
 
-      if (a.type === 'quick_win') {
-        colorBase = 'green'
-        icon = 'pi pi-check-circle'
-      } else if (a.type === 'metric') {
-        colorBase = 'blue'
-        icon = 'pi pi-chart-bar'
-      }
+    if (a.type === 'quick_win') {
+      colorBase = 'green';
+      icon = 'pi pi-check-circle';
+    } else if (a.type === 'metric') {
+      colorBase = 'blue';
+      icon = 'pi pi-chart-bar';
+    }
 
-      return {
-        ...a,
-        icon,
-        color: `bg-${colorBase}-500`,
-        borderClass: `border-${colorBase}-200`,
-        dateStr: d(a.date, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()
-      }
-    })
-  })
+    return {
+      ...a,
+      icon,
+      color: `bg-${colorBase}-500`,
+      borderClass: `border-${colorBase}-200`,
+      dateStr: d(a.date, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
+    };
+  });
+});
 
-  const items = ref([
-    { label: 'All Activity', value: 'all' },
-    { label: 'Supports', value: 'support' },
-    { label: 'Quick Wins', value: 'quick_win' },
-    { label: 'Measurements', value: 'metric' }
-  ])
+const items = ref([
+  { label: 'All Activity', value: 'all' },
+  { label: 'Supports', value: 'support' },
+  { label: 'Quick Wins', value: 'quick_win' },
+  { label: 'Measurements', value: 'metric' },
+]);
 </script>
 
 <template>
@@ -71,7 +70,7 @@
               :value="
                 tab.value === 'all'
                   ? timelineItems
-                  : timelineItems.filter((i) => i.type === tab.value)
+                  : timelineItems.filter(i => i.type === tab.value)
               "
               align="left"
               class="custom-timeline"
@@ -128,7 +127,7 @@
               v-if="
                 (tab.value === 'all'
                   ? timelineItems
-                  : timelineItems.filter((i) => i.type === tab.value)
+                  : timelineItems.filter(i => i.type === tab.value)
                 ).length === 0
               "
               class="text-center text-500 py-4"
@@ -143,30 +142,30 @@
 </template>
 
 <style scoped>
-  .timeline-marker {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    font-size: 0.75rem;
-  }
+.timeline-marker {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  font-size: 0.75rem;
+}
 
-  :deep(.p-timeline-event-connector) {
-    background-color: var(--surface-300) !important;
-  }
+:deep(.p-timeline-event-connector) {
+  background-color: var(--surface-300) !important;
+}
 
-  :deep(.custom-timeline .p-timeline-event-opposite) {
-    display: none !important;
-  }
+:deep(.custom-timeline .p-timeline-event-opposite) {
+  display: none !important;
+}
 
-  :deep(.custom-timeline .p-timeline-event-content) {
-    padding-left: 0.5rem !important;
-  }
+:deep(.custom-timeline .p-timeline-event-content) {
+  padding-left: 0.5rem !important;
+}
 
-  :deep(.p-tabview-nav) {
-    border-bottom: 1px solid var(--surface-border);
-  }
+:deep(.p-tabview-nav) {
+  border-bottom: 1px solid var(--surface-border);
+}
 </style>

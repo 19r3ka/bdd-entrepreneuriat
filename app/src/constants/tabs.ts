@@ -8,10 +8,10 @@ export const BUSINESS_TABS = {
   SUPPORTS: 'supports',
   QUICK_WINS: 'quick_wins',
   OUTCOMES: 'outcomes',
-  MATURITY: 'maturity'
-} as const
+  MATURITY: 'maturity',
+} as const;
 
 /**
  * Type definition for BusinessTab derived from the constants.
  */
-export type BusinessTab = (typeof BUSINESS_TABS)[keyof typeof BUSINESS_TABS]
+export type BusinessTab = (typeof BUSINESS_TABS)[keyof typeof BUSINESS_TABS];

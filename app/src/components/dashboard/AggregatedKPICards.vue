@@ -1,49 +1,49 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore'
-  import SelectButton from 'primevue/selectbutton'
-  import MetricCard from '@/components/shared/MetricCard.vue'
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore';
+import SelectButton from 'primevue/selectbutton';
+import MetricCard from '@/components/shared/MetricCard.vue';
 
-  const { n } = useI18n()
+const { n } = useI18n();
 
-  const props = defineProps<{
-    metrics: MomentumMetric[]
-    quickWins: QuickWin[]
-  }>()
+const props = defineProps<{
+  metrics: MomentumMetric[];
+  quickWins: QuickWin[];
+}>();
 
-  const healthStore = useBusinessHealthStore()
-  const periodOptions = ['Month', 'Quarter', 'Year']
-  const selectedPeriod = ref('Quarter')
+const healthStore = useBusinessHealthStore();
+const periodOptions = ['Month', 'Quarter', 'Year'];
+const selectedPeriod = ref('Quarter');
 
-  // Computed Aggregated Metrics
-  const jobsMetric = computed(() =>
-    healthStore.getJobsCreated(props.metrics, props.quickWins, selectedPeriod.value)
-  )
-  const revenueMetric = computed(() =>
-    healthStore.getRevenueGrowth(props.metrics, selectedPeriod.value)
-  )
-  const marketMetric = computed(() =>
-    healthStore.getMarketGrowth(props.metrics, selectedPeriod.value)
-  )
-  const profitMetric = computed(() =>
-    healthStore.getProfitability(props.metrics, selectedPeriod.value)
-  )
+// Computed Aggregated Metrics
+const jobsMetric = computed(() =>
+  healthStore.getJobsCreated(props.metrics, props.quickWins, selectedPeriod.value)
+);
+const revenueMetric = computed(() =>
+  healthStore.getRevenueGrowth(props.metrics, selectedPeriod.value)
+);
+const marketMetric = computed(() =>
+  healthStore.getMarketGrowth(props.metrics, selectedPeriod.value)
+);
+const profitMetric = computed(() =>
+  healthStore.getProfitability(props.metrics, selectedPeriod.value)
+);
 
-  // Staff Growth - Mock or derive from metrics if available
-  // Assuming we might have a 'Staff' metric or we use Jobs Created trend?
-  // Let's use Jobs Created trend as proxy for Staff Growth if available, or mock.
-  // Actually, Jobs Created is usually "Total Jobs". Staff Growth is % change.
-  // Let's create a derived metric for Staff Growth based on Jobs Created trend.
-  const staffGrowth = computed(() => {
-    // If we had trend in jobsMetric, we'd use it.
-    // Since getJobsCreated returns null trend currently (stock), let's mock or implement trend there later.
-    // For now, let's show a mock value +12% as per design if data exists
-    if (props.metrics.length > 0) return { value: '+12%', trend: 2, direction: 'up' }
-    return { value: '0%', trend: 0, direction: 'flat' }
-  })
+// Staff Growth - Mock or derive from metrics if available
+// Assuming we might have a 'Staff' metric or we use Jobs Created trend?
+// Let's use Jobs Created trend as proxy for Staff Growth if available, or mock.
+// Actually, Jobs Created is usually "Total Jobs". Staff Growth is % change.
+// Let's create a derived metric for Staff Growth based on Jobs Created trend.
+const staffGrowth = computed(() => {
+  // If we had trend in jobsMetric, we'd use it.
+  // Since getJobsCreated returns null trend currently (stock), let's mock or implement trend there later.
+  // For now, let's show a mock value +12% as per design if data exists
+  if (props.metrics.length > 0) return { value: '+12%', trend: 2, direction: 'up' };
+  return { value: '0%', trend: 0, direction: 'flat' };
+});
 </script>
 
 <template>
@@ -91,7 +91,13 @@
               :class="staffGrowth.direction === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ n(Math.abs(staffGrowth.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+            {{
+              n(Math.abs(staffGrowth.trend), {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })
+            }}
           </span>
         </template>
       </MetricCard>
@@ -114,7 +120,13 @@
               :class="marketMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ n(Math.abs(marketMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+            {{
+              n(Math.abs(marketMetric.trend!), {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })
+            }}
           </span>
         </template>
       </MetricCard>
@@ -137,7 +149,13 @@
               :class="revenueMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ n(Math.abs(revenueMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+            {{
+              n(Math.abs(revenueMetric.trend!), {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })
+            }}
           </span>
         </template>
       </MetricCard>
@@ -160,7 +178,13 @@
               :class="profitMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"
               class="text-xs"
             ></i>
-            {{ n(Math.abs(profitMetric.trend!), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+            {{
+              n(Math.abs(profitMetric.trend!), {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })
+            }}
           </span>
         </template>
       </MetricCard>
@@ -169,8 +193,8 @@
 </template>
 
 <style scoped>
-  :deep(.p-selectbutton .p-button) {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
+:deep(.p-selectbutton .p-button) {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
 </style>

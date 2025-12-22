@@ -10,13 +10,21 @@
         <label class="block text-900 font-medium mb-2">{{
           $t('common.primaryBusinessArea')
         }}</label>
-        <p>{{ getBusinessAreaLabel(business.primaryBusinessArea || '') || $t('common.notAvailable') }}</p>
+        <p>
+          {{
+            getBusinessAreaLabel(business.primaryBusinessArea || '') || $t('common.notAvailable')
+          }}
+        </p>
       </div>
       <div class="col-12 md:col-6 field">
         <label class="block text-900 font-medium mb-2">{{
           $t('common.secondaryBusinessArea')
         }}</label>
-        <p>{{ getBusinessAreaLabel(business.secondaryBusinessArea || '') || $t('common.notAvailable') }}</p>
+        <p>
+          {{
+            getBusinessAreaLabel(business.secondaryBusinessArea || '') || $t('common.notAvailable')
+          }}
+        </p>
       </div>
       <!-- onlinePresence field removed - property doesn't exist in Business type -->
       <!-- <div class="col-12 md:col-6 field">
@@ -62,22 +70,22 @@
 </template>
 
 <script setup lang="ts">
-  import { useI18n } from 'vue-i18n'
-  import type { Business } from '@/types/business'
-  import { useBusinessAreas } from '@/composables/useBusinessAreas'
+import { useI18n } from 'vue-i18n';
+import type { Business } from '@/types/business';
+import { useBusinessAreas } from '@/composables/useBusinessAreas';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  defineProps<{
-    business: Business
-  }>()
+defineProps<{
+  business: Business;
+}>();
 
-  const { getBusinessAreaLabel } = useBusinessAreas()
+const { getBusinessAreaLabel } = useBusinessAreas();
 </script>
 
 <style scoped>
-  .field p {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-  }
+.field p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
 </style>

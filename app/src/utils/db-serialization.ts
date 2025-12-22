@@ -10,30 +10,30 @@
  */
 export function serializeForDb<T>(data: T): T {
   if (data === null || data === undefined) {
-    return data
+    return data;
   }
 
   // Handle Date objects
   if (data instanceof Date) {
-    return data.toISOString() as any
+    return data.toISOString() as T;
   }
 
   // Handle arrays
   if (Array.isArray(data)) {
-    return data.map((item) => serializeForDb(item)) as any
+    return data.map(item => serializeForDb(item)) as T;
   }
 
   // Handle plain objects
   if (typeof data === 'object' && data.constructor === Object) {
-    const serialized: any = {}
+    const serialized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
-      serialized[key] = serializeForDb(value)
+      serialized[key] = serializeForDb(value);
     }
-    return serialized
+    return serialized as T;
   }
 
   // Return primitives as-is
-  return data
+  return data;
 }
 
 /**
@@ -42,30 +42,30 @@ export function serializeForDb<T>(data: T): T {
  */
 export function deserializeFromDb<T>(data: T): T {
   if (data === null || data === undefined) {
-    return data
+    return data;
   }
 
   // Handle arrays
   if (Array.isArray(data)) {
-    return data.map((item) => deserializeFromDb(item)) as any
+    return data.map(item => deserializeFromDb(item)) as T;
   }
 
   // Handle plain objects
   if (typeof data === 'object' && data.constructor === Object) {
-    const deserialized: any = {}
+    const deserialized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
-      deserialized[key] = deserializeFromDb(value)
+      deserialized[key] = deserializeFromDb(value);
     }
-    return deserialized
+    return deserialized as T;
   }
 
   // Convert ISO date strings to Date objects
   if (typeof data === 'string' && isISODateString(data)) {
-    return new Date(data) as any
+    return new Date(data) as T;
   }
 
   // Return primitives as-is
-  return data
+  return data;
 }
 
 /**
@@ -73,6 +73,6 @@ export function deserializeFromDb<T>(data: T): T {
  */
 function isISODateString(value: string): boolean {
   // Match ISO 8601 formats: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ
-  const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/
-  return isoDateRegex.test(value)
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/;
+  return isoDateRegex.test(value);
 }

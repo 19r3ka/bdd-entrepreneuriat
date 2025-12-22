@@ -34,7 +34,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: '',
       firstName: '',
@@ -72,7 +72,7 @@ describe('EntrepreneurForm.vue', () => {
     // Check for "new entrepreneur" heading
     expect(wrapper.text()).toContain('New Entrepreneur');
     expect(wrapper.text()).toContain('Entrepreneur Form');
-    
+
     // Check for submit button
     const submitButton = wrapper.find('button[type="submit"]');
     expect(submitButton.text()).toContain('Submit');
@@ -83,7 +83,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: 'test-id',
       firstName: 'John',
@@ -120,7 +120,7 @@ describe('EntrepreneurForm.vue', () => {
 
     // Check for "edit entrepreneur" heading
     expect(wrapper.text()).toContain('Edit Entrepreneur');
-    
+
     // Check for update button
     const submitButton = wrapper.find('button[type="submit"]');
     expect(submitButton.text()).toContain('Update');
@@ -131,7 +131,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: '',
       firstName: '',
@@ -177,7 +177,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: '',
       firstName: '',
@@ -216,7 +216,7 @@ describe('EntrepreneurForm.vue', () => {
     const firstNameField = wrapper.find('[id="firstName"]');
     const lastNameField = wrapper.find('[id="lastName"]');
     const emailField = wrapper.find('[id="contact.email"]');
-    
+
     expect(firstNameField.exists()).toBe(true);
     expect(lastNameField.exists()).toBe(true);
     expect(emailField.exists()).toBe(true);
@@ -227,7 +227,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn().mockReturnValue({}),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: '',
       firstName: '',
@@ -264,7 +264,7 @@ describe('EntrepreneurForm.vue', () => {
 
     // Submit the form (simulating valid submission)
     await wrapper.find('form').trigger('submit');
-    
+
     // Check that the store's add method was called for create mode
     expect(mockEntrepreneurStore.add).toHaveBeenCalled();
   });
@@ -274,7 +274,7 @@ describe('EntrepreneurForm.vue', () => {
       parse: vi.fn().mockReturnValue({}),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Entrepreneur = {
       id: 'test-id',
       firstName: 'Jane',
@@ -311,7 +311,7 @@ describe('EntrepreneurForm.vue', () => {
 
     // Submit the form (simulating valid submission)
     await wrapper.find('form').trigger('submit');
-    
+
     // Check that the store's update method was called for edit mode
     expect(mockEntrepreneurStore.update).toHaveBeenCalled();
   });

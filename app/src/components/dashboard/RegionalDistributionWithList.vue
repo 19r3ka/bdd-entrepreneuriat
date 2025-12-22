@@ -1,75 +1,95 @@
 <script setup lang="ts">
-  import { ref, computed, watch } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import type { Business } from '@/types/business'
-  import InteractiveMap from '@/components/InteractiveMap.vue'
-  import Card from 'primevue/card'
-  import Button from 'primevue/button'
-  import { useRouter } from 'vue-router'
-  import { useBusinessAreas } from '@/composables/useBusinessAreas'
+import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { Business } from '@/types/business';
+import InteractiveMap from '@/components/InteractiveMap.vue';
+import Card from 'primevue/card';
+import { useRouter } from 'vue-router';
+import { useBusinessAreas } from '@/composables/useBusinessAreas';
 
-  const props = defineProps<{
-    businesses: Business[]
-  }>()
+const props = defineProps<{
+  businesses: Business[];
+}>();
 
-  const router = useRouter()
-  const { t } = useI18n()
-  const { getBusinessAreaLabel } = useBusinessAreas()
-  const mapRef = ref<any>(null)
-  const visibleBusinesses = ref<Business[]>([])
+const router = useRouter();
+const { t } = useI18n();
+const { getBusinessAreaLabel } = useBusinessAreas();
+const mapRef = ref<InstanceType<typeof InteractiveMap> | null>(null);
+const visibleBusinesses = ref<Business[]>([]);
 
-  // Initial locations for the map
-  const locations = computed(() => {
-    return props.businesses
-      .filter(
-        (business) => business.location && business.location.latitude && business.location.longitude
-      )
-      .map((business) => ({
-        lat: business.location!.latitude!,
-        lng: business.location!.longitude!,
-        name: business.name,
-        address: business.location!.address,
-        id: business.id // Add ID to link back
-      }))
-  })
+// Initial locations for the map
+const locations = computed(() => {
+  return props.businesses
+    .filter(
+      business =>
+        business.location &&
+        business.location.coordinates &&
+        business.location.coordinates.latitude &&
+        business.location.coordinates.longitude
+    )
+    .map(business => ({
+      lat: business.location!.coordinates!.latitude!,
+      lng: business.location!.coordinates!.longitude!,
+      name: business.name,
+      address: [business.location?.street, business.location?.city, business.location?.country]
+        .filter(Boolean)
+        .join(', '),
+      id: business.id, // Add ID to link back
+    }));
+});
 
-  // Initialize visible businesses with all mapped businesses
-  watch(
-    () => props.businesses,
-    (newBusinesses) => {
-      visibleBusinesses.value = newBusinesses.filter(
-        (business) => business.location && business.location.latitude && business.location.longitude
-      )
-    },
-    { immediate: true }
-  )
+// Initialize visible businesses with all mapped businesses
+watch(
+  () => props.businesses,
+  newBusinesses => {
+    visibleBusinesses.value = newBusinesses.filter(
+      business =>
+        business.location &&
+        business.location.coordinates &&
+        business.location.coordinates.latitude &&
+        business.location.coordinates.longitude
+    );
+  },
+  { immediate: true }
+);
 
-  const handleMapBounds = (bounds: any) => {
-    if (!bounds) return
+const handleMapBounds = (bounds: { contains: (point: [number, number]) => boolean }) => {
+  if (!bounds) return;
 
-    visibleBusinesses.value = props.businesses.filter((business) => {
-      if (!business.location || !business.location.latitude || !business.location.longitude)
-        return false
-      const latitude = business.location.latitude
-      const longitude = business.location.longitude
-      return bounds.contains([latitude, longitude])
-    })
+  visibleBusinesses.value = props.businesses.filter(business => {
+    if (
+      !business.location ||
+      !business.location.coordinates ||
+      !business.location.coordinates.latitude ||
+      !business.location.coordinates.longitude
+    )
+      return false;
+    const latitude = business.location.coordinates.latitude;
+    const longitude = business.location.coordinates.longitude;
+    return bounds.contains([latitude, longitude]);
+  });
+};
+
+const handleBusinessClick = (businessId: string) => {
+  router.push(`/businesses/${businessId}`);
+};
+
+const flyToBusiness = (business: Business) => {
+  if (
+    mapRef.value &&
+    business.location &&
+    business.location.coordinates &&
+    business.location.coordinates.latitude &&
+    business.location.coordinates.longitude
+  ) {
+    // mapRef.value.flyTo([business.location.coordinates.latitude, business.location.coordinates.longitude]);
   }
+};
 
-  const handleBusinessClick = (businessId: string) => {
-    router.push(`/businesses/${businessId}`)
-  }
-
-  const flyToBusiness = (business: Business) => {
-    if (mapRef.value && business.location) {
-      // mapRef.value.flyTo([business.location.latitude, business.location.longitude]);
-    }
-  }
-
-  const getBusinessAreaName = (code: string | undefined) => {
-    if (!code) return t('pages.dashboard.regional.unknownSector')
-    return getBusinessAreaLabel(code)
-  }
+const getBusinessAreaName = (code: string | undefined) => {
+  if (!code) return t('pages.dashboard.regional.unknownSector');
+  return getBusinessAreaLabel(code);
+};
 </script>
 
 <template>
@@ -96,21 +116,25 @@
             >
               <i class="pi pi-eye text-primary"></i>
               <span class="font-bold text-900 dark:text-0">{{ visibleBusinesses.length }}</span>
-              <span class="text-700 dark:text-200 text-sm font-medium">{{ $t('pages.dashboard.regional.visible') }}</span>
+              <span class="text-700 dark:text-200 text-sm font-medium">{{
+                $t('pages.dashboard.regional.visible')
+              }}</span>
             </div>
           </div>
         </template>
       </Card>
     </div>
 
-    <!-- List Column (Right) -->
+    <!-- List Column (Right)-->
     <div class="col-12 lg:col-4 h-full">
       <Card
         class="h-full border-1 border-surface-100 dark:border-surface-500 shadow-sm flex flex-column"
       >
         <template #title>
           <div class="flex justify-content-between align-items-center p-2">
-            <h3 class="text-lg font-bold m-0">{{ $t('pages.dashboard.regional.businessOverview') }}</h3>
+            <h3 class="text-lg font-bold m-0">
+              {{ $t('pages.dashboard.regional.businessOverview') }}
+            </h3>
             <span
               class="text-xs text-500 bg-surface-100 dark:bg-surface-800 px-2 py-1 border-round"
             >
@@ -144,7 +168,15 @@
                 <div class="flex align-items-center gap-2 text-sm text-600 dark:text-400">
                   <i class="pi pi-map-marker text-primary text-xs"></i>
                   <span class="white-space-nowrap overflow-hidden text-overflow-ellipsis">
-                    {{ business.location?.address || $t('pages.dashboard.regional.locationPinned') }}
+                    {{
+                      [
+                        business.location?.street,
+                        business.location?.city,
+                        business.location?.country,
+                      ]
+                        .filter(Boolean)
+                        .join(', ') || $t('pages.dashboard.regional.locationPinned')
+                    }}
                   </span>
                 </div>
 
@@ -159,7 +191,8 @@
                   <span
                     class="text-xs text-primary font-medium flex align-items-center gap-1 hover:underline flex-shrink-0"
                   >
-                    {{ $t('pages.dashboard.regional.viewDetails') }} <i class="pi pi-arrow-right text-xs"></i>
+                    {{ $t('pages.dashboard.regional.viewDetails') }}
+                    <i class="pi pi-arrow-right text-xs"></i>
                   </span>
                 </div>
               </div>
@@ -169,7 +202,9 @@
                 class="flex flex-column align-items-center justify-content-center py-6 text-center text-500"
               >
                 <i class="pi pi-map text-4xl mb-3 text-300"></i>
-                <span class="font-medium">{{ $t('pages.dashboard.regional.noBusinessesFound') }}</span>
+                <span class="font-medium">{{
+                  $t('pages.dashboard.regional.noBusinessesFound')
+                }}</span>
                 <span class="text-sm mt-1">{{ $t('pages.dashboard.regional.tryPanning') }}</span>
               </div>
             </div>
@@ -181,15 +216,15 @@
 </template>
 
 <style scoped>
-  :deep(.p-card-body) {
-    height: 100%;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  :deep(.p-card-content) {
-    flex: 1;
-    overflow: hidden;
-    padding: 0;
-  }
+:deep(.p-card-body) {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+:deep(.p-card-content) {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
 </style>

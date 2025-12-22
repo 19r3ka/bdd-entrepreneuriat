@@ -1,86 +1,104 @@
 <script setup lang="ts">
-  import { toRefs } from 'vue'
-  import type { Business } from '@/types/business'
-  import type { Entrepreneur } from '@/types/entrepreneur'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
-  import type { ActivityLog } from '@/types/ActivityLog'
-  import { useActivityFeed } from '@/composables/useActivityFeed'
-  import { useRouter } from 'vue-router'
-  import { useI18n } from 'vue-i18n'
+import { toRefs } from 'vue';
+import type { Business } from '@/types/business';
+import type { Entrepreneur } from '@/types/entrepreneur';
+import type { Support } from '@/types/monitoring-evaluation/Support';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+import type { ActivityLog } from '@/types/ActivityLog';
+import { useActivityFeed } from '@/composables/useActivityFeed';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
-  import Card from 'primevue/card'
-  import Tabs from 'primevue/tabs'
-  import TabList from 'primevue/tablist'
-  import Tab from 'primevue/tab'
-  import TabPanels from 'primevue/tabpanels'
-  import TabPanel from 'primevue/tabpanel'
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
-  import Avatar from 'primevue/avatar'
-  import Tag from 'primevue/tag'
-  import Badge from 'primevue/badge'
-  import Button from 'primevue/button'
+import Card from 'primevue/card';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Avatar from 'primevue/avatar';
+import Tag from 'primevue/tag';
+import Badge from 'primevue/badge';
+import Button from 'primevue/button';
 
-  const props = defineProps<{
-    businesses: Business[]
-    entrepreneurs: Entrepreneur[]
-    supports: Support[]
-    quickWins: QuickWin[]
-    metrics: MomentumMetric[]
-    logs: ActivityLog[]
-  }>()
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_DAY =
+  MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
 
-  const router = useRouter()
-  const { t } = useI18n()
+const DAYS_TODAY = 0;
+const DAYS_YESTERDAY = 1;
 
-  // Convert props to refs for the composable
-  const { businesses, entrepreneurs, supports, quickWins, metrics, logs } = toRefs(props)
+const props = defineProps<{
+  businesses: Business[];
+  entrepreneurs: Entrepreneur[];
+  supports: Support[];
+  quickWins: QuickWin[];
+  metrics: MomentumMetric[];
+  logs: ActivityLog[];
+}>();
 
-  // Use the composable
-  const { activities, alerts } = useActivityFeed(
-    businesses,
-    entrepreneurs,
-    supports as any,
-    quickWins as any,
-    metrics as any,
-    logs as any
-  )
+const router = useRouter();
+const { t } = useI18n();
 
-  const getSeverity = (
-    status: string
-  ): 'success' | 'info' | 'danger' | 'secondary' | 'warn' | 'contrast' | undefined => {
-    switch (status) {
-      case 'Verified':
-      case 'Achieved':
-      case 'Completed':
-        return 'success'
-      case 'Registered':
-      case 'Reported':
-        return 'info'
-      case 'Pending':
-        return 'warn'
-      case 'Rejected':
-        return 'danger'
-      default:
-        return 'secondary'
-    }
+// Convert props to refs for the composable
+const { businesses, entrepreneurs, supports, quickWins, metrics, logs } = toRefs(props);
+
+// Use the composable
+const { activities, alerts } = useActivityFeed(
+  businesses,
+  entrepreneurs,
+  supports,
+  quickWins,
+  metrics,
+  logs
+);
+
+const getSeverity = (
+  status: string
+): 'success' | 'info' | 'danger' | 'secondary' | 'warn' | 'contrast' | undefined => {
+  switch (status) {
+    case 'Verified':
+    case 'Achieved':
+    case 'Completed':
+      return 'success';
+    case 'Registered':
+    case 'Reported':
+      return 'info';
+    case 'Pending':
+      return 'warn';
+    case 'Rejected':
+      return 'danger';
+    default:
+      return 'secondary';
   }
+};
 
-  const formatRelativeTime = (date: Date) => {
-    const now = new Date()
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-    if (diffDays === 0) return t('pages.dashboard.time.today')
-    if (diffDays === 1) return t('pages.dashboard.time.yesterday')
-    return t('pages.dashboard.time.daysAgo', { days: diffDays })
-  }
+/**
+ * Formats a date to a relative time string (e.g., "today", "yesterday", "days ago").
+ * @param date The date to format.
+ * @returns A string representing the relative time.
+ */
+const formatRelativeTime = (date: Date) => {
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / MILLISECONDS_PER_DAY);
+
+  if (diffDays === DAYS_TODAY) return t('pages.dashboard.time.today');
+  if (diffDays === DAYS_YESTERDAY) return t('pages.dashboard.time.yesterday');
+  return t('pages.dashboard.time.daysAgo', { days: diffDays });
+};
 </script>
 
 <template>
   <Card class="h-full border-1 border-surface-200 dark:border-surface-700 shadow-sm flex flex-col">
     <template #title>
-      <h2 class="text-900 dark:text-white text-lg font-bold m-0">{{ $t('pages.dashboard.activity.title') }}</h2>
+      <h2 class="text-900 dark:text-white text-lg font-bold m-0">
+        {{ $t('pages.dashboard.activity.title') }}
+      </h2>
     </template>
     <template #content>
       <Tabs value="0">
@@ -207,7 +225,7 @@
                     class="text-sm font-bold"
                     :class="{
                       'text-red-500': slotProps.data.type === 'danger',
-                      'text-orange-500': slotProps.data.type === 'warning'
+                      'text-orange-500': slotProps.data.type === 'warning',
                     }"
                     >{{ slotProps.data.time }}</span
                   >

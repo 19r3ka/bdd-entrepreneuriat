@@ -1,31 +1,41 @@
-import type { Business } from '@/types/business'
+import type { Business } from '@/schemas/business';
+import { v4 as uuidv4 } from 'uuid'; // For default UUID
 
 /**
  * Default initial values for a Business form.
  */
 export const initialBusiness: Business = {
-  id: '', // optional, empty until persisted
-  entrepreneurId: '', // required UUID, empty until selected
+  id: undefined, // Optional, undefined until persisted
+  entrepreneurId: uuidv4(), // Required UUID, generate a placeholder
   name: '', // required string
   location: {
-    longitude: null, // required number, null until filled
-    latitude: null // required number, null until filled
+    // Reflects AddressSchema. All fields are optional initially.
+    street: '',
+    city: '',
+    postalCode: '',
+    country: '',
+    coordinates: undefined, // Optional, no coordinates initially
   },
   contact: {
-    email: '', // required string
-    telephone: '' // required string
+    // Reflects ContactInfoSchema
+    email: '',
+    telephone: '',
   },
-  primaryBusinessArea: undefined as unknown as Business['primaryBusinessArea'], // required, undefined until selected
+  primaryBusinessArea: 'G', // Default to 'Wholesale and retail trade; repair of motor vehicles and motorcycles' (the G code)
   secondaryBusinessArea: undefined, // optional
   socialMedia: {
     linkedin: '',
     twitter: '',
     facebook: '',
-    instagram: ''
+    instagram: '',
+    tiktok: '',
+    website: '',
+    github: '',
   },
   registrationNumber: '', // optional string
-  registrationDate: null, // optional date
-  activityStartDate: null, // required date
-  supportStartDate: null, // required date
-  avatar: null // optional, can be File or string later
-}
+  registrationDate: null, // optional date - Schema uses DateStringSchema now
+  activityStartDate: null, // required date - Schema uses DateStringSchema now
+  supportStartDate: null, // required date - Schema uses DateStringSchema now
+  avatar: null, // optional, can be File or string later
+  maturityLevels: undefined, // optional
+};

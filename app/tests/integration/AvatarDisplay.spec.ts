@@ -4,7 +4,7 @@ import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
 
 // Mock the useImageResolver composable
 vi.mock('@/composables/useImageResolver', () => ({
-  useImageResolver: vi.fn((src) => ({
+  useImageResolver: vi.fn(src => ({
     resolvedSrc: src, // For testing, just return the source as resolved
   })),
 }));

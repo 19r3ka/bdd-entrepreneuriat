@@ -59,7 +59,9 @@
             <div class="grid">
               <div v-if="entrepreneur?.gender" class="col-12 md:col-6 mb-3">
                 <span class="block text-500 font-medium text-sm">{{ $t('common.gender') }}</span>
-                <span class="block text-900 text-lg mt-1">{{ entrepreneur.gender }}</span>
+                <span class="block text-900 text-lg mt-1">{{
+                  getGenderLabel(entrepreneur.gender)
+                }}</span>
               </div>
               <div v-if="calculatedAge !== null" class="col-12 md:col-6 mb-3">
                 <span class="block text-500 font-medium text-sm">{{ $t('common.age') }}</span>
@@ -72,7 +74,7 @@
         </Card>
 
         <!-- Location Map -->
-        <Card v-if="entrepreneur?.address" class="shadow-2">
+        <Card v-if="entrepreneur?.address?.coordinates?.latitude" class="shadow-2">
           <template #title>{{ $t('common.mapPreview') }}</template>
           <template #content>
             <InteractiveMap :locations="addressLocation" :is-editable="false" />
@@ -99,12 +101,20 @@
                     <div>
                       <div class="font-bold text-900">{{ biz.name }}</div>
                       <div class="text-sm text-500">
-                        {{ biz.primaryBusinessArea ? $t(`businessAreas.${biz.primaryBusinessArea}`) : $t('common.notAvailable') }}
+                        {{
+                          biz.primaryBusinessArea
+                            ? $t(`businessAreas.${biz.primaryBusinessArea}`)
+                            : $t('common.notAvailable')
+                        }}
                       </div>
                     </div>
                   </div>
                   <div class="text-600 text-sm">
-                    {{ biz.secondaryBusinessArea ? $t(`businessAreas.${biz.secondaryBusinessArea}`) : '' }}
+                    {{
+                      biz.secondaryBusinessArea
+                        ? $t(`businessAreas.${biz.secondaryBusinessArea}`)
+                        : ''
+                    }}
                   </div>
                 </div>
               </div>
@@ -124,8 +134,8 @@
           :title="$t('common.contactInformation')"
           :email="entrepreneur?.contact?.email"
           :telephone="entrepreneur?.contact?.telephone"
-          :address="entrepreneur?.address"
-          :website="entrepreneur?.personalWebsite"
+          :address="displayAddress"
+          :website="entrepreneur?.socialMedia?.website"
         />
         <SocialMediaCard :title="$t('common.socialMedia.title')" :socials="socials" />
       </div>
@@ -134,112 +144,121 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import { useI18n } from 'vue-i18n'
-  import Card from 'primevue/card'
-  import Button from 'primevue/button'
-  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import Card from 'primevue/card';
+import Button from 'primevue/button';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
 
-  import DetailLayout from '@/components/common/DetailLayout.vue'
-  import ContactInfos from '@/components/common/ContactDetailsCard.vue'
-  import SocialMediaCard from '@/components/common/SocialMediaCard.vue'
-  import InteractiveMap from '@/components/InteractiveMap.vue'
+import DetailLayout from '@/components/common/DetailLayout.vue';
+import ContactInfos from '@/components/common/ContactDetailsCard.vue';
+import SocialMediaCard from '@/components/common/SocialMediaCard.vue';
+import InteractiveMap from '@/components/InteractiveMap.vue';
 
-  import type { Entrepreneur } from '@/types/entrepreneur'
-  import type { Business } from '@/types/business'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import { calculateAge } from '@/utils/date.helpers' // Import calculateAge
+import { type Entrepreneur } from '@/schemas/entrepreneur'; // Use schema for type inference
+import { type Business } from '@/schemas/business'; // Use schema for type inference
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { calculateAge } from '@/utils/date.helpers'; // Import calculateAge
+import { useGenderOptions } from '@/composables/useGenderOptions';
 
-  const route = useRoute()
-  const router = useRouter()
-  const { t } = useI18n()
+const route = useRoute();
+const router = useRouter();
+const { getGenderLabel } = useGenderOptions();
 
-  const entrepreneurStore = useEntrepreneurStore()
-  const businessStore = useBusinessStore()
+const entrepreneurStore = useEntrepreneurStore();
+const businessStore = useBusinessStore();
 
-  const entrepreneur = ref<Entrepreneur | null>(null)
+const entrepreneur = ref<Entrepreneur | null>(null);
 
-  onMounted(async () => {
-    const id = route.params.id as string
-    await entrepreneurStore.fetchAll()
-    entrepreneur.value = entrepreneurStore.getById(id) || null
-    if (entrepreneur.value) {
-      await businessStore.fetchAll()
-    }
-  })
-
-  const fullName = computed(() =>
-    entrepreneur.value ? `${entrepreneur.value.firstName} ${entrepreneur.value.lastName}` : ''
-  )
-
-  const avatarSrc = computed(() => entrepreneur.value?.avatar || '')
-  const heroImage = computed(() => entrepreneur.value?.avatar || '')
-
-  const businesses = computed<Business[]>(() => {
-    if (!entrepreneur.value) return []
-    return businessStore.businesses.filter((b) => b.entrepreneurId === entrepreneur.value!.id)
-  })
-
-  const addressLocation = computed(() => {
-    if (entrepreneur.value?.address) {
-      // For now, just show the address as text
-      // We'll need to geocode it to get coordinates for the map
-      // For this implementation, we'll temporarily return an empty array
-      // since we don't have the coordinates yet, but it will be geocoded in the MapComponent
-      return [
-        {
-          lat: 47.41322, // Default coordinates as fallback
-          lng: -1.219482,
-          name: entrepreneur.value.address || 'Entrepreneur Address'
-        }
-      ]
-    }
-    return []
-  })
-
-  const calculatedAge = computed(() => {
-    if (entrepreneur.value?.dateOfBirth) {
-      return calculateAge(entrepreneur.value.dateOfBirth)
-    }
-    return null
-  })
-
-  // Map entrepreneur.socialMedia schema to SocialMediaCard format
-  const socials = computed(() => {
-    const sm = entrepreneur.value?.socialMedia
-    if (!sm) return []
-    const map: { name: string; url: string; icon: string; username?: string }[] = []
-    if (sm.linkedin) map.push({ name: 'LinkedIn', url: sm.linkedin, icon: 'pi-linkedin' })
-    if (sm.twitter) map.push({ name: 'Twitter', url: sm.twitter, icon: 'pi-twitter' })
-    if (sm.facebook) map.push({ name: 'Facebook', url: sm.facebook, icon: 'pi-facebook' })
-    if (sm.instagram) map.push({ name: 'Instagram', url: sm.instagram, icon: 'pi-instagram' })
-    if ((sm as any).github) map.push({ name: 'GitHub', url: (sm as any).github, icon: 'pi-github' })
-    if (sm.tiktok) map.push({ name: 'TikTok', url: sm.tiktok, icon: 'pi-globe' }) // fallback icon
-    return map
-  })
-
-  /**
-   *
-   */
-  function onAddBusiness() {
-    if (!entrepreneur.value) return
-    router.push(`/businesses/new?entrepreneurId=${entrepreneur.value.id}`)
+onMounted(async () => {
+  const id = route.params.id as string;
+  await entrepreneurStore.fetchAll();
+  entrepreneur.value = entrepreneurStore.getById(id) || null;
+  if (entrepreneur.value) {
+    await businessStore.fetchAll();
   }
+});
 
-  /**
-   *
-   */
-  function onEditProfile() {
-    if (!entrepreneur.value) return
-    router.push(`/entrepreneurs/${entrepreneur.value.id}/edit`)
-  }
+const fullName = computed(() =>
+  entrepreneur.value ? `${entrepreneur.value.firstName} ${entrepreneur.value.lastName}` : ''
+);
 
-  /**
-   *
-   */
-  function goBusiness(id: string) {
-    router.push(`/businesses/${id}`)
+const avatarSrc = computed(() => entrepreneur.value?.avatar || '');
+const heroImage = computed(() => entrepreneur.value?.avatar || '');
+
+const businesses = computed<Business[]>(() => {
+  if (!entrepreneur.value) return [];
+  return businessStore.businesses.filter(b => b.entrepreneurId === entrepreneur.value!.id);
+});
+
+const addressLocation = computed(() => {
+  if (
+    entrepreneur.value?.address?.coordinates?.latitude &&
+    entrepreneur.value?.address?.coordinates?.longitude
+  ) {
+    return [
+      {
+        lat: entrepreneur.value.address.coordinates.latitude,
+        lng: entrepreneur.value.address.coordinates.longitude,
+        name: displayAddress.value || 'Entrepreneur Address', // Use formatted address as name
+      },
+    ];
   }
+  return [];
+});
+
+const displayAddress = computed(() => {
+  const addr = entrepreneur.value?.address;
+  if (!addr) return undefined;
+  const parts = [];
+  if (addr.street) parts.push(addr.street);
+  if (addr.city) parts.push(addr.city);
+  if (addr.country) parts.push(addr.country);
+  return parts.join(', ');
+});
+
+const calculatedAge = computed(() => {
+  if (entrepreneur.value?.dateOfBirth) {
+    return calculateAge(entrepreneur.value.dateOfBirth);
+  }
+  return null;
+});
+
+// Map entrepreneur.socialMedia schema to SocialMediaCard format
+const socials = computed(() => {
+  const sm = entrepreneur.value?.socialMedia;
+  if (!sm) return [];
+  const map: { name: string; url: string; icon: string; username?: string }[] = [];
+  if (sm.linkedin) map.push({ name: 'LinkedIn', url: sm.linkedin, icon: 'pi-linkedin' });
+  if (sm.twitter) map.push({ name: 'Twitter', url: sm.twitter, icon: 'pi-twitter' });
+  if (sm.facebook) map.push({ name: 'Facebook', url: sm.facebook, icon: 'pi-facebook' });
+  if (sm.instagram) map.push({ name: 'Instagram', url: sm.instagram, icon: 'pi-instagram' });
+  if (sm.github) map.push({ name: 'GitHub', url: sm.github, icon: 'pi-globe' }); // Changed to globe, as pi-github is not standard in PrimeIcons
+  if (sm.tiktok) map.push({ name: 'TikTok', url: sm.tiktok, icon: 'pi-globe' }); // fallback icon
+  return map;
+});
+
+/**
+ *
+ */
+function onAddBusiness() {
+  if (!entrepreneur.value) return;
+  router.push(`/businesses/new?entrepreneurId=${entrepreneur.value.id}`);
+}
+
+/**
+ *
+ */
+function onEditProfile() {
+  if (!entrepreneur.value) return;
+  router.push(`/entrepreneurs/${entrepreneur.value.id}/edit`);
+}
+
+/**
+ *
+ */
+function goBusiness(id: string) {
+  router.push(`/businesses/${id}`);
+}
 </script>

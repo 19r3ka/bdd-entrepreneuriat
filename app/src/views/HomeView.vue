@@ -103,94 +103,106 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import { useSupportStore } from '@/stores/useSupportStore'
-  import DashboardWidget from '@/components/DashboardWidget.vue'
-  import QuickAddEntrepreneurForm from '@/components/QuickAddEntrepreneurForm.vue'
-  import InteractiveMap from '@/components/InteractiveMap.vue'
-  import Button from 'primevue/button'
-  import Dialog from 'primevue/dialog'
-  import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue'
-  import GoalForm from '@/components/monitoring-evaluation/GoalForm.vue'
-  import MeasurementForm from '@/components/monitoring-evaluation/MeasurementForm.vue'
-  import { useI18n } from 'vue-i18n'
-  import { useToast } from 'primevue/usetoast'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
+import { computed, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useSupportStore } from '@/stores/useSupportStore';
+import DashboardWidget from '@/components/DashboardWidget.vue';
+import QuickAddEntrepreneurForm from '@/components/QuickAddEntrepreneurForm.vue';
+import InteractiveMap from '@/components/InteractiveMap.vue';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import SupportBoostForm from '@/components/monitoring-evaluation/SupportBoostForm.vue';
+import GoalForm from '@/components/monitoring-evaluation/GoalForm.vue';
+import MeasurementForm from '@/components/monitoring-evaluation/MeasurementForm.vue';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
+import type { Support } from '@/schemas/monitoring-evaluation/Support'; // Use schema for type inference
 
-  const { t } = useI18n()
-  const toast = useToast()
+const { t } = useI18n();
+const toast = useToast();
 
-  const entrepreneurStore = useEntrepreneurStore()
-  const businessStore = useBusinessStore()
-  const supportStore = useSupportStore()
+const entrepreneurStore = useEntrepreneurStore();
+const businessStore = useBusinessStore();
+const supportStore = useSupportStore();
 
-  const showSupportDialog = ref(false)
-  const showGoalDialog = ref(false)
-  const showMeasurementDialog = ref(false)
+const showSupportDialog = ref(false);
+const showGoalDialog = ref(false);
+const showMeasurementDialog = ref(false);
 
-  const { entrepreneurs } = storeToRefs(entrepreneurStore)
-  const { businesses } = storeToRefs(businessStore)
+const { entrepreneurs } = storeToRefs(entrepreneurStore);
+const { businesses } = storeToRefs(businessStore);
 
-  const totalEntrepreneurs = computed(() => entrepreneurs.value.length)
-  const totalBusinesses = computed(() => businesses.value.length)
+const totalEntrepreneurs = computed(() => entrepreneurs.value.length);
+const totalBusinesses = computed(() => businesses.value.length);
 
-  const businessLocations = computed(() => {
-    return businesses.value
-      .filter((b) => b.location?.latitude && b.location?.longitude)
-      .map((b) => ({
-        lat: b.location!.latitude as number,
-        lng: b.location!.longitude as number,
-        name: b.name,
-        address: b.location?.address
-      }))
-  })
+const businessLocations = computed(() => {
+  return businesses.value
+    .filter(b => b.location?.coordinates?.latitude && b.location?.coordinates?.longitude)
+    .map(b => ({
+      lat: b.location!.coordinates!.latitude as number,
+      lng: b.location!.coordinates!.longitude as number,
+      name: b.name,
+      address: formatAddress(b.location), // Format address from AddressSchema
+    }));
+});
 
-  const handleSupportSubmit = async (data: Support) => {
-    try {
-      await supportStore.addSupport(data)
-      toast.add({
-        severity: 'success',
-        summary: t('common.success'),
-        detail: t('messages.supportCreated'),
-        life: 3000
-      })
-      showSupportDialog.value = false
-    } catch (error) {
-      console.error(error)
-      toast.add({
-        severity: 'error',
-        summary: t('common.error'),
-        detail: t('messages.supportFailed'),
-        life: 3000
-      })
-    }
+/**
+ *
+ */
+function formatAddress(location: (typeof businesses.value)[number]['location']) {
+  if (!location) return undefined;
+  const parts = [];
+  if (location.street) parts.push(location.street);
+  if (location.city) parts.push(location.city);
+  if (location.country) parts.push(location.country);
+  return parts.join(', ');
+}
+
+const handleSupportSubmit = async (data: Support) => {
+  try {
+    await supportStore.addSupport(data);
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: t('messages.supportCreated'),
+      life: 3000,
+    });
+    showSupportDialog.value = false;
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: 'error',
+      summary: t('common.error'),
+      detail: t('messages.supportFailed'),
+      life: 3000,
+    });
   }
+};
 
-  onMounted(async () => {
-    await entrepreneurStore.fetchAll()
-    await businessStore.fetchAll()
-  })
+onMounted(async () => {
+  await entrepreneurStore.fetchAll();
+  await businessStore.fetchAll();
+});
 </script>
 
 <style scoped>
-  .card {
-    background: var(--surface-card);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-  }
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+}
 </style>
 
 <style scoped>
-  .card {
-    background: var(--surface-card);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-  }
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+}
 </style>

@@ -1,37 +1,37 @@
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
-  import Tag from 'primevue/tag'
-  import Button from 'primevue/button'
-  import Avatar from 'primevue/avatar'
-  import type { RecentActivity } from '@/types/portfolio'
+import { ref, computed } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import Avatar from 'primevue/avatar';
+import type { RecentActivity } from '@/types/portfolio';
 
-  const props = defineProps<{
-    activities: RecentActivity[]
-    incompleteCount: number
-  }>()
+const props = defineProps<{
+  activities: RecentActivity[];
+  incompleteCount: number;
+}>();
 
-  // Simple Filter Logic simulating Tabs
-  const activeFilter = ref<'ALL' | 'INCOMPLETE'>('ALL')
+// Simple Filter Logic simulating Tabs
+const activeFilter = ref<'ALL' | 'INCOMPLETE'>('ALL');
 
-  const filteredData = computed(() => {
-    if (activeFilter.value === 'INCOMPLETE') {
-      return props.activities.filter((a) => a.status === 'MISSING_INFO')
-    }
-    return props.activities
-  })
-
-  const getSeverity = (status: string) => {
-    switch (status) {
-      case 'VERIFIED':
-        return 'success'
-      case 'MISSING_INFO':
-        return 'warning' // Orange in PrimeVue
-      default:
-        return 'info'
-    }
+const filteredData = computed(() => {
+  if (activeFilter.value === 'INCOMPLETE') {
+    return props.activities.filter(a => a.status === 'MISSING_INFO');
   }
+  return props.activities;
+});
+
+const getSeverity = (status: string) => {
+  switch (status) {
+    case 'VERIFIED':
+      return 'success';
+    case 'MISSING_INFO':
+      return 'warning'; // Orange in PrimeVue
+    default:
+      return 'info';
+  }
+};
 </script>
 
 <template>

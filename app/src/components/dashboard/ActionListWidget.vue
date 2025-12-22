@@ -1,21 +1,21 @@
 <script setup lang="ts">
-  import Card from 'primevue/card'
-  import ActionItemComponent from './ActionItem.vue'
-  import type { ActionItem } from '@/composables/usePortfolioActions'
+import Card from 'primevue/card';
+import ActionItemComponent from './ActionItem.vue';
+import type { ActionItem } from '@/composables/usePortfolioActions';
 
-  const props = defineProps<{
-    title: string
-    icon: string
-    color: string // e.g., 'blue', 'red', 'orange'
-    actions: ActionItem[]
-    emptyTitle?: string
-    emptyMessage?: string
-    emptyIcon?: string
-  }>()
+defineProps<{
+  title: string;
+  icon: string;
+  color: string; // e.g., 'blue', 'red', 'orange'
+  actions: ActionItem[];
+  emptyTitle?: string;
+  emptyMessage?: string;
+  emptyIcon?: string;
+}>();
 
-  const emit = defineEmits<{
-    (e: 'action-click', action: ActionItem): void
-  }>()
+const emit = defineEmits<{
+  (e: 'action-click', action: ActionItem): void;
+}>();
 </script>
 
 <template>

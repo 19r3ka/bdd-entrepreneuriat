@@ -13,14 +13,12 @@
 </template>
 
 <script setup lang="ts">
-  import Panel from 'primevue/panel'
+import Panel from 'primevue/panel';
 
-  interface Props {
-    title: string
-    initiallyCollapsed?: boolean
-  }
+interface Props {
+  title: string;
+  initiallyCollapsed?: boolean;
+}
 
-  const props = withDefaults(defineProps<Props>(), {
-    initiallyCollapsed: false
-  })
+defineProps<Props>();
 </script>

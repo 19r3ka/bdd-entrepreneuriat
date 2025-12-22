@@ -59,92 +59,93 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Tag from 'primevue/tag'
-  import Button from 'primevue/button'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
+import { useI18n } from 'vue-i18n';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  const props = defineProps<{
-    metric: MomentumMetric
-  }>()
+defineProps<{
+  metric: MomentumMetric;
+}>();
 
-  defineEmits<{
-    (e: 'edit', metric: MomentumMetric): void
-  }>()
+defineEmits<{
+  (e: 'edit', metric: MomentumMetric): void;
+}>();
 
-  const getGenderSeverity = (marker?: string) => {
-    switch (marker) {
-      case 'GEN3':
-        return 'success'
-      case 'GEN2':
-        return 'info'
-      case 'GEN1':
-        return 'warning'
-      case 'GEN0':
-        return 'danger'
-      default:
-        return 'secondary'
-    }
+const getGenderSeverity = (marker?: string) => {
+  switch (marker) {
+    case 'GEN3':
+      return 'success';
+    case 'GEN2':
+      return 'info';
+    case 'GEN1':
+      return 'warning';
+    case 'GEN0':
+      return 'danger';
+    default:
+      return 'secondary';
   }
+};
 
-  const getLatestReading = (indicator: any) => {
-    if (!indicator.readings || indicator.readings.length === 0) return null
-    // Sort by date descending
-    const sorted = [...indicator.readings].sort(
-      (a, b) => new Date(b.asOf).getTime() - new Date(a.asOf).getTime()
-    )
-    return sorted[0].value
-  }
+const getLatestReading = (indicator: MomentumMetric['indicators'][number]) => {
+  if (!indicator.readings || indicator.readings.length === 0) return null;
+  // Sort by date descending
+  const sorted = [...indicator.readings].sort(
+    (a, b) => new Date(b.asOf).getTime() - new Date(a.asOf).getTime()
+  );
+  return sorted[0] ? sorted[0].value : null;
+};
 
-  const formatValue = (value: any, unit?: string) => {
-    if (value === null || value === undefined) return '-'
+const formatValue = (value: number | boolean | string | null | undefined, unit?: string) => {
+  if (value === null || value === undefined) return '-';
 
-    if (unit === 'percent') return `${value}%`
-    if (unit === 'currency') return `${value}` // Currency symbol handling could be added
-    if (unit === 'boolean') return value ? 'Yes' : 'No'
-    return value
-  }
+  if (unit === 'percent') return `${value}%`;
+  if (unit === 'currency') return `${value}`; // Currency symbol handling could be added
+  if (unit === 'boolean') return value ? 'Yes' : 'No';
+  return value;
+};
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return ''
-    return d(new Date(dateStr), 'long')
-  }
+const formatDate = (dateStr?: string | Date) => {
+  if (!dateStr) return '';
+  return d(new Date(dateStr), 'long');
+};
 
-  const getSparklinePoints = (readings: any[]) => {
-    if (!readings || readings.length < 2) return ''
+const getSparklinePoints = (
+  readings: NonNullable<MomentumMetric['indicators'][number]['readings']>
+) => {
+  if (!readings || readings.length < 2) return '';
 
-    // Sort by date ascending
-    const sorted = [...readings].sort(
-      (a, b) => new Date(a.asOf).getTime() - new Date(b.asOf).getTime()
-    )
+  // Sort by date ascending
+  const sorted = [...readings].sort(
+    (a, b) => new Date(a.asOf).getTime() - new Date(b.asOf).getTime()
+  );
 
-    const values = sorted.map((r) => Number(r.value))
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    const range = max - min || 1 // Avoid division by zero
+  const values = sorted.map(r => Number(r.value));
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1; // Avoid division by zero
 
-    return values
-      .map((val, index) => {
-        const x = (index / (values.length - 1)) * 100
-        // Invert Y because SVG coords start from top
-        const y = 100 - ((val - min) / range) * 100
-        return `${x},${y}`
-      })
-      .join(' ')
-  }
+  return values
+    .map((val, index) => {
+      const x = (index / (values.length - 1)) * 100;
+      // Invert Y because SVG coords start from top
+      const y = 100 - ((val - min) / range) * 100;
+      return `${x},${y}`;
+    })
+    .join(' ');
+};
 </script>
 
 <style scoped>
-  .momentum-metric-card {
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s;
-  }
-  .momentum-metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-4);
-  }
+.momentum-metric-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.momentum-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-4);
+}
 </style>

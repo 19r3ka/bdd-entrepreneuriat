@@ -6,7 +6,7 @@ describe('FormField.vue', () => {
   it('renders with label and input field', () => {
     const name = 'testField';
     const label = 'Test Field';
-    
+
     const wrapper = mountWithGlobalComponents(FormField, {
       props: {
         name,
@@ -18,7 +18,7 @@ describe('FormField.vue', () => {
     // Check for the label
     expect(wrapper.find('label').text()).toContain(label);
     expect(wrapper.find('label').attributes('for')).toBe(name);
-    
+
     // Check for the input field
     expect(wrapper.find('input').exists()).toBe(true);
   });
@@ -62,7 +62,7 @@ describe('FormField.vue', () => {
 
     // Check for error class on input
     expect(wrapper.find('input').classes()).toContain('p-invalid');
-    
+
     // Check for error message
     expect(wrapper.text()).toContain('This field is required');
   });
@@ -155,8 +155,8 @@ describe('FormField.vue', () => {
         modelValue: '',
       },
       slots: {
-        input: '<input type="text" class="custom-input" value="slot-value" />'
-      }
+        input: '<input type="text" class="custom-input" value="slot-value" />',
+      },
     });
 
     // Should render the slot content instead of default input
@@ -171,8 +171,8 @@ describe('FormField.vue', () => {
         modelValue: 'initial-value',
       },
       slots: {
-        input: '<div class="slot-content">{{ JSON.stringify($slots.input().data.attrs) }}</div>'
-      }
+        input: '<div class="slot-content">{{ JSON.stringify($slots.input().data.attrs) }}</div>',
+      },
     });
 
     // Should pass the correct slot props

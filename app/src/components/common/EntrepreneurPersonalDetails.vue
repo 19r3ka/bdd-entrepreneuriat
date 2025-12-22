@@ -16,23 +16,23 @@
       </div>
       <div class="col-12 md:col-6 field">
         <label class="block text-900 font-medium mb-2">{{ $t('common.personalWebsite') }}</label>
-        <p>{{ entrepreneur.personalWebsite || $t('common.notAvailable') }}</p>
+        <p>{{ entrepreneur.socialMedia?.website || $t('common.notAvailable') }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import type { Entrepreneur } from '@/types/entrepreneur'
+import type { Entrepreneur } from '@/types/entrepreneur';
 
-  defineProps<{
-    entrepreneur: Entrepreneur
-  }>()
+defineProps<{
+  entrepreneur: Entrepreneur;
+}>();
 </script>
 
 <style scoped>
-  .field p {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-  }
+.field p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
 </style>

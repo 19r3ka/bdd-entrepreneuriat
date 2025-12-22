@@ -1,52 +1,55 @@
 <script setup lang="ts">
-  import { computed, toRef } from 'vue'
-  import {
-    MaturityDimensions,
-    type MaturityDimension,
-    type MilestoneDefinition
-  } from '@/constants/maturityCatalog'
-  import { useMaturityCalculations } from '@/composables/useMaturityCalculations'
-  import Card from 'primevue/card'
-  import Accordion from 'primevue/accordion'
-  import AccordionPanel from 'primevue/accordionpanel'
-  import AccordionHeader from 'primevue/accordionheader'
-  import AccordionContent from 'primevue/accordioncontent'
-  import ProgressBar from 'primevue/progressbar'
-  import MaturityRadarChart from '@/components/shared/MaturityRadarChart.vue'
+import { computed, toRef } from 'vue';
+import {
+  MaturityDimensions,
+  type MaturityDimension,
+  type MilestoneDefinition,
+} from '@/constants/maturityCatalog';
+import { useMaturityCalculations } from '@/composables/useMaturityCalculations';
+import Card from 'primevue/card';
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import ProgressBar from 'primevue/progressbar';
+import MaturityRadarChart from '@/components/shared/MaturityRadarChart.vue';
 
-  const props = defineProps<{
-    levels: Record<MaturityDimension, number>
-    nextMilestones: { dimension: MaturityDimension; milestone: MilestoneDefinition }[]
-    dimensionStats: Record<string, { hasSupport: boolean; hasOutcome: boolean }>
-  }>()
+const props = defineProps<{
+  levels: Record<MaturityDimension, number>;
+  nextMilestones: { dimension: MaturityDimension; milestone: MilestoneDefinition }[];
+  dimensionStats: Record<string, { hasSupport: boolean; hasOutcome: boolean }>;
+}>();
 
-  // Use shared composable for maturity calculations
-  const { avgMaturityLevels } = useMaturityCalculations(toRef(props, 'levels'))
+// Use shared composable for maturity calculations
+const { avgMaturityLevels } = useMaturityCalculations(toRef(props, 'levels'));
 
-  const filteredMilestones = computed(() => {
-    // Show ALL dimensions, even if at max level
-    return MaturityDimensions.map((dim) => {
-      const existing = props.nextMilestones.find((m) => m.dimension === dim)
-      if (existing) {
-        return existing
-      }
-      // If no next milestone (at max level), show completion message
-      return {
-        dimension: dim,
-        milestone: {
-          level: 4,
-          name: 'Max Level Achieved',
-          description: 'This dimension has reached maximum maturity.',
-          requiredIndicators: [],
-          suggestedSupport: 'Maintain current practices'
-        }
-      }
-    })
-  })
+// Constants
+const MAX_MATURITY_LEVEL = 4;
 
-  const getProgress = (currentLevel: number) => {
-    return (currentLevel / 4) * 100
-  }
+const filteredMilestones = computed(() => {
+  // Show ALL dimensions, even if at max level
+  return MaturityDimensions.map(dim => {
+    const existing = props.nextMilestones.find(m => m.dimension === dim);
+    if (existing) {
+      return existing;
+    }
+    // If no next milestone (at max level), show completion message
+    return {
+      dimension: dim,
+      milestone: {
+        level: MAX_MATURITY_LEVEL,
+        name: 'Max Level Achieved',
+        description: 'This dimension has reached maximum maturity.',
+        requiredIndicators: [],
+        suggestedSupport: 'Maintain current practices',
+      },
+    };
+  });
+});
+
+const getProgress = (currentLevel: number) => {
+  return (currentLevel / MAX_MATURITY_LEVEL) * 100;
+};
 </script>
 
 <template>
@@ -57,7 +60,7 @@
         <span class="font-semibold">Maturity Nexus</span>
       </div>
     </template>
-    <template #content class="p-0">
+    <template #content>
       <div class="grid grid-nogutter">
         <!-- Radar Chart - Using Shared Component -->
         <div class="col-12 lg:col-6 flex justify-content-center align-items-center p-4">
@@ -117,7 +120,7 @@
 </template>
 
 <style scoped>
-  .maturity-nexus {
-    height: 100%;
-  }
+.maturity-nexus {
+  height: 100%;
+}
 </style>

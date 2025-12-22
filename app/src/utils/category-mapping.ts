@@ -13,7 +13,7 @@ export type SupportBoostType =
   | 'policy_advocacy'
   | 'partnership_linkage'
   | 'market_access'
-  | 'digitalization_support'
+  | 'digitalization_support';
 
 export type OutcomeCategory =
   | 'performance'
@@ -23,7 +23,7 @@ export type OutcomeCategory =
   | 'sustainability'
   | 'resilience'
   | 'digital_adoption'
-  | 'market_integration'
+  | 'market_integration';
 
 /**
  * Maps Support boost types to their primary outcome categories
@@ -38,12 +38,12 @@ export const BOOST_TYPE_TO_CATEGORY: Record<SupportBoostType, OutcomeCategory> =
   policy_advocacy: 'resilience',
   partnership_linkage: 'market_integration',
   market_access: 'market_integration',
-  digitalization_support: 'digital_adoption'
-}
+  digitalization_support: 'digital_adoption',
+};
 
 /**
  * Get the strategic category for a given boost type
  */
 export function getCategoryFromBoostType(boostType: SupportBoostType): OutcomeCategory {
-  return BOOST_TYPE_TO_CATEGORY[boostType]
+  return BOOST_TYPE_TO_CATEGORY[boostType];
 }

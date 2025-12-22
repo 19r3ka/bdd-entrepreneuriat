@@ -48,7 +48,7 @@ describe('DashboardWidget.vue', () => {
 
     // Check for the main widget class
     expect(wrapper.classes()).toContain('dashboard-widget');
-    
+
     // Check for PrimeVue surface classes
     expect(wrapper.classes()).toContain('surface-0');
     expect(wrapper.classes()).toContain('shadow-2');
@@ -56,7 +56,7 @@ describe('DashboardWidget.vue', () => {
     expect(wrapper.classes()).toContain('border-1');
     expect(wrapper.classes()).toContain('border-50');
     expect(wrapper.classes()).toContain('border-round');
-    
+
     // Check for hover cursor class
     expect(wrapper.classes()).toContain('cursor-pointer');
   });

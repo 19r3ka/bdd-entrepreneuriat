@@ -1,4 +1,6 @@
 // Global error handler service
+import type { ToastServiceMethods } from 'primevue/toastservice';
+
 /**
  *
  */
@@ -7,17 +9,24 @@ export class ErrorHandler {
   /**
    *
    */
-  handleApiError(error: unknown, toast?: any, customMessage?: string): void {
-    let message = 'An unexpected error occurred'
+  handleApiError(error: unknown, toast?: ToastServiceMethods, customMessage?: string): void {
+    let message = 'An unexpected error occurred';
 
     if (error instanceof Error) {
-      message = error.message
+      message = error.message;
     } else if (typeof error === 'string') {
-      message = error
+      message = error;
+    } else if (
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof (error as { message: unknown }).message === 'string'
+    ) {
+      message = (error as { message: string }).message;
     }
 
     if (customMessage) {
-      message = customMessage
+      message = customMessage;
     }
 
     if (toast) {
@@ -25,38 +34,44 @@ export class ErrorHandler {
         severity: 'error',
         summary: 'Error',
         detail: message,
-        life: 5000
-      })
+        life: 5000,
+      });
     } else {
-      console.error('Toast service not provided, showing in console:', message)
+      console.error('Toast service not provided, showing in console:', message);
     }
 
-    console.error('API Error:', error)
+    console.error('API Error:', error);
   }
 
   // Handle validation errors from Zod schema
   /**
    *
    */
-  handleValidationError(errors: any, toast?: any, customMessage?: string): void {
-    const message = customMessage || 'Validation failed'
+  handleValidationError(
+    errors: unknown,
+    toast?: ToastServiceMethods,
+    customMessage?: string
+  ): void {
+    const message = customMessage || 'Validation failed';
 
     if (toast) {
       toast.add({
         severity: 'error',
         summary: 'Validation Error',
         detail: message,
-        life: 5000
-      })
+        life: 5000,
+      });
     } else {
-      console.error('Toast service not provided, showing in console:', message)
+      console.error('Toast service not provided, showing in console:', message);
     }
 
     // Log the validation errors for debugging
     if (Array.isArray(errors)) {
-      errors.forEach((error) => {
-        console.error('Validation Error:', error)
-      })
+      errors.forEach(error => {
+        console.error('Validation Error:', error);
+      });
+    } else {
+      console.error('Validation Error:', errors);
     }
   }
 
@@ -64,17 +79,24 @@ export class ErrorHandler {
   /**
    *
    */
-  handleGenericError(error: unknown, toast?: any, customMessage?: string): void {
-    let message = 'An unexpected error occurred'
+  handleGenericError(error: unknown, toast?: ToastServiceMethods, customMessage?: string): void {
+    let message = 'An unexpected error occurred';
 
     if (error instanceof Error) {
-      message = error.message
+      message = error.message;
     } else if (typeof error === 'string') {
-      message = error
+      message = error;
+    } else if (
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof (error as { message: unknown }).message === 'string'
+    ) {
+      message = (error as { message: string }).message;
     }
 
     if (customMessage) {
-      message = customMessage
+      message = customMessage;
     }
 
     if (toast) {
@@ -82,15 +104,15 @@ export class ErrorHandler {
         severity: 'error',
         summary: 'Error',
         detail: message,
-        life: 5000
-      })
+        life: 5000,
+      });
     } else {
-      console.error('Toast service not provided, showing in console:', message)
+      console.error('Toast service not provided, showing in console:', message);
     }
 
-    console.error('Generic Error:', error)
+    console.error('Generic Error:', error);
   }
 }
 
 // Create a singleton instance
-export const errorHandler = new ErrorHandler()
+export const errorHandler = new ErrorHandler();

@@ -1,22 +1,27 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Accordion from 'primevue/accordion'
-  import AccordionTab from 'primevue/accordiontab'
-  import ProgressBar from 'primevue/progressbar'
-  import MaturityRadarChart from './MaturityRadarChart.vue' // Sub-component wrapper for ChartJS
-  import type { MaturityScore, Milestone } from '@/types/maturity'
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import MaturityRadarChart from './MaturityRadarChart.vue';
+import ProgressBar from 'primevue/progressbar';
+import type { MaturityScore, Milestone } from '@/types/maturity';
 
-  const props = defineProps<{
-    scores: MaturityScore[]
-    milestones: Record<string, Milestone[]> // Keyed by Axis Name
-  }>()
+const props = defineProps<{
+  scores: MaturityScore[];
+  milestones: Record<string, Milestone[]>;
+}>();
 
-  // Helper to calculate progress per axis for the accordion header
-  const getProgress = (axis: string) => {
-    const list = props.milestones[axis] || []
-    const completed = list.filter((m) => m.isCompleted).length
-    return { count: completed, total: list.length, percentage: (completed / list.length) * 100 }
-  }
+/**
+ * Helper to calculate progress per axis for the accordion header
+ * @param axis The axis to calculate progress for
+ * @returns An object containing the count, total, and percentage of completed milestones
+ */
+const getProgress = (axis: string) => {
+  const list = props.milestones[axis] || [];
+  const completed = list.filter(m => m.isCompleted).length;
+  return { count: completed, total: list.length, percentage: (completed / list.length) * 100 };
+};
 </script>
 
 <template>
@@ -33,9 +38,13 @@
       </div>
 
       <div class="flex flex-col gap-3">
-        <Accordion :active-index="0" class="maturity-accordion">
-          <AccordionTab v-for="score in scores" :key="score.axis">
-            <template #header>
+        <Accordion value="0" class="maturity-accordion">
+          <AccordionPanel
+            v-for="(score, index) in scores"
+            :key="score.axis"
+            :value="index.toString()"
+          >
+            <AccordionHeader>
               <div class="w-full pr-4">
                 <div class="flex justify-between items-center mb-1">
                   <p class="text-sm font-medium text-text-light dark:text-text-dark capitalize">
@@ -53,20 +62,22 @@
                   :pt="{ value: { class: '!bg-primary' } }"
                 />
               </div>
-            </template>
+            </AccordionHeader>
 
-            <ul class="list-none p-0 m-0 flex flex-col gap-2">
-              <li v-for="m in milestones[score.axis]" :key="m.id" class="flex items-center gap-2">
-                <span
-                  class="material-symbols-outlined !text-sm"
-                  :class="m.isCompleted ? 'text-success' : 'text-gray-300'"
-                >
-                  {{ m.isCompleted ? 'check_circle' : 'radio_button_unchecked' }}
-                </span>
-                <span class="text-sm text-text-medium-light">{{ m.label }}</span>
-              </li>
-            </ul>
-          </AccordionTab>
+            <AccordionContent>
+              <ul class="list-none p-0 m-0 flex flex-col gap-2">
+                <li v-for="m in milestones[score.axis]" :key="m.id" class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined !text-sm"
+                    :class="m.isCompleted ? 'text-success' : 'text-gray-300'"
+                  >
+                    {{ m.isCompleted ? 'check_circle' : 'radio_button_unchecked' }}
+                  </span>
+                  <span class="text-sm text-text-medium-light">{{ m.label }}</span>
+                </li>
+              </ul>
+            </AccordionContent>
+          </AccordionPanel>
         </Accordion>
       </div>
     </div>
@@ -74,19 +85,29 @@
 </template>
 
 <style scoped>
-  /* Slight override to match the flat design of the reference HTML */
-  :deep(.p-accordion-header-link) {
-    background: transparent !important;
-    border: none !important;
-    padding: 1rem 0 !important;
-    box-shadow: none !important;
-  }
-  :deep(.p-accordion-content) {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 0 1rem 0 !important;
-  }
-  :deep(.p-accordion-tab) {
-    @apply border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark px-4 mb-3;
-  }
+:deep(.p-accordionheader-toggle) {
+  background: transparent !important;
+  border: none !important;
+  padding: 1rem 0 !important;
+  box-shadow: none !important;
+}
+:deep(.p-accordioncontent-content) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 0 1rem 0 !important;
+}
+
+:deep(.p-accordionpanel) {
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  background: var(--background-light);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+:deep(.dark .p-accordionpanel) {
+  border-color: var(--border-dark);
+  background: var(--background-dark);
+}
 </style>

@@ -1,46 +1,46 @@
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import Timeline from 'primevue/timeline'
-  import type { TimelineEvent } from '@/types/maturity'
+import { ref, computed } from 'vue';
+import Timeline from 'primevue/timeline';
+import type { TimelineEvent } from '@/types/maturity';
 
-  // CONTRACT
-  const props = defineProps<{
-    events: TimelineEvent[]
-  }>()
+// CONTRACT
+const props = defineProps<{
+  events: TimelineEvent[];
+}>();
 
-  const activeTab = ref<'ALL' | 'SUPPORTS' | 'MEASUREMENTS'>('ALL')
+const activeTab = ref<'ALL' | 'SUPPORTS' | 'MEASUREMENTS'>('ALL');
 
-  // Filter Logic
-  const filteredEvents = computed(() => {
-    if (activeTab.value === 'ALL') return props.events
-    // Basic mapping logic assuming TYPES match the tabs
-    return props.events.filter((e) => e.type.includes(activeTab.value.slice(0, -1)))
-  })
+// Filter Logic
+const filteredEvents = computed(() => {
+  if (activeTab.value === 'ALL') return props.events;
+  // Basic mapping logic assuming TYPES match the tabs
+  return props.events.filter(e => e.type.includes(activeTab.value.slice(0, -1)));
+});
 
-  // Visual helpers based on type
-  const getEventColor = (type: TimelineEvent['type']) => {
-    switch (type) {
-      case 'SUPPORT':
-        return 'bg-success text-success border-success'
-      case 'MEASUREMENT':
-        return 'bg-primary text-primary border-primary'
-      case 'MATURITY':
-        return 'bg-[#6A1B9A] text-[#6A1B9A] border-[#6A1B9A]'
-      default:
-        return 'bg-gray-500'
-    }
+// Visual helpers based on type
+const getEventColor = (type: TimelineEvent['type']) => {
+  switch (type) {
+    case 'SUPPORT':
+      return 'bg-success text-success border-success';
+    case 'MEASUREMENT':
+      return 'bg-primary text-primary border-primary';
+    case 'MATURITY':
+      return 'bg-[#6A1B9A] text-[#6A1B9A] border-[#6A1B9A]';
+    default:
+      return 'bg-gray-500';
   }
+};
 
-  const getIcon = (type: TimelineEvent['type']) => {
-    switch (type) {
-      case 'SUPPORT':
-        return 'card_giftcard'
-      case 'MEASUREMENT':
-        return 'monitoring'
-      case 'MATURITY':
-        return 'check_circle'
-    }
+const getIcon = (type: TimelineEvent['type']) => {
+  switch (type) {
+    case 'SUPPORT':
+      return 'card_giftcard';
+    case 'MEASUREMENT':
+      return 'monitoring';
+    case 'MATURITY':
+      return 'check_circle';
   }
+};
 </script>
 
 <template>
@@ -83,7 +83,9 @@
             class="ml-4 mb-8 border-l-4 pl-4 rounded-r-lg py-3 bg-opacity-5"
             :class="[
               getEventColor(slotProps.item.type).split(' ')[2] ?? '', // Border color
-              getEventColor(slotProps.item.type).split(' ')[0]?.replace('bg-', 'bg-opacity-5 bg-') ?? '' // BG tint
+              getEventColor(slotProps.item.type)
+                .split(' ')[0]
+                ?.replace('bg-', 'bg-opacity-5 bg-') ?? '', // BG tint
             ]"
           >
             <p class="text-sm font-semibold text-text-light dark:text-text-dark">
@@ -113,12 +115,12 @@
 </template>
 
 <style scoped>
-  /* PrimeVue Timeline overrides to match reference dashed line */
-  :deep(.p-timeline-event-connector) {
-    background-color: #dbe0e6 !important; /* border-light */
-    width: 2px;
-  }
-  .dark :deep(.p-timeline-event-connector) {
-    background-color: #324456 !important; /* border-dark */
-  }
+/* PrimeVue Timeline overrides to match reference dashed line */
+:deep(.p-timeline-event-connector) {
+  background-color: #dbe0e6 !important; /* border-light */
+  width: 2px;
+}
+.dark :deep(.p-timeline-event-connector) {
+  background-color: #324456 !important; /* border-dark */
+}
 </style>

@@ -44,7 +44,7 @@ describe('TextFilter.vue', () => {
     // Check that the update:modelValue event was emitted
     expect(wrapper.emitted('update:modelValue')).toBeTruthy();
     expect(wrapper.emitted('update:modelValue')![0]).toEqual(['new value']);
-    
+
     // Check that the value was updated
     expect(wrapper.props().modelValue).toBe('new value');
   });
@@ -112,7 +112,7 @@ describe('TextFilter.vue', () => {
     const input = wrapper.find('input');
     expect(input.attributes('type')).toBe('text');
     expect(input.attributes('placeholder')).toBe(placeholder);
-    
+
     // Check for proper input attributes
     expect(input.attributes('role')).toBeUndefined(); // Input doesn't need explicit role
   });

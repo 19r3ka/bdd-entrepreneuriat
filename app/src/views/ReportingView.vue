@@ -42,187 +42,168 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue'
-  import { FilterMatchMode } from '@primevue/core/api'
-  import { useI18n } from 'vue-i18n'
-  import { useRouter } from 'vue-router'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import { useSupportStore } from '@/stores/useSupportStore'
-  import { useIndicatorStore } from '@/stores/useIndicatorStore'
-  import { useMaturityStore } from '@/stores/useMaturityStore'
-  import { useQuickWinStore } from '@/stores/useQuickWinStore'
-  import Button from 'primevue/button'
+import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useSupportStore } from '@/stores/useSupportStore';
+import { useIndicatorStore } from '@/stores/useIndicatorStore';
+import { useMaturityStore } from '@/stores/useMaturityStore';
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
+import Button from 'primevue/button';
 
-  import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
-  import { generateCsvColumns, useCsv } from '@/composables/useCsv'
+import ResourceDataTable from '@/components/common/ResourceDataTable.vue';
+import { generateCsvColumns, useCsv } from '@/composables/useCsv';
 
-  const { t } = useI18n()
-  const router = useRouter()
-  const entrepreneurStore = useEntrepreneurStore()
-  const businessStore = useBusinessStore()
-  const supportStore = useSupportStore()
-  const indicatorStore = useIndicatorStore()
-  const maturityStore = useMaturityStore()
-  const quickWinStore = useQuickWinStore()
-  const { exportCsv } = useCsv()
+const { t } = useI18n();
+const router = useRouter();
+const entrepreneurStore = useEntrepreneurStore();
+const businessStore = useBusinessStore();
+const supportStore = useSupportStore();
+const indicatorStore = useIndicatorStore();
+const maturityStore = useMaturityStore();
+const quickWinStore = useQuickWinStore();
+const { exportCsv } = useCsv();
 
-  const loading = ref(true)
+const loading = ref(true);
 
-  interface ReportRow {
-    businessId: string
-    businessName: string
-    entrepreneurName: string
-    gender: string
-    age: number | null
-    supportCount: number
-    goalCount: number
-    maturityLevel: number | null
-    genderMarkers: string[]
-  }
+interface ReportRow {
+  businessId: string;
+  businessName: string;
+  entrepreneurName: string;
+  gender: string;
+  age: number | null;
+  supportCount: number;
+  goalCount: number;
+  maturityLevel: number | null;
+  genderMarkers: string[];
+}
 
-  const reportData = ref<ReportRow[]>([])
+const reportData = ref<ReportRow[]>([]);
 
-  // Initialize filters with proper structure for advanced mode
-  const tableFilters = ref({})
+// Initialize filters with proper structure for advanced mode
+const tableFilters = ref({});
 
-  // Column definitions
-  const columns = computed(() => [
-    {
-      field: 'businessName',
-      header: t('reporting.columns.businessName'),
-      sortable: true,
-      dataType: 'text' as const,
-      filterField: 'businessName'
-    },
-    {
-      field: 'gender',
-      header: t('reporting.columns.gender'),
-      sortable: true,
-      dataType: 'text' as const,
-      filterField: 'gender'
-    },
-    {
-      field: 'age',
-      header: t('reporting.columns.age'),
-      sortable: true,
-      dataType: 'numeric' as const,
-      filterField: 'age'
-    },
-    {
-      field: 'supportCount',
-      header: t('reporting.columns.supportCount'),
-      sortable: true,
-      dataType: 'numeric' as const,
-      filterField: 'supportCount'
-    },
-    {
-      field: 'goalCount',
-      header: t('reporting.columns.goalCount'),
-      sortable: true,
-      dataType: 'numeric' as const,
-      filterField: 'goalCount'
-    },
-    {
-      field: 'maturityLevel',
-      header: t('reporting.columns.maturityLevel'),
-      sortable: true,
-      dataType: 'numeric' as const,
-      filterField: 'maturityLevel'
+// Column definitions
+const columns = computed(() => [
+  {
+    field: 'businessName',
+    header: t('reporting.columns.businessName'),
+    sortable: true,
+    dataType: 'text' as const,
+    filterField: 'businessName',
+  },
+  {
+    field: 'gender',
+    header: t('reporting.columns.gender'),
+    sortable: true,
+    dataType: 'text' as const,
+    filterField: 'gender',
+  },
+  {
+    field: 'age',
+    header: t('reporting.columns.age'),
+    sortable: true,
+    dataType: 'numeric' as const,
+    filterField: 'age',
+  },
+  {
+    field: 'supportCount',
+    header: t('reporting.columns.supportCount'),
+    sortable: true,
+    dataType: 'numeric' as const,
+    filterField: 'supportCount',
+  },
+  {
+    field: 'goalCount',
+    header: t('reporting.columns.goalCount'),
+    sortable: true,
+    dataType: 'numeric' as const,
+    filterField: 'goalCount',
+  },
+  {
+    field: 'maturityLevel',
+    header: t('reporting.columns.maturityLevel'),
+    sortable: true,
+    dataType: 'numeric' as const,
+    filterField: 'maturityLevel',
+  },
+]);
+
+const EPOCH_YEAR = 1970;
+
+const calculateAge = (dob: Date | string | undefined) => {
+  if (!dob) return null;
+  const birthDate = new Date(dob);
+  const ageDifMs = Date.now() - birthDate.getTime();
+  const ageDate = new Date(ageDifMs);
+  return Math.abs(ageDate.getUTCFullYear() - EPOCH_YEAR);
+};
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      businessStore.fetchAll(),
+      entrepreneurStore.fetchAll(),
+      supportStore.fetchAll(),
+    ]);
+
+    const rows: ReportRow[] = [];
+
+    for (const business of businessStore.businesses) {
+      if (!business.id) continue;
+      const entrepreneurId = business.entrepreneurId;
+      const entrepreneur = entrepreneurId ? entrepreneurStore.getById(entrepreneurId) : undefined;
+      const supports = await supportStore.getSupportsByBusinessId(business.id);
+      const indicators = await indicatorStore.getIndicatorsByBusinessId(business.id);
+      const quickWins = await quickWinStore.getQuickWinsByBusinessId(business.id);
+
+      const age = entrepreneur ? calculateAge(entrepreneur.dateOfBirth) : null;
+      const genderMarkers = supports.map(s => s.genderMarker).filter(Boolean) as string[];
+
+      // Calculate maturity level from quick wins
+      const maturityLevels = maturityStore.getMaturityLevels(quickWins);
+      const maturityLevel = maturityLevels
+        ? Object.values(maturityLevels).reduce((sum, val) => sum + val, 0) /
+          Object.values(maturityLevels).length
+        : null;
+
+      rows.push({
+        businessId: business.id,
+        businessName: business.name,
+        entrepreneurName: entrepreneur
+          ? `${entrepreneur.firstName} ${entrepreneur.lastName}`
+          : 'N/A',
+        gender: entrepreneur?.gender || 'N/A',
+        age,
+        supportCount: supports.length,
+        goalCount: indicators.length,
+        maturityLevel,
+        genderMarkers,
+      });
     }
-  ])
-
-  const youthOptions = computed(() => [
-    { label: t('reporting.filters.all'), value: 'all' },
-    { label: t('reporting.filters.youth'), value: 'youth' },
-    { label: t('reporting.filters.nonYouth'), value: 'nonYouth' }
-  ])
-
-  const genderOptions = computed(() => [
-    { label: t('reporting.filters.all'), value: 'all' },
-    { label: t('reporting.filters.female'), value: 'Female' },
-    { label: t('reporting.filters.male'), value: 'Male' },
-    { label: t('reporting.filters.other'), value: 'Other' }
-  ])
-
-  const genderMarkerOptions = computed(() => [
-    { label: t('reporting.filters.all'), value: 'all' },
-    { label: 'GEN0', value: 'GEN0' },
-    { label: 'GEN1', value: 'GEN1' },
-    { label: 'GEN2', value: 'GEN2' },
-    { label: 'GEN3', value: 'GEN3' }
-  ])
-
-  const calculateAge = (dob: Date | string | undefined) => {
-    if (!dob) return null
-    const birthDate = new Date(dob)
-    const ageDifMs = Date.now() - birthDate.getTime()
-    const ageDate = new Date(ageDifMs)
-    return Math.abs(ageDate.getUTCFullYear() - 1970)
+    reportData.value = rows;
+  } finally {
+    loading.value = false;
   }
+});
 
-  onMounted(async () => {
-    loading.value = true
-    try {
-      await Promise.all([
-        businessStore.fetchAll(),
-        entrepreneurStore.fetchAll(),
-        supportStore.fetchAll()
-      ])
+const filteredData = computed(() => reportData.value);
 
-      const rows: ReportRow[] = []
+const handleViewBusiness = (businessId: string) => {
+  router.push(`/businesses/${businessId}`);
+};
 
-      for (const business of businessStore.businesses) {
-        if (!business.id) continue
-        const entrepreneurId = business.entrepreneurId
-        const entrepreneur = entrepreneurId ? entrepreneurStore.getById(entrepreneurId) : undefined
-        const supports = await supportStore.getSupportsByBusinessId(business.id)
-        const indicators = await indicatorStore.getIndicatorsByBusinessId(business.id)
-        const quickWins = await quickWinStore.getQuickWinsByBusinessId(business.id)
+const handleExportCSV = (dataToExport: ReportRow[]) => {
+  if (!dataToExport.length) return;
+  const sample = dataToExport[0];
+  const cols = generateCsvColumns(sample, ['businessId', 'genderMarkers', 'entrepreneurName']);
+  exportCsv(dataToExport, cols as any, 'business-report');
+};
 
-        const age = entrepreneur ? calculateAge(entrepreneur.dateOfBirth) : null
-        const genderMarkers = supports.map((s) => s.genderMarker).filter(Boolean) as string[]
-        
-        // Calculate maturity level from quick wins
-        const maturityLevels = maturityStore.getMaturityLevels(quickWins)
-        const maturityLevel = maturityLevels
-          ? Object.values(maturityLevels).reduce((sum, val) => sum + val, 0) / Object.values(maturityLevels).length
-          : null
-
-        rows.push({
-          businessId: business.id,
-          businessName: business.name,
-          entrepreneurName: entrepreneur
-            ? `${entrepreneur.firstName} ${entrepreneur.lastName}`
-            : 'N/A',
-          gender: entrepreneur?.gender || 'N/A',
-          age,
-          supportCount: supports.length,
-          goalCount: indicators.length,
-          maturityLevel,
-          genderMarkers
-        })
-      }
-      reportData.value = rows
-    } finally {
-      loading.value = false
-    }
-  })
-
-  const filteredData = computed(() => reportData.value)
-
-  const handleViewBusiness = (businessId: string) => {
-    router.push(`/businesses/${businessId}`)
-  }
-
-  const handleExportCSV = (dataToExport: ReportRow[]) => {
-    if (!dataToExport.length) return
-    const sample = dataToExport[0]
-    const cols = generateCsvColumns(sample, ['businessId', 'genderMarkers', 'entrepreneurName'])
-    exportCsv(dataToExport, cols as any, 'business-report')
-  }
-
-  const exportAllCSV = () => {
-    handleExportCSV(filteredData.value)
-  }
+const exportAllCSV = () => {
+  handleExportCSV(filteredData.value);
+};
 </script>

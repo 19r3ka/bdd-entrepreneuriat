@@ -11,12 +11,12 @@
 </template>
 
 <script setup lang="ts">
-  import Checkbox from 'primevue/checkbox'
+import Checkbox from 'primevue/checkbox';
 
-  defineProps<{
-    modelValue: boolean | null
-    label: string // i18n key
-  }>()
+defineProps<{
+  modelValue: boolean | null;
+  label: string; // i18n key
+}>();
 
-  defineEmits<(e: 'update:modelValue', value: boolean | null) => void>()
+defineEmits<(e: 'update:modelValue', value: boolean | null) => void>();
 </script>

@@ -1,52 +1,54 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { MaturityDimensions, type MaturityDimension } from '@/constants/maturityCatalog'
+import { computed } from 'vue';
+import { MaturityDimensions, type MaturityDimension } from '@/constants/maturityCatalog';
 
-  const props = defineProps<{
-    levels: Record<MaturityDimension, number>
-  }>()
+const LABEL_OFFSET_FROM_RADAR = 25;
 
-  // Chart configuration
-  const size = 300
-  const center = size / 2
-  const radius = 100 // Radius for the max value (4)
-  const maxLevel = 4
+const props = defineProps<{
+  levels: Record<MaturityDimension, number>;
+}>();
 
-  // Helper to calculate points
-  const getPoint = (index: number, value: number, total: number) => {
-    const angle = (Math.PI * 2 * index) / total - Math.PI / 2 // Start from top
-    const r = (value / maxLevel) * radius
-    const x = center + r * Math.cos(angle)
-    const y = center + r * Math.sin(angle)
-    return `${x},${y}`
-  }
+// Chart configuration
+const size = 300;
+const center = size / 2;
+const radius = 100; // Radius for the max value (4)
+const maxLevel = 4;
 
-  // Generate polygon points for the current levels
-  const currentPolygonPoints = computed(() => {
-    return MaturityDimensions.map((dim, index) => {
-      return getPoint(index, props.levels[dim], MaturityDimensions.length)
-    }).join(' ')
-  })
+// Helper to calculate points
+const getPoint = (index: number, value: number, total: number) => {
+  const angle = (Math.PI * 2 * index) / total - Math.PI / 2; // Start from top
+  const r = (value / maxLevel) * radius;
+  const x = center + r * Math.cos(angle);
+  const y = center + r * Math.sin(angle);
+  return `${x},${y}`;
+};
 
-  // Generate polygon points for the baseline (optional, maybe level 1 or 0?)
-  // For now, let's just show a background grid
-  const getGridPolygon = (level: number) => {
-    return MaturityDimensions.map((_, index) => {
-      return getPoint(index, level, MaturityDimensions.length)
-    }).join(' ')
-  }
+// Generate polygon points for the current levels
+const currentPolygonPoints = computed(() => {
+  return MaturityDimensions.map((dim, index) => {
+    return getPoint(index, props.levels[dim], MaturityDimensions.length);
+  }).join(' ');
+});
 
-  // Labels positions
-  const labels = computed(() => {
-    return MaturityDimensions.map((dim, index) => {
-      // Push labels out a bit further than the max radius
-      const angle = (Math.PI * 2 * index) / MaturityDimensions.length - Math.PI / 2
-      const r = radius + 25
-      const x = center + r * Math.cos(angle)
-      const y = center + r * Math.sin(angle)
-      return { text: dim, x, y }
-    })
-  })
+// Generate polygon points for the baseline (optional, maybe level 1 or 0?)
+// For now, let's just show a background grid
+const getGridPolygon = (level: number) => {
+  return MaturityDimensions.map((_, index) => {
+    return getPoint(index, level, MaturityDimensions.length);
+  }).join(' ');
+};
+
+// Labels positions
+const labels = computed(() => {
+  return MaturityDimensions.map((dim, index) => {
+    // Push labels out a bit further than the max radius
+    const angle = (Math.PI * 2 * index) / MaturityDimensions.length - Math.PI / 2;
+    const r = radius + LABEL_OFFSET_FROM_RADAR;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return { text: dim, x, y };
+  });
+});
 </script>
 
 <template>

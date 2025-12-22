@@ -63,10 +63,15 @@ const i18n = createI18n({
         },
       },
       pages: {
+        dashboard: {
+          quickAddEntrepreneur: 'Quick Add Entrepreneur',
+        },
         entrepreneurs: {
           title: 'Entrepreneurs',
           new: 'New Entrepreneur',
           edit: 'Edit Entrepreneur',
+          add: 'Add Entrepreneur',
+          quickAddSuccess: 'Quick add success',
         },
         businesses: {
           title: 'Businesses',
@@ -86,78 +91,105 @@ const i18n = createI18n({
  */
 export function mountWithGlobalComponents<T extends Component>(
   component: T,
-  options?: MountingOptions<InstanceType<T> extends Component ? InstanceType<T>['_props'] : Record<string, unknown>>
+  options?: MountingOptions<
+    InstanceType<T> extends Component ? InstanceType<T>['_props'] : Record<string, unknown>
+  >
 ) {
   return mount(component, {
     ...options,
     global: {
       plugins: [
-        i18n, 
-        PrimeVue, 
-        ToastService, 
+        i18n,
+        PrimeVue,
+        ToastService,
         ConfirmationService,
         createTestingPinia({
           createSpy: vi.fn,
-        })
+        }),
       ],
       components: {
         // PrimeVue components that might be used across components
         Button: {
-          template: '<button><slot /></button>',
-          props: ['icon', 'class', 'label'],
+          template: '<button :class="$props.class" v-bind="$attrs"><slot />{{ label }}</button>',
+          props: ['icon', 'class', 'label', 'severity', 'outlined', 'text', 'size'],
         },
         Avatar: {
-          template: '<div><slot /></div>',
+          template:
+            '<div class="p-avatar"><slot />{{ label }}<img v-if="image" :src="image" /></div>',
           props: ['icon', 'size', 'shape', 'image', 'label'],
         },
         InputText: {
-          template: '<input type="text" :value="$props.modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+          template:
+            '<input type="text" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" v-bind="$attrs" />',
           props: ['modelValue'],
           emits: ['update:modelValue'],
         },
-        InputTextarea: {
-          template: '<textarea :value="$props.modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+        Textarea: {
+          template:
+            '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" v-bind="$attrs" />',
           props: ['modelValue'],
           emits: ['update:modelValue'],
         },
         InputNumber: {
-          template: '<input type="number" :value="$props.modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+          template:
+            '<input type="number" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" v-bind="$attrs" />',
           props: ['modelValue'],
           emits: ['update:modelValue'],
         },
         Select: {
-          template: '<select><slot /></select>',
+          template:
+            '<select :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)" v-bind="$attrs"><slot /></select>',
           props: ['modelValue', 'options', 'optionLabel', 'optionValue'],
           emits: ['update:modelValue'],
         },
         Calendar: {
-          template: '<input type="text" />',
+          template:
+            '<input type="date" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" v-bind="$attrs" />',
           props: ['modelValue'],
           emits: ['update:modelValue'],
         },
         DataTable: {
-          template: '<div><slot /></div>',
-          props: ['value', 'dataKey'],
+          template:
+            '<div class="p-datatable"><slot name="header" /><div v-for="item in value"><slot :data="item" /></div><slot name="footer" /><slot name="empty" v-if="!value || value.length === 0" /></div>',
+          props: ['value', 'dataKey', 'filters'],
         },
         Column: {
-          template: '<div><slot /></div>',
-          props: ['field', 'header'],
+          template:
+            '<div class="p-column"><slot name="header" /><slot name="body" :data="{}" /><slot name="filter" :filterModel="{value: null}" :filterCallback="() => {}" /></div>',
+          props: ['field', 'header', 'selectionMode'],
         },
         Card: {
-          template: '<div class="card"><slot /></div>',
+          template:
+            '<div class="card"><div class="p-card-title" v-if="$slots.title"><slot name="title" /></div><div class="p-card-content"><slot name="content" /><slot /></div></div>',
         },
         Toolbar: {
-          template: '<div class="toolbar"><slot /></div>',
+          template:
+            '<div class="toolbar"><slot name="start" /><slot name="center" /><slot name="end" /></div>',
         },
         Dialog: {
-          template: '<div v-if="visible"><slot /></div>',
+          template:
+            '<div v-if="visible" class="p-dialog"><slot name="header" /><slot /><slot name="footer" /></div>',
           props: ['visible'],
         },
         ConfirmDialog: {
-          template: '<div></div>',
+          template: '<div class="p-confirm-dialog"></div>',
         },
         Toast: {
-          template: '<div></div>',
+          template: '<div class="p-toast"></div>',
+        },
+        IconField: {
+          template: '<div class="p-icon-field"><slot /></div>',
+        },
+        InputIcon: {
+          template: '<i class="p-input-icon"><slot /></i>',
+        },
+        FileUpload: {
+          template: '<div class="p-fileupload"><slot /></div>',
+          props: ['mode', 'name', 'chooseLabel', 'customUpload', 'auto'],
+        },
+        AutoComplete: {
+          template: '<div class="p-autocomplete"><input type="text" /><slot /></div>',
+          props: ['modelValue', 'suggestions'],
         },
       },
       directives: {

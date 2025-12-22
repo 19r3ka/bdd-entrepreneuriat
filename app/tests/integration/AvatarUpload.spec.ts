@@ -4,7 +4,7 @@ import AvatarUpload from '@/components/common/AvatarUpload.vue';
 
 // Mock the useImageResolver composable
 vi.mock('@/composables/useImageResolver', () => ({
-  useImageResolver: vi.fn((src) => ({
+  useImageResolver: vi.fn(src => ({
     resolvedSrc: src, // For testing, just return the source as resolved
   })),
 }));
@@ -19,7 +19,7 @@ describe('AvatarUpload.vue', () => {
 
     // Should have the FileUpload component
     expect(wrapper.find('.p-fileupload').exists()).toBe(true);
-    
+
     // Should have the default choose label
     expect(wrapper.text()).toContain('Choose Avatar');
   });
@@ -102,7 +102,7 @@ describe('AvatarUpload.vue', () => {
 
     // Should show the error message
     expect(wrapper.text()).toContain(errorMessage);
-    
+
     // Should have error class
     expect(wrapper.find('.p-fileupload').classes()).toContain('p-invalid');
   });

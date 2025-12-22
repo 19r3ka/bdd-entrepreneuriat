@@ -15,23 +15,22 @@
 </template>
 
 <script setup lang="ts">
-  import { useLanguageStore } from '@/stores/useLanguageStore'
-  import SelectButton from 'primevue/selectbutton'
+import { useLanguageStore } from '@/stores/useLanguageStore';
+import SelectButton, { type SelectButtonChangeEvent } from 'primevue/selectbutton';
 
-  const languageStore = useLanguageStore()
+const languageStore = useLanguageStore();
 
-  const locales = [
-    { label: 'FR', value: 'fr' },
-    { label: 'EN', value: 'en' }
-  ]
+const locales = [
+  { label: 'FR', value: 'fr' },
+  { label: 'EN', value: 'en' },
+];
 
-  /**
-   *
-   */
-  function handleLocaleChange(event: any) {
-    if (event.value) {
-      languageStore.setLocale(event.value)
-    }
+/**
+ *
+ */
+function handleLocaleChange(event: SelectButtonChangeEvent) {
+  if (event.value) {
+    languageStore.setLocale(event.value as 'fr' | 'en');
   }
+}
 </script>
-

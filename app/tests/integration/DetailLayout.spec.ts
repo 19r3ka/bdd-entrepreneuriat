@@ -17,7 +17,7 @@ global.fetch = vi.fn();
 describe('DetailLayout.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset fetch mock to default behavior
     (global.fetch as any).mockResolvedValue({
       ok: true,
@@ -31,11 +31,11 @@ describe('DetailLayout.vue', () => {
 
     // Should have the main container
     expect(wrapper.find('.surface-ground').exists()).toBe(true);
-    
+
     // Should have the header with default aria-label
     const header = wrapper.find('header');
     expect(header.attributes('aria-label')).toBe('page hero');
-    
+
     // Should have the main content area
     expect(wrapper.find('main').exists()).toBe(true);
   });
@@ -71,10 +71,10 @@ describe('DetailLayout.vue', () => {
 
     // Check for grid layout
     expect(wrapper.find('.grid').exists()).toBe(true);
-    
+
     // Check for main content column (8 on large screens)
     expect(wrapper.find('.lg\\:col-8').exists()).toBe(true);
-    
+
     // Check for sidebar column (4 on large screens)
     expect(wrapper.find('.lg\\:col-4').exists()).toBe(true);
   });
@@ -96,7 +96,7 @@ describe('DetailLayout.vue', () => {
     // Check for PrimeFlex classes
     expect(wrapper.classes()).toContain('w-full');
     expect(wrapper.classes()).toContain('min-h-screen');
-    
+
     // Check for header classes
     const header = wrapper.find('header');
     expect(header.classes()).toContain('relative');
@@ -109,10 +109,14 @@ describe('DetailLayout.vue', () => {
 
   it('handles loading state correctly', async () => {
     // Mock fetch to take some time
-    (global.fetch as any).mockImplementation(() => 
-      new Promise(resolve => 
-        setTimeout(() => resolve({ ok: true, url: 'https://example.com/image.jpg', type: 'opaque' }), 100)
-      )
+    (global.fetch as any).mockImplementation(
+      () =>
+        new Promise(resolve =>
+          setTimeout(
+            () => resolve({ ok: true, url: 'https://example.com/image.jpg', type: 'opaque' }),
+            100
+          )
+        )
     );
 
     const wrapper = mountWithGlobalComponents(DetailLayout, {
@@ -123,7 +127,7 @@ describe('DetailLayout.vue', () => {
 
     // Initially, should not be loading
     expect(wrapper.find('.pi-spinner').exists()).toBe(false);
-    
+
     // After some time, loading indicator should appear
     await new Promise(resolve => setTimeout(resolve, 50));
     await wrapper.vm.$nextTick();

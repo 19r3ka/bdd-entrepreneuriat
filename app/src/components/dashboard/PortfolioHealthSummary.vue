@@ -1,35 +1,35 @@
 <script setup lang="ts">
-  import { toRef } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import type { Business } from '@/types/business'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import { usePortfolioHealth } from '@/composables/usePortfolioHealth'
-  import MetricCard from '@/components/shared/MetricCard.vue'
+import { toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { Business } from '@/types/business';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import { usePortfolioHealth } from '@/composables/usePortfolioHealth';
+import MetricCard from '@/components/shared/MetricCard.vue';
 
-  const { n } = useI18n()
+const { n } = useI18n();
 
-  const props = defineProps<{
-    businesses: Business[]
-    metrics: MomentumMetric[]
-    quickWins: QuickWin[]
-  }>()
+const props = defineProps<{
+  businesses: Business[];
+  metrics: MomentumMetric[];
+  quickWins: QuickWin[];
+}>();
 
-  const {
-    selectedJobsDisagg,
-    totalBusinesses,
-    activeBusinesses,
-    inactiveBusinesses,
-    profileCompleteness,
-    needsAttentionCount,
-    displayedJobsValue,
-    financeUnlocked,
-    avgMaturityScore
-  } = usePortfolioHealth(
-    toRef(props, 'businesses'),
-    toRef(props, 'metrics'),
-    toRef(props, 'quickWins')
-  )
+const {
+  selectedJobsDisagg,
+  totalBusinesses,
+  activeBusinesses,
+  inactiveBusinesses,
+  profileCompleteness,
+  needsAttentionCount,
+  displayedJobsValue,
+  financeUnlocked,
+  avgMaturityScore,
+} = usePortfolioHealth(
+  toRef(props, 'businesses'),
+  toRef(props, 'metrics'),
+  toRef(props, 'quickWins')
+);
 </script>
 
 <template>

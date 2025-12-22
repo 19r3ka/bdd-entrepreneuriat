@@ -56,92 +56,92 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Timeline from 'primevue/timeline'
-  import Card from 'primevue/card'
-  import Button from 'primevue/button'
-  import Tag from 'primevue/tag'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Timeline from 'primevue/timeline';
+import Card from 'primevue/card';
+import Button from 'primevue/button';
+import Tag from 'primevue/tag';
+import type { Support } from '@/types/monitoring-evaluation/Support';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  const props = defineProps<{
-    supports: Support[]
-  }>()
+const props = defineProps<{
+  supports: Support[];
+}>();
 
-  defineEmits<{
-    (e: 'add'): void
-    (e: 'view', id: string): void
-    (e: 'edit', id: string): void
-  }>()
+defineEmits<{
+  (e: 'add'): void;
+  (e: 'view', id: string): void;
+  (e: 'edit', id: string): void;
+}>();
 
-  const sortedSupports = computed(() => {
-    return [...props.supports].sort((a, b) => {
-      return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-    })
-  })
+const sortedSupports = computed(() => {
+  return [...props.supports].sort((a, b) => {
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  });
+});
 
-  /**
-   *
-   */
-  function formatDate(dateStr: string) {
-    if (!dateStr) return ''
-    return d(new Date(dateStr), 'long')
-  }
+/**
+ *
+ */
+function formatDate(dateStr: string) {
+  if (!dateStr) return '';
+  return d(new Date(dateStr), 'long');
+}
 
-  /**
-   *
-   */
-  function formatType(type: string) {
-    return type
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-  }
+/**
+ *
+ */
+function formatType(type: string) {
+  return type
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
-  /**
-   *
-   */
-  function formatQuantity(quantity: any) {
-    if (!quantity || !quantity.value) return ''
-    const unit = quantity.unit === 'currency' ? quantity.currency : quantity.unit
-    return `${quantity.value} ${unit || ''}`
-  }
+/**
+ *
+ */
+function formatQuantity(quantity: { value: number; unit: string; currency?: string } | undefined) {
+  if (!quantity || !quantity.value) return '';
+  const unit = quantity.unit === 'currency' ? quantity.currency : quantity.unit;
+  return `${quantity.value} ${unit || ''}`;
+}
 
-  /**
-   *
-   */
-  function getColor(type: string) {
-    // Simple color mapping based on type
-    if (type.includes('financial')) return '#9C27B0'
-    if (type.includes('training') || type.includes('mentoring')) return '#673AB7'
-    if (type.includes('equipment') || type.includes('workspace')) return '#FF9800'
-    return '#607D8B'
-  }
+/**
+ *
+ */
+function getColor(type: string) {
+  // Simple color mapping based on type
+  if (type.includes('financial')) return '#9C27B0';
+  if (type.includes('training') || type.includes('mentoring')) return '#673AB7';
+  if (type.includes('equipment') || type.includes('workspace')) return '#FF9800';
+  return '#607D8B';
+}
 
-  /**
-   *
-   */
-  function getIcon(type: string) {
-    if (type.includes('financial')) return 'pi pi-dollar'
-    if (type.includes('training')) return 'pi pi-book'
-    if (type.includes('mentoring')) return 'pi pi-users'
-    if (type.includes('equipment')) return 'pi pi-box'
-    if (type.includes('digital')) return 'pi pi-desktop'
-    return 'pi pi-check'
-  }
+/**
+ *
+ */
+function getIcon(type: string) {
+  if (type.includes('financial')) return 'pi pi-dollar';
+  if (type.includes('training')) return 'pi pi-book';
+  if (type.includes('mentoring')) return 'pi pi-users';
+  if (type.includes('equipment')) return 'pi pi-box';
+  if (type.includes('digital')) return 'pi pi-desktop';
+  return 'pi pi-check';
+}
 </script>
 
 <style scoped>
-  .customized-timeline :deep(.p-timeline-event-opposite) {
-    flex: 0;
-    padding: 0;
-  }
-  .customized-timeline :deep(.p-timeline-event-content) {
-    width: 100%;
-  }
-  .cursor-pointer {
-    cursor: pointer;
-  }
+.customized-timeline :deep(.p-timeline-event-opposite) {
+  flex: 0;
+  padding: 0;
+}
+.customized-timeline :deep(.p-timeline-event-content) {
+  width: 100%;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
 </style>

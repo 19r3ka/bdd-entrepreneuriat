@@ -1,36 +1,36 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useRoute } from 'vue-router'
-  import Message from 'primevue/message'
-  import type { ActionItem } from '@/composables/usePortfolioActions'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import Message from 'primevue/message';
+import type { ActionItem } from '@/composables/usePortfolioActions';
 
-  const props = defineProps<{
-    actions: ActionItem[]
-  }>()
+const props = defineProps<{
+  actions: ActionItem[];
+}>();
 
-  const route = useRoute()
+const route = useRoute();
 
-  // Check if we navigated here from a specific action
-  const activeActionId = computed(() => route.query.actionId as string)
+// Check if we navigated here from a specific action
+const activeActionId = computed(() => route.query.actionId as string);
 
-  // Filter actions to show: either the active one (if present) or the top priority one
-  const displayedAction = computed(() => {
-    if (activeActionId.value) {
-      return props.actions.find((a) => a.id === activeActionId.value)
-    }
-    // Default: Show the highest priority urgent action, or opportunity
-    return props.actions[0]
-  })
+// Filter actions to show: either the active one (if present) or the top priority one
+const displayedAction = computed(() => {
+  if (activeActionId.value) {
+    return props.actions.find(a => a.id === activeActionId.value);
+  }
+  // Default: Show the highest priority urgent action, or opportunity
+  return props.actions[0];
+});
 
-  const severity = computed(() => {
-    if (!displayedAction.value) return 'info'
-    return displayedAction.value.type === 'urgent' ? 'warn' : 'info'
-  })
+const severity = computed(() => {
+  if (!displayedAction.value) return 'info';
+  return displayedAction.value.type === 'urgent' ? 'warn' : 'info';
+});
 
-  const icon = computed(() => {
-    if (!displayedAction.value) return 'pi-info-circle'
-    return displayedAction.value.type === 'urgent' ? 'pi-exclamation-triangle' : 'pi-sparkles'
-  })
+const icon = computed(() => {
+  if (!displayedAction.value) return 'pi-info-circle';
+  return displayedAction.value.type === 'urgent' ? 'pi-exclamation-triangle' : 'pi-sparkles';
+});
 </script>
 
 <template>
@@ -53,7 +53,7 @@
 </template>
 
 <style scoped>
-  :deep(.p-message-wrapper) {
-    padding: 1rem;
-  }
+:deep(.p-message-wrapper) {
+  padding: 1rem;
+}
 </style>

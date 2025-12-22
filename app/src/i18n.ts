@@ -1,11 +1,11 @@
-import { createI18n } from 'vue-i18n'
-import en from './locales/en.json'
-import fr from './locales/fr.json'
+import { createI18n } from 'vue-i18n';
+import en from './locales/en.json';
+import fr from './locales/fr.json';
 
 const messages = {
   en: en,
-  fr: fr
-}
+  fr: fr,
+};
 
 const i18n = createI18n({
   legacy: false, // Use Composition API mode
@@ -18,71 +18,71 @@ const i18n = createI18n({
       short: {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       },
       medium: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       },
       long: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
-      }
+        day: 'numeric',
+      },
     },
     fr: {
       short: {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       },
       medium: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       },
       long: {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
-      }
-    }
+        day: 'numeric',
+      },
+    },
   },
   numberFormats: {
     en: {
       currency: {
         style: 'currency',
         currency: 'USD',
-        notation: 'standard'
+        notation: 'standard',
       },
       decimal: {
         style: 'decimal',
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       },
       percent: {
         style: 'percent',
-        useGrouping: false
-      }
+        useGrouping: false,
+      },
     },
     fr: {
       currency: {
         style: 'currency',
         currency: 'EUR',
-        notation: 'standard'
+        notation: 'standard',
       },
       decimal: {
         style: 'decimal',
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       },
       percent: {
         style: 'percent',
-        useGrouping: false
-      }
-    }
-  }
-})
+        useGrouping: false,
+      },
+    },
+  },
+});
 
-export default i18n
+export default i18n;

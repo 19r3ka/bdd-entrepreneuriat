@@ -29,66 +29,68 @@
         text
         rounded
         severity="secondary"
-        @click="$emit('download', evidence)"
+        @click="$emit(DOWNLOAD_EVENT, evidence)"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Button from 'primevue/button'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  interface Evidence {
-    id: string
-    name: string
-    type: 'document' | 'image' | 'video' | 'other'
-    uploadedAt: string
-    uploadedBy?: string
-    url?: string
+interface Evidence {
+  id: string;
+  name: string;
+  type: 'document' | 'image' | 'video' | 'other';
+  uploadedAt: string;
+  uploadedBy?: string;
+  url?: string;
+}
+
+interface Props {
+  evidence: Evidence;
+}
+
+const DOWNLOAD_EVENT = 'download';
+
+const props = defineProps<Props>();
+
+defineEmits<{
+  (e: typeof DOWNLOAD_EVENT, evidence: Evidence): void;
+}>();
+
+const iconClass = computed(() => {
+  switch (props.evidence.type) {
+    case 'document':
+      return 'pi pi-file';
+    case 'image':
+      return 'pi pi-image';
+    case 'video':
+      return 'pi pi-video';
+    default:
+      return 'pi pi-file';
   }
+});
 
-  interface Props {
-    evidence: Evidence
+const iconColor = computed(() => {
+  switch (props.evidence.type) {
+    case 'document':
+      return 'text-blue-500';
+    case 'image':
+      return 'text-green-500';
+    case 'video':
+      return 'text-purple-500';
+    default:
+      return 'text-gray-500';
   }
+});
 
-  const props = defineProps<Props>()
-
-  const emit = defineEmits<{
-    (e: 'download', evidence: Evidence): void
-  }>()
-
-  const iconClass = computed(() => {
-    switch (props.evidence.type) {
-      case 'document':
-        return 'pi pi-file'
-      case 'image':
-        return 'pi pi-image'
-      case 'video':
-        return 'pi pi-video'
-      default:
-        return 'pi pi-file'
-    }
-  })
-
-  const iconColor = computed(() => {
-    switch (props.evidence.type) {
-      case 'document':
-        return 'text-blue-500'
-      case 'image':
-        return 'text-green-500'
-      case 'video':
-        return 'text-purple-500'
-      default:
-        return 'text-gray-500'
-    }
-  })
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '-'
-    return d(new Date(dateStr), 'long')
-  }
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '-';
+  return d(new Date(dateStr), 'long');
+};
 </script>

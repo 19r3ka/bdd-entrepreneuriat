@@ -20,15 +20,15 @@
 </template>
 
 <script setup lang="ts">
-  import MomentumMetricCard from './MomentumMetricCard.vue'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
+import MomentumMetricCard from './MomentumMetricCard.vue';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
 
-  defineProps<{
-    metrics: MomentumMetric[]
-    emptyMessage?: string
-  }>()
+defineProps<{
+  metrics: MomentumMetric[];
+  emptyMessage?: string;
+}>();
 
-  defineEmits<{
-    (e: 'edit', metric: MomentumMetric): void
-  }>()
+defineEmits<{
+  (e: 'edit', metric: MomentumMetric): void;
+}>();
 </script>

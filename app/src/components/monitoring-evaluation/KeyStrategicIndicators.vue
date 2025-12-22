@@ -1,107 +1,108 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import Tag from 'primevue/tag'
-  import SelectButton from 'primevue/selectbutton'
-  import Chart from 'primevue/chart'
-  import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore'
-  import { useRouter } from 'vue-router'
-  import MetricCard from '@/components/shared/MetricCard.vue'
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import Tag from 'primevue/tag';
+import SelectButton from 'primevue/selectbutton';
+import Chart from 'primevue/chart';
+import { useBusinessHealthStore } from '@/stores/useBusinessHealthStore';
+import MetricCard from '@/components/shared/MetricCard.vue';
 
-  const { d, n } = useI18n()
+const MONTHS_PER_QUARTER = 3;
+const MONTH_OFFSET_FOR_QUARTER = 3;
 
-  const props = withDefaults(
-    defineProps<{
-      metrics?: MomentumMetric[]
-      quickWins?: QuickWin[]
-    }>(),
+const { d, n } = useI18n();
+
+const props = withDefaults(
+  defineProps<{
+    metrics?: MomentumMetric[];
+    quickWins?: QuickWin[];
+  }>(),
+  {
+    metrics: () => [],
+    quickWins: () => [],
+  }
+);
+
+const healthStore = useBusinessHealthStore();
+
+// State for filters
+const periodOptions = ['Month', 'Quarter', 'Year'];
+const selectedPeriod = ref('Quarter');
+
+const disaggOptions = [
+  { label: 'Total', value: 'total' },
+  { label: 'Women', value: 'women' },
+  { label: 'Youth', value: 'youth' },
+  { label: 'Disability', value: 'disability' },
+];
+const selectedDisagg = ref('total');
+
+// Computed Metrics from Store
+// Computed Metrics from Store
+const jobsMetric = computed(() =>
+  healthStore.getJobsCreated(props.metrics, props.quickWins, selectedPeriod.value)
+);
+const revenueMetric = computed(() =>
+  healthStore.getRevenueGrowth(props.metrics, selectedPeriod.value)
+);
+const marketMetric = computed(() =>
+  healthStore.getMarketGrowth(props.metrics, selectedPeriod.value)
+);
+const profitMetric = computed(() =>
+  healthStore.getProfitability(props.metrics, selectedPeriod.value)
+);
+
+// Helper to get display value based on disaggregation
+const periodLabel = computed(() => {
+  const now = new Date();
+  if (selectedPeriod.value === 'Month') {
+    return d(now, { month: 'long', year: 'numeric' });
+  } else if (selectedPeriod.value === 'Quarter') {
+    const quarter = Math.floor((now.getMonth() + MONTH_OFFSET_FOR_QUARTER) / MONTHS_PER_QUARTER);
+    return `Q${quarter} ${now.getFullYear()}`;
+  } else {
+    return now.getFullYear().toString();
+  }
+});
+
+// Helper to get display value based on disaggregation
+const displayJobsValue = computed(() => {
+  if (selectedDisagg.value === 'total') return jobsMetric.value.value;
+  const val =
+    jobsMetric.value.disaggregation?.[
+      selectedDisagg.value as keyof typeof jobsMetric.value.disaggregation
+    ] || 0;
+  return val.toString();
+});
+
+// Sparkline Chart Options
+const sparklineOptions = {
+  plugins: { legend: { display: false }, tooltip: { enabled: false } },
+  scales: { x: { display: false }, y: { display: false } },
+  elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.4 } },
+  maintainAspectRatio: false,
+  responsive: true,
+};
+
+const getSparklineData = (data: number[], color: string) => ({
+  labels: data.map((_, i) => i),
+  datasets: [
     {
-      metrics: () => [],
-      quickWins: () => []
-    }
-  )
+      data: data,
+      borderColor: color,
+      fill: false,
+    },
+  ],
+});
 
-  const router = useRouter()
-  const healthStore = useBusinessHealthStore()
-
-  // State for filters
-  const periodOptions = ['Month', 'Quarter', 'Year']
-  const selectedPeriod = ref('Quarter')
-
-  const disaggOptions = [
-    { label: 'Total', value: 'total' },
-    { label: 'Women', value: 'women' },
-    { label: 'Youth', value: 'youth' },
-    { label: 'Disability', value: 'disability' }
-  ]
-  const selectedDisagg = ref('total')
-
-  // Computed Metrics from Store
-  // Computed Metrics from Store
-  const jobsMetric = computed(() =>
-    healthStore.getJobsCreated(props.metrics, props.quickWins, selectedPeriod.value)
-  )
-  const revenueMetric = computed(() =>
-    healthStore.getRevenueGrowth(props.metrics, selectedPeriod.value)
-  )
-  const marketMetric = computed(() =>
-    healthStore.getMarketGrowth(props.metrics, selectedPeriod.value)
-  )
-  const profitMetric = computed(() =>
-    healthStore.getProfitability(props.metrics, selectedPeriod.value)
-  )
-
-  // Helper to get display value based on disaggregation
-  const periodLabel = computed(() => {
-    const now = new Date()
-    if (selectedPeriod.value === 'Month') {
-      return d(now, { month: 'long', year: 'numeric' })
-    } else if (selectedPeriod.value === 'Quarter') {
-      const quarter = Math.floor((now.getMonth() + 3) / 3)
-      return `Q${quarter} ${now.getFullYear()}`
-    } else {
-      return now.getFullYear().toString()
-    }
-  })
-
-  // Helper to get display value based on disaggregation
-  const displayJobsValue = computed(() => {
-    if (selectedDisagg.value === 'total') return jobsMetric.value.value
-    const val =
-      jobsMetric.value.disaggregation?.[
-        selectedDisagg.value as keyof typeof jobsMetric.value.disaggregation
-      ] || 0
-    return val.toString()
-  })
-
-  // Sparkline Chart Options
-  const sparklineOptions = {
-    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    scales: { x: { display: false }, y: { display: false } },
-    elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.4 } },
-    maintainAspectRatio: false,
-    responsive: true
-  }
-
-  const getSparklineData = (data: number[], color: string) => ({
-    labels: data.map((_, i) => i),
-    datasets: [
-      {
-        data: data,
-        borderColor: color,
-        fill: false
-      }
-    ]
-  })
-
-  const openMomentumForm = () => {
-    // Emit event or use router to open form
-    // Since this component is inside a view, we might need to emit up
-    // But for now, let's assume we can navigate or the parent handles it via the header button
-    // We'll just show a "No Data" state that encourages using the main action button
-  }
+// const openMomentumForm = () => {
+// Emit event or use router to open form
+// Since this component is inside a view, we might need to emit up
+// But for now, let's assume we can navigate or the parent handles it via the header button
+// We'll just show a "No Data" state that encourages using the main action button
+// }
 </script>
 
 <template>
@@ -196,7 +197,13 @@
                   revenueMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ n(Math.abs(revenueMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span>{{
+                n(Math.abs(revenueMetric.trend), {
+                  style: 'percent',
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              }}</span>
             </div>
           </template>
 
@@ -251,7 +258,13 @@
                   marketMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ n(Math.abs(marketMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span>{{
+                n(Math.abs(marketMetric.trend), {
+                  style: 'percent',
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              }}</span>
             </div>
           </template>
 
@@ -306,7 +319,13 @@
                   profitMetric.trendDirection === 'up' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'
                 "
               ></i>
-              <span>{{ n(Math.abs(profitMetric.trend), { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span>{{
+                n(Math.abs(profitMetric.trend), {
+                  style: 'percent',
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              }}</span>
             </div>
           </template>
 
@@ -330,8 +349,8 @@
 </template>
 
 <style scoped>
-  :deep(.p-selectbutton .p-button) {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
+:deep(.p-selectbutton .p-button) {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
 </style>

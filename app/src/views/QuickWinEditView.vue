@@ -20,57 +20,57 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import { useI18n } from 'vue-i18n'
-  import Button from 'primevue/button'
-  import QuickWinForm from '@/components/monitoring-evaluation/QuickWinForm.vue'
-  import { useQuickWinStore } from '@/stores/useQuickWinStore'
-  import { useToast } from 'primevue/usetoast'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
+import QuickWinForm from '@/components/monitoring-evaluation/QuickWinForm.vue';
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
+import { useToast } from 'primevue/usetoast';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
-  const route = useRoute()
-  const router = useRouter()
-  const store = useQuickWinStore()
-  const toast = useToast()
-  const { t } = useI18n()
+const route = useRoute();
+const router = useRouter();
+const store = useQuickWinStore();
+const toast = useToast();
+const { t } = useI18n();
 
-  const quickWinId = route.params.id as string
-  const quickWin = ref<QuickWin | undefined>(undefined)
-  const loading = ref(true)
+const quickWinId = route.params.id as string;
+const quickWin = ref<QuickWin | undefined>(undefined);
+const loading = ref(true);
 
-  onMounted(async () => {
-    try {
-      quickWin.value = await store.getQuickWinById(quickWinId)
-    } catch (error) {
-      console.error('Failed to load quick win', error)
-    } finally {
-      loading.value = false
-    }
-  })
-
-  const goBack = () => {
-    router.back()
+onMounted(async () => {
+  try {
+    quickWin.value = await store.getQuickWinById(quickWinId);
+  } catch (error) {
+    console.error('Failed to load quick win', error);
+  } finally {
+    loading.value = false;
   }
+});
 
-  const handleUpdate = async (data: any) => {
-    try {
-      await store.updateQuickWin(quickWinId, data)
-      toast.add({
-        severity: 'success',
-        summary: t('common.success'),
-        detail: t('messages.quickWinUpdated'),
-        life: 3000
-      })
-      goBack()
-    } catch (error) {
-      console.error('Failed to update quick win', error)
-      toast.add({
-        severity: 'error',
-        summary: t('common.error'),
-        detail: t('messages.quickWinUpdateFailed'),
-        life: 3000
-      })
-    }
+const goBack = () => {
+  router.back();
+};
+
+const handleUpdate = async (data: any) => {
+  try {
+    await store.updateQuickWin(quickWinId, data);
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: t('messages.quickWinUpdated'),
+      life: 3000,
+    });
+    goBack();
+  } catch (error) {
+    console.error('Failed to update quick win', error);
+    toast.add({
+      severity: 'error',
+      summary: t('common.error'),
+      detail: t('messages.quickWinUpdateFailed'),
+      life: 3000,
+    });
   }
+};
 </script>

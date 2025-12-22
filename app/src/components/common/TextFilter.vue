@@ -3,12 +3,12 @@
 </template>
 
 <script setup lang="ts">
-  import InputText from 'primevue/inputtext'
+import InputText from 'primevue/inputtext';
 
-  // defineModel creates a writable binding for v-model
-  const model = defineModel<string | null>('modelValue')
+// defineModel creates a writable binding for v-model
+const model = defineModel<string | null>('modelValue');
 
-  defineProps<{
-    placeholder?: string
-  }>()
+defineProps<{
+  placeholder?: string;
+}>();
 </script>

@@ -1,41 +1,41 @@
-import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useEntrepreneurStore } from './useEntrepreneurStore'
-import { useCrudStore } from '@/composables/useCrudStore'
-import { ref } from 'vue'
-import { isProfileCompletedStrict } from '@/utils/schemaCompletion'
-import { useActivityLogStore } from './useActivityLogStore'
+import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useEntrepreneurStore } from './useEntrepreneurStore';
+import { useCrudStore } from '@/composables/useCrudStore';
+import { ref } from 'vue';
+import { isProfileCompletedStrict } from '@/utils/schemaCompletion';
+import { useActivityLogStore } from './useActivityLogStore';
 
 // Mock dependencies
-vi.mock('@/composables/useCrudStore')
-vi.mock('@/utils/schemaCompletion')
-vi.mock('./useActivityLogStore')
+vi.mock('@/composables/useCrudStore');
+vi.mock('@/utils/schemaCompletion');
+vi.mock('./useActivityLogStore');
 
 describe('useEntrepreneurStore', () => {
-  let mockCrudStore: any
-  let mockActivityLogStore: any
-  let mockIsProfileCompletedStrict: any
+  let mockCrudStore: any;
+  let mockActivityLogStore: any;
+  let mockIsProfileCompletedStrict: any;
 
   const mockEntrepreneursData = [
     {
-      id: 'ent1',
+      id: '123e4567-e89b-12d3-a456-426614174001',
       firstName: 'John',
       lastName: 'Doe',
       slug: 'john-doe',
-      contact: { email: 'john@example.com' }
+      contact: { email: 'john@example.com' },
     },
     {
-      id: 'ent2',
+      id: '123e4567-e89b-12d3-a456-426614174002',
       firstName: 'Jane',
       lastName: 'Smith',
       slug: 'jane-smith',
-      contact: { email: 'jane@example.com' }
-    }
-  ]
+      contact: { email: 'jane@example.com' },
+    },
+  ];
 
   beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.clearAllMocks()
+    setActivePinia(createPinia());
+    vi.clearAllMocks();
 
     // Mock useCrudStore
     mockCrudStore = {
@@ -43,152 +43,157 @@ describe('useEntrepreneurStore', () => {
       loading: ref(false),
       error: ref(null),
       fetchAll: vi.fn(async () => {
-        mockCrudStore.items.value = mockEntrepreneursData // Populate items
+        mockCrudStore.items.value = mockEntrepreneursData; // Populate items
       }),
       fetchOne: vi.fn(async (id: string) => {
-        return mockEntrepreneursData.find((e) => e.id === id)
+        return mockEntrepreneursData.find(e => e.id === id);
       }),
       add: vi.fn(async (item: any) => {
-        const newItem = { ...item, id: item.id || 'new-id' }
-        mockCrudStore.items.value.push(newItem)
-        return newItem
+        const newItem = { ...item, id: item.id || '123e4567-e89b-12d3-a456-426614174003' };
+        mockCrudStore.items.value.push(newItem);
+        return newItem;
       }),
       update: vi.fn(async (item: any) => {
-        const index = mockCrudStore.items.value.findIndex((e: any) => e.id === item.id)
+        const index = mockCrudStore.items.value.findIndex((e: any) => e.id === item.id);
         if (index !== -1) {
-          mockCrudStore.items.value[index] = item
+          mockCrudStore.items.value[index] = item;
         }
-        return item
+        return item;
       }),
       remove: vi.fn(async (id: string) => {
-        mockCrudStore.items.value = mockCrudStore.items.value.filter((e: any) => e.id !== id)
+        mockCrudStore.items.value = mockCrudStore.items.value.filter((e: any) => e.id !== id);
       }),
-      removeMany: vi.fn()
-    }
-    vi.mocked(useCrudStore).mockReturnValue(mockCrudStore)
+      removeMany: vi.fn(),
+    };
+    vi.mocked(useCrudStore).mockReturnValue(mockCrudStore);
 
     // Mock isProfileCompletedStrict
-    mockIsProfileCompletedStrict = vi.mocked(isProfileCompletedStrict).mockReturnValue(true)
+    mockIsProfileCompletedStrict = vi.mocked(isProfileCompletedStrict).mockReturnValue(true);
 
     // Mock useActivityLogStore
     mockActivityLogStore = {
-      logAction: vi.fn()
-    }
-    vi.mocked(useActivityLogStore).mockReturnValue(mockActivityLogStore)
-  })
+      logAction: vi.fn(),
+    };
+    vi.mocked(useActivityLogStore).mockReturnValue(mockActivityLogStore);
+  });
 
   it('fetchAll should fetch and enrich entrepreneurs', async () => {
-    const store = useEntrepreneurStore()
-    await store.fetchAll()
+    const store = useEntrepreneurStore();
+    await store.fetchAll();
 
-    expect(mockCrudStore.fetchAll).toHaveBeenCalled()
-    expect(store.entrepreneurs).toHaveLength(mockEntrepreneursData.length)
-    expect(mockIsProfileCompletedStrict).toHaveBeenCalledTimes(mockEntrepreneursData.length)
-    expect(store.entrepreneurs[0]).toHaveProperty('profileCompleted', true)
-  })
+    expect(mockCrudStore.fetchAll).toHaveBeenCalled();
+    expect(store.entrepreneurs).toHaveLength(mockEntrepreneursData.length);
+    expect(mockIsProfileCompletedStrict).toHaveBeenCalledTimes(mockEntrepreneursData.length);
+    expect(store.entrepreneurs[0]).toHaveProperty('profileCompleted', true);
+  });
 
   it('fetchOne should fetch and enrich a single entrepreneur', async () => {
-    const store = useEntrepreneurStore()
-    const entrepreneur = await store.fetchOne('ent1')
+    const store = useEntrepreneurStore();
+    const entrepreneur = await store.fetchOne('123e4567-e89b-12d3-a456-426614174001');
 
-    expect(mockCrudStore.fetchOne).toHaveBeenCalledWith('ent1')
-    expect(entrepreneur).not.toBeNull()
-    expect(entrepreneur?.firstName).toBe('John')
-    expect(entrepreneur).toHaveProperty('profileCompleted', true)
-    expect(mockIsProfileCompletedStrict).toHaveBeenCalledOnce()
-  })
+    expect(mockCrudStore.fetchOne).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174001');
+    expect(entrepreneur).not.toBeNull();
+    expect(entrepreneur?.firstName).toBe('John');
+    expect(entrepreneur).toHaveProperty('profileCompleted', true);
+    expect(mockIsProfileCompletedStrict).toHaveBeenCalledOnce();
+  });
 
   it('add should call baseAdd and log action', async () => {
-    const store = useEntrepreneurStore()
+    const store = useEntrepreneurStore();
     const newEntrepreneur = {
       firstName: 'New',
       lastName: 'Person',
       slug: 'new-person',
-      contact: { email: 'new@example.com' }
-    } as any // Cast to any because the schema will add id, etc.
+      contact: { email: 'new@example.com' },
+    } as any; // Cast to any because the schema will add id, etc.
 
-    await store.add(newEntrepreneur)
+    await store.add(newEntrepreneur);
 
-    expect(mockCrudStore.add).toHaveBeenCalledWith(newEntrepreneur)
+    expect(mockCrudStore.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...newEntrepreneur,
+        id: expect.any(String),
+      })
+    );
     expect(mockActivityLogStore.logAction).toHaveBeenCalledWith(
       'create',
       'entrepreneur',
-      expect.any(String), // ID will be generated by crudStore mock
+      expect.any(String), // ID will be generated by store before calling crudStore
       'New Person'
-    )
-  })
+    );
+  });
 
   it('update should call baseUpdate and log action', async () => {
-    const store = useEntrepreneurStore()
-    const updatedEntrepreneur = { ...mockEntrepreneursData[0], firstName: 'Jonathan' } as any
+    const store = useEntrepreneurStore();
+    const updatedEntrepreneur = { ...mockEntrepreneursData[0], firstName: 'Jonathan' } as any;
 
-    await store.update(updatedEntrepreneur)
+    await store.update(updatedEntrepreneur);
 
-    expect(mockCrudStore.update).toHaveBeenCalledWith(updatedEntrepreneur)
+    expect(mockCrudStore.update).toHaveBeenCalledWith(updatedEntrepreneur);
     expect(mockActivityLogStore.logAction).toHaveBeenCalledWith(
       'update',
       'entrepreneur',
       updatedEntrepreneur.id,
       'Jonathan Doe'
-    )
-  })
+    );
+  });
 
   it('remove should call baseRemove and log action', async () => {
     // Populate store for getById to work
-    mockCrudStore.items.value = mockEntrepreneursData
+    mockCrudStore.items.value = mockEntrepreneursData;
 
-    const store = useEntrepreneurStore()
-    await store.remove('ent1')
+    const store = useEntrepreneurStore();
+    await store.remove('123e4567-e89b-12d3-a456-426614174001');
 
-    expect(mockCrudStore.remove).toHaveBeenCalledWith('ent1')
+    expect(mockCrudStore.remove).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174001');
     expect(mockActivityLogStore.logAction).toHaveBeenCalledWith(
       'delete',
       'entrepreneur',
-      'ent1',
+      '123e4567-e89b-12d3-a456-426614174001',
       'John Doe'
-    )
-  })
+    );
+  });
 
   it('getters work correctly', async () => {
-    const store = useEntrepreneurStore()
-    await store.fetchAll() // Ensure data is loaded and enriched
+    const store = useEntrepreneurStore();
+    await store.fetchAll(); // Ensure data is loaded and enriched
 
-    expect(store.getById('ent1')?.firstName).toBe('John')
-    expect(store.getById('non-existent')).toBeUndefined()
+    expect(store.getById('123e4567-e89b-12d3-a456-426614174001')?.firstName).toBe('John');
+    expect(store.getById('non-existent')).toBeUndefined();
 
-    expect(store.getBySlug('jane-smith')?.firstName).toBe('Jane')
-    expect(store.getBySlug('non-existent')).toBeUndefined()
+    expect(store.getBySlug('jane-smith')?.firstName).toBe('Jane');
+    expect(store.getBySlug('non-existent')).toBeUndefined();
 
-    expect(store.getByEmail('john@example.com')?.firstName).toBe('John')
-    expect(store.getByEmail('non-existent@example.com')).toBeUndefined()
-  })
+    expect(store.getByEmail('john@example.com')?.firstName).toBe('John');
+    expect(store.getByEmail('non-existent@example.com')).toBeUndefined();
+  });
 
   it('searchByName works correctly', async () => {
-    const store = useEntrepreneurStore()
-    await store.fetchAll()
+    const store = useEntrepreneurStore();
+    await store.fetchAll();
 
-    const johnResults = store.searchByName('John')
-    expect(johnResults).toHaveLength(1)
-    expect(johnResults[0]!.firstName).toBe('John')
+    const johnResults = store.searchByName('John');
+    expect(johnResults.value).toHaveLength(1);
+    expect(johnResults.value[0]!.firstName).toBe('John');
 
-    const allResults = store.searchByName('e') // should match John and Jane
-    expect(allResults).toHaveLength(2)
-  })
+    const allResults = store.searchByName('e'); // should match John and Jane
+    expect(allResults.value).toHaveLength(2);
+  });
 
   it('searchByEmail works correctly', async () => {
-    const store = useEntrepreneurStore()
-    await store.fetchAll()
+    const store = useEntrepreneurStore();
+    await store.fetchAll();
 
-    const smithEmail = store.searchByEmail('jane@example.com')
-    expect(smithEmail).toHaveLength(1)
-    expect(smithEmail[0]!.contact?.email).toBe('jane@example.com')
-  })
+    const smithEmail = store.searchByEmail('jane@example.com');
+    expect(smithEmail.value).toHaveLength(1);
+    expect(smithEmail.value[0]!.contact?.email).toBe('jane@example.com');
+  });
 
   it('handles error gracefully during fetchAll', async () => {
-    mockCrudStore.fetchAll.mockRejectedValue(new Error('Fetch failed'))
-    const store = useEntrepreneurStore()
+    mockCrudStore.fetchAll.mockRejectedValue(new Error('Fetch failed'));
+    const store = useEntrepreneurStore();
 
-    await expect(store.fetchAll()).rejects.toThrow('Fetch failed')
+    await expect(store.fetchAll()).rejects.toThrow('Fetch failed');
     // expect(store.error).not.toBeNull() // Mock doesn't set error
-  })
-})
+  });
+});

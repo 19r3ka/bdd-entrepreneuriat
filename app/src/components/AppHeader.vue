@@ -15,7 +15,7 @@
         selector: '@next',
         enterClass: 'hidden',
         leaveToClass: 'hidden',
-        hideOnOutsideClick: true
+        hideOnOutsideClick: true,
       }"
       class="cursor-pointer block lg:hidden text-700 p-ripple"
     >
@@ -86,47 +86,61 @@
     <!-- User profile on the right -->
     <div class="flex align-items-center gap-3">
       <LanguageSwitcher />
-      <Button icon="pi pi-bell" class="p-button-text p-button-rounded p-2" />
+      <Button
+        icon="pi pi-upload"
+        class="p-button-text p-button-rounded p-2"
+        @click="router.push('/settings')"
+      />
       <Avatar icon="pi pi-user" shape="circle" size="normal" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Button from 'primevue/button'
-  import Avatar from 'primevue/avatar'
-  import Ripple from 'primevue/ripple'
-  import StyleClass from 'primevue/styleclass'
-  import packageJson from '../../package.json'
-  import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import Button from 'primevue/button';
+import Avatar from 'primevue/avatar';
+import Ripple from 'primevue/ripple';
+import StyleClass from 'primevue/styleclass';
+import packageJson from '../../package.json';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 
-  // Register PrimeVue directives
-  const vRipple = Ripple
-  const vStyleclass = StyleClass
+// Register PrimeVue directives
+const vRipple = Ripple;
+const vStyleclass = StyleClass;
+const router = useRouter();
 
-  // App name from package.json
-  const appName = computed(() => (packageJson as any).displayName || packageJson.name || 'Entrepreneur App')
+// App name from package.json
+interface PackageJson {
+  name?: string;
+  displayName?: string;
+}
 
-  // Check if running in development mode
-  const isDev = computed(() => import.meta.env.DEV)
+const appName = computed(
+  () =>
+    ((packageJson as PackageJson).displayName || packageJson.name || 'Entrepreneur App') as string
+);
+
+// Check if running in development mode
+const isDev = computed(() => import.meta.env.DEV);
 </script>
 
 <style scoped>
-  /* Remove underlines from links */
-  a {
-    text-decoration: none;
-  }
+/* Remove underlines from links */
+a {
+  text-decoration: none;
+}
 
-  a:hover {
-    text-decoration: none;
-  }
+a:hover {
+  text-decoration: none;
+}
 
-  /* Ensure proper heading styles */
-  h2 {
-    font-weight: 700;
-    font-size: 1.125rem;
-    line-height: 1.25rem;
-    letter-spacing: -0.015em;
-  }
+/* Ensure proper heading styles */
+h2 {
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.25rem;
+  letter-spacing: -0.015em;
+}
 </style>

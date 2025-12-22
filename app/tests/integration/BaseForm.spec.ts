@@ -2,34 +2,41 @@ import { describe, it, expect, vi } from 'vitest';
 import { mountWithGlobalComponents } from './test-utils';
 import BaseForm from '@/components/common/BaseForm.vue';
 
-// Mock the useValidationForm composable
-const mockDefineField = vi.fn(() => ({
-  modelValue: { value: '' },
-  errors: { value: [] },
-  onBlur: vi.fn(),
-  updateModelValue: vi.fn(),
-  hasError: false,
-  errorMessage: '',
-}));
-
-const mockUseValidationForm = vi.fn(() => ({
-  values: { name: 'Test' },
-  errors: { name: [] },
-  rawErrors: [],
-  touchedFields: { name: true },
-  isSubmitting: { value: false },
-  isDirty: { value: false },
-  isValid: { value: true },
-  hasErrors: { value: false },
-  isTouched: { value: true },
-  canSubmit: { value: true },
-  defineField: mockDefineField,
-  handleFieldChange: vi.fn(),
-  handleFieldBlur: vi.fn(),
-  validateField: vi.fn(),
-  validateForm: vi.fn(),
-  resetForm: vi.fn(),
-  handleSubmit: vi.fn(),
+const { mockUseValidationForm, mockDefineField } = vi.hoisted(() => ({
+  mockDefineField: vi.fn(() => ({
+    modelValue: { value: '' },
+    errors: { value: [] },
+    onBlur: vi.fn(),
+    updateModelValue: vi.fn(),
+    hasError: false,
+    errorMessage: '',
+  })),
+  mockUseValidationForm: vi.fn(() => ({
+    values: { name: 'Test' },
+    errors: { name: [] },
+    rawErrors: [],
+    touchedFields: { name: true },
+    isSubmitting: { value: false },
+    isDirty: { value: false },
+    isValid: { value: true },
+    hasErrors: { value: false },
+    isTouched: { value: true },
+    canSubmit: { value: true },
+    defineField: vi.fn(() => ({
+      modelValue: { value: '' },
+      errors: { value: [] },
+      onBlur: vi.fn(),
+      updateModelValue: vi.fn(),
+      hasError: false,
+      errorMessage: '',
+    })),
+    handleFieldChange: vi.fn(),
+    handleFieldBlur: vi.fn(),
+    validateField: vi.fn(),
+    validateForm: vi.fn(),
+    resetForm: vi.fn(),
+    handleSubmit: vi.fn(),
+  })),
 }));
 
 vi.mock('@/composables/useValidationForm', () => ({

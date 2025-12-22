@@ -134,7 +134,7 @@ describe('EntrepreneurPersonalDetails.vue', () => {
     // Check for PrimeFlex grid classes
     expect(wrapper.classes()).toContain('grid');
     expect(wrapper.classes()).toContain('formgrid');
-    
+
     // Check for field classes
     expect(wrapper.findAll('.field').length).toBeGreaterThan(0);
   });
@@ -207,7 +207,7 @@ describe('EntrepreneurPersonalDetails.vue', () => {
     expect(wrapper.text()).toContain('Johnson');
     expect(wrapper.text()).toContain('Experienced entrepreneur focusing on tech startups');
     expect(wrapper.text()).toContain('https://alicejohnson.dev');
-    
+
     // Should not contain "Not Available" since all important fields have values
     expect(wrapper.text()).not.toContain('Not Available');
   });

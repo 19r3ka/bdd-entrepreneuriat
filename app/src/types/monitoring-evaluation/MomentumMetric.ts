@@ -1,3 +1,4 @@
-import type { MomentumMetric } from '../../schemas/monitoring-evaluation/MomentumMetric'
+import type z from 'zod';
+import { MomentumMetricSchema } from '../../schemas/monitoring-evaluation/MomentumMetric';
 
-export type { MomentumMetric }
+export type MomentumMetric = z.infer<typeof MomentumMetricSchema>;

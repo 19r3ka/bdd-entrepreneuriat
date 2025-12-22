@@ -8,15 +8,15 @@
 </template>
 
 <script setup lang="ts">
-  import EntrepreneurForm from '@/components/EntrepreneurForm.vue'
-  import { EntrepreneurSchema } from '@/schemas/entrepreneur'
-  import { initialEntrepreneur } from '@/constants/entrepreneurInitialValues'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
+import EntrepreneurForm from '@/components/EntrepreneurForm.vue';
+import { EntrepreneurSchema } from '@/schemas/entrepreneur';
+import { initialEntrepreneur } from '@/constants/entrepreneurInitialValues';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
 
-  const store = useEntrepreneurStore()
+const store = useEntrepreneurStore();
 
-  const uniqueChecks = {
-    slug: store.getBySlug,
-    'contact.email': store.getByEmail
-  } as any
+const uniqueChecks = {
+  slug: store.getBySlug,
+  'contact.email': store.getByEmail,
+} as any;
 </script>

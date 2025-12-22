@@ -1,14 +1,14 @@
 <script setup lang="ts">
-  const props = defineProps<{
-    dimension: string
-    level: string
-    count: number
-    message: string
-  }>()
+defineProps<{
+  dimension: string;
+  level: string;
+  count: number;
+  message: string;
+}>();
 
-  const emit = defineEmits<{
-    click: []
-  }>()
+const emit = defineEmits<{
+  click: [];
+}>();
 </script>
 
 <template>

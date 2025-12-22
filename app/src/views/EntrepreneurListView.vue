@@ -14,6 +14,16 @@
     @delete-selected="confirmDeleteSelected"
     @export-csv="exportCSV"
   >
+    <!-- Header actions -->
+    <template #header-actions>
+      <Button
+        :label="$t('pages.entrepreneurs.add')"
+        icon="pi pi-plus"
+        class="p-button-primary"
+        @click="addEntrepreneur"
+      />
+    </template>
+
     <!-- Avatar Column -->
     <template #col-avatar="{ data }">
       <AvatarDisplay
@@ -41,114 +51,115 @@
 </template>
 
 <script setup lang="ts">
-  import { FilterMatchMode } from '@primevue/core/api'
-  import { storeToRefs } from 'pinia'
-  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
-  import { useToast } from 'primevue/usetoast'
-  import { onMounted, ref, computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import { useRouter } from 'vue-router'
-  import ResourceDataTable from '@/components/common/ResourceDataTable.vue'
-  import { useConfirmation } from '@/composables/useConfirmation'
-  import { generateCsvColumns, useCsv } from '@/composables/useCsv'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import type { Entrepreneur } from '@/types/entrepreneur'
+import { FilterMatchMode } from '@primevue/core/api';
+import { storeToRefs } from 'pinia';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+import Button from 'primevue/button';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import ResourceDataTable from '@/components/common/ResourceDataTable.vue';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { generateCsvColumns, useCsv } from '@/composables/useCsv';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import type { Entrepreneur } from '@/types/entrepreneur';
 
-  const router = useRouter()
-  const store = useEntrepreneurStore()
-  const { entrepreneurs } = storeToRefs(store)
-  const {
-    confirmDelete: confirmDeleteEntrepreneur,
-    confirmDeleteSelected: confirmDeleteSelectedEntrepreneurs
-  } = useConfirmation()
-  const toast = useToast()
-  const { t } = useI18n()
-  const { exportCsv } = useCsv<Entrepreneur>()
+const router = useRouter();
+const store = useEntrepreneurStore();
+const { entrepreneurs } = storeToRefs(store);
+const {
+  confirmDelete: confirmDeleteEntrepreneur,
+  confirmDeleteSelected: confirmDeleteSelectedEntrepreneurs,
+} = useConfirmation();
+const toast = useToast();
+const { t } = useI18n();
+const { exportCsv } = useCsv<Entrepreneur>();
 
-  /**
-   * Column definitions: lean, declarative.
-   */
-  const columns = computed(() => [
-    {
-      field: 'firstName',
-      header: t('common.firstName'),
-      sortable: true,
-      filterField: 'firstName',
-      dataType: 'text' as const
-    },
-    {
-      field: 'lastName',
-      header: t('common.lastName'),
-      sortable: true,
-      filterField: 'lastName',
-      dataType: 'text' as const
-    },
-    {
-      field: 'contact.email',
-      header: t('common.email'),
-      sortable: true,
-      filterField: 'contact.email',
-      dataType: 'text' as const
+/**
+ * Column definitions: lean, declarative.
+ */
+const columns = computed(() => [
+  {
+    field: 'firstName',
+    header: t('common.firstName'),
+    sortable: true,
+    filterField: 'firstName',
+    dataType: 'text' as const,
+  },
+  {
+    field: 'lastName',
+    header: t('common.lastName'),
+    sortable: true,
+    filterField: 'lastName',
+    dataType: 'text' as const,
+  },
+  {
+    field: 'contact.email',
+    header: t('common.email'),
+    sortable: true,
+    filterField: 'contact.email',
+    dataType: 'text' as const,
+  },
+]);
+
+/** Global filter fields: used by the search box */
+const globalFilterFields = ref(['firstName', 'lastName', 'contact.email']);
+
+/** Filters object: parent owns it, passed via v-model */
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  firstName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  lastName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  'contact.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
+
+/* ---------- Navigation and actions ---------- */
+const addEntrepreneur = () => router.push('/entrepreneurs/new');
+const viewEntrepreneur = (id: string) => router.push(`/entrepreneurs/${id}`);
+const EditEntrepreneur = (id: string) => router.push(`/entrepreneurs/${id}/edit`);
+
+/** Delete confirmations using extended useConfirmation */
+const confirmDelete = (id: string) => {
+  const entrepreneur = entrepreneurs.value.find(e => e.id === id);
+  const name = entrepreneur
+    ? `${entrepreneur.firstName} ${entrepreneur.lastName}`
+    : t('common.entrepreneur');
+
+  confirmDeleteEntrepreneur(name, async () => {
+    try {
+      await store.remove(id);
+    } catch {
+      toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 });
     }
-  ])
+  });
+};
 
-  /** Global filter fields: used by the search box */
-  const globalFilterFields = ref(['firstName', 'lastName', 'contact.email'])
+const confirmDeleteSelected = (ids: string[]) => {
+  confirmDeleteSelectedEntrepreneurs('Entrepreneur', ids.length, async () => {
+    try {
+      await store.removeMany(ids);
+    } catch {
+      toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 });
+    }
+  });
+};
 
-  /** Filters object: parent owns it, passed via v-model */
-  const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    firstName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    lastName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    'contact.email': { value: null, matchMode: FilterMatchMode.CONTAINS }
-  })
+/** CSV export using useCsv */
+const exportCSV = (dataToExport: Entrepreneur[]) => {
+  if (!dataToExport.length) return;
 
-  /* ---------- Navigation and actions ---------- */
-  const addEntrepreneur = () => router.push('/entrepreneurs/new')
-  const viewEntrepreneur = (id: string) => router.push(`/entrepreneurs/${id}`)
-  const EditEntrepreneur = (id: string) => router.push(`/entrepreneurs/${id}/edit`)
+  const sample = dataToExport[0];
+  const cols = generateCsvColumns(sample, ['id']); // exclude id
 
-  /** Delete confirmations using extended useConfirmation */
-  const confirmDelete = (id: string) => {
-    const entrepreneur = entrepreneurs.value.find((e) => e.id === id)
-    const name = entrepreneur
-      ? `${entrepreneur.firstName} ${entrepreneur.lastName}`
-      : t('common.entrepreneur')
+  exportCsv(dataToExport, cols, 'entrepreneurs');
+};
 
-    confirmDeleteEntrepreneur(name, async () => {
-      try {
-        await store.remove(id)
-      } catch {
-        toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 })
-      }
-    })
-  }
-
-  const confirmDeleteSelected = (ids: string[]) => {
-    confirmDeleteSelectedEntrepreneurs('Entrepreneur', ids.length, async () => {
-      try {
-        await store.removeMany(ids)
-      } catch {
-        toast.add({ severity: 'error', summary: t('pages.entrepreneurs.deleteError'), life: 3000 })
-      }
-    })
-  }
-
-  /** CSV export using useCsv */
-  const exportCSV = (dataToExport: Entrepreneur[]) => {
-    if (!dataToExport.length) return
-
-    const sample = dataToExport[0]
-    const cols = generateCsvColumns(sample, ['id']) // exclude id
-
-    exportCsv(dataToExport, cols, 'entrepreneurs')
-  }
-
-  onMounted(() => store.fetchAll())
+onMounted(() => store.fetchAll());
 </script>
 
 <style scoped>
-  .text-capitalize {
-    text-transform: capitalize;
-  }
+.text-capitalize {
+  text-transform: capitalize;
+}
 </style>

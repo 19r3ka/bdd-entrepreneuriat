@@ -1,20 +1,20 @@
 <script setup lang="ts">
-  import Button from 'primevue/button'
-  import SplitButton from 'primevue/splitbutton'
+import Button from 'primevue/button';
+import SplitButton from 'primevue/splitbutton';
 
-  defineProps<{
-    regionName: string
-  }>()
+defineProps<{
+  regionName: string;
+}>();
 
-  const emit = defineEmits<{
-    (e: 'export'): void
-    (e: 'add-entrepreneur'): void
-  }>()
+const emit = defineEmits<{
+  (e: 'export'): void;
+  (e: 'add-entrepreneur'): void;
+}>();
 
-  const addItems = [
-    { label: 'Add Business', icon: 'pi pi-briefcase' },
-    { label: 'Bulk Import', icon: 'pi pi-upload' }
-  ]
+const addItems = [
+  { label: 'Add Business', icon: 'pi pi-briefcase' },
+  { label: 'Bulk Import', icon: 'pi pi-upload' },
+];
 </script>
 
 <template>

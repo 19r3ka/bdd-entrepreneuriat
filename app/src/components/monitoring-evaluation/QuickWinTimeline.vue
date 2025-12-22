@@ -13,7 +13,7 @@
     </div>
 
     <Timeline :value="formattedQuickWins" align="alternate" class="customized-timeline">
-      <template #marker="slotProps">
+      <template #marker>
         <span
           class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
           style="background-color: #00bcd4"
@@ -37,36 +37,36 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Timeline from 'primevue/timeline'
-  import Button from 'primevue/button'
-  import ActivityCard from './ActivityCard.vue'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import { computed } from 'vue';
+import Timeline from 'primevue/timeline';
+import Button from 'primevue/button';
+import ActivityCard from './ActivityCard.vue';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
-  const props = defineProps<{
-    quickWins: QuickWin[]
-    title?: string
-  }>()
+const props = defineProps<{
+  quickWins: QuickWin[];
+  title?: string;
+}>();
 
-  defineEmits<{
-    (e: 'add'): void
-    (e: 'view', id: string): void
-    (e: 'edit', id: string): void
-  }>()
+defineEmits<{
+  (e: 'add'): void;
+  (e: 'view', id: string): void;
+  (e: 'edit', id: string): void;
+}>();
 
-  const formattedQuickWins = computed(() => {
-    return [...props.quickWins]
-      .sort((a, b) => new Date(b.achievedOn).getTime() - new Date(a.achievedOn).getTime())
-      .map((q) => ({ type: 'quickWin' as const, data: q, date: q.achievedOn }))
-  })
+const formattedQuickWins = computed(() => {
+  return [...props.quickWins]
+    .sort((a, b) => new Date(b.achievedOn).getTime() - new Date(a.achievedOn).getTime())
+    .map(q => ({ type: 'quickWin' as const, data: q, date: q.achievedOn }));
+});
 </script>
 
 <style scoped>
-  .customized-timeline :deep(.p-timeline-event-opposite) {
-    flex: 0;
-    padding: 0;
-  }
-  .customized-timeline :deep(.p-timeline-event-content) {
-    width: 100%;
-  }
+.customized-timeline :deep(.p-timeline-event-opposite) {
+  flex: 0;
+  padding: 0;
+}
+.customized-timeline :deep(.p-timeline-event-content) {
+  width: 100%;
+}
 </style>

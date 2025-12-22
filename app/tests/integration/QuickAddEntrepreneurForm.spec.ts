@@ -23,11 +23,15 @@ vi.mock('primevue/usetoast', () => ({
   useToast: vi.fn(() => mockToast),
 }));
 
-vi.mock('vue-i18n', () => ({
-  useI18n: vi.fn(() => ({
-    t: (key: string) => key, // Return the key as translation for testing
-  })),
-}));
+vi.mock('vue-i18n', async importOriginal => {
+  const actual = await importOriginal<any>();
+  return {
+    ...actual,
+    useI18n: vi.fn(() => ({
+      t: (key: string) => key, // Return the key as translation for testing
+    })),
+  };
+});
 
 describe('QuickAddEntrepreneurForm.vue', () => {
   beforeEach(() => {
@@ -39,12 +43,12 @@ describe('QuickAddEntrepreneurForm.vue', () => {
 
     // Check for form title
     expect(wrapper.text()).toContain('Quick Add Entrepreneur');
-    
+
     // Check for all form fields
     expect(wrapper.find('input#firstName').exists()).toBe(true);
     expect(wrapper.find('input#lastName').exists()).toBe(true);
     expect(wrapper.find('input#email').exists()).toBe(true);
-    
+
     // Check for submit button
     expect(wrapper.find('button[type="submit"]').text()).toContain('Add');
   });
@@ -90,7 +94,7 @@ describe('QuickAddEntrepreneurForm.vue', () => {
       slug: 'john-doe',
       contact: { email: 'john@example.com' },
     });
-    
+
     // Should show success toast
     expect(mockToast.add).toHaveBeenCalledWith({
       severity: 'success',
@@ -153,7 +157,7 @@ describe('QuickAddEntrepreneurForm.vue', () => {
 
     // Mock store with a delayed response to check loading state
     let resolvePromise: any;
-    const promise = new Promise((resolve) => {
+    const promise = new Promise(resolve => {
       resolvePromise = resolve;
     });
     mockEntrepreneurStore.add.mockReturnValue(promise);

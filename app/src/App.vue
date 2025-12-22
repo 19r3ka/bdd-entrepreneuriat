@@ -1,24 +1,24 @@
 <script setup lang="ts">
-  import { onMounted } from 'vue'
-  import AppHeader from './components/AppHeader.vue'
-  import { RouterView } from 'vue-router'
-  import ConfirmDialog from 'primevue/confirmdialog'
-  import Toast from 'primevue/toast'
-  import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
+import { onMounted } from 'vue';
+import AppHeader from './components/AppHeader.vue';
+import { RouterView } from 'vue-router';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
+import { useEntrepreneurStore } from '@/stores/useEntrepreneurStore';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
 
-  const entrepreneurStore = useEntrepreneurStore()
-  const businessStore = useBusinessStore()
-  const { handleApiError } = useErrorHandler()
+const entrepreneurStore = useEntrepreneurStore();
+const businessStore = useBusinessStore();
+const { handleApiError } = useErrorHandler();
 
-  onMounted(async () => {
-    try {
-      await Promise.all([entrepreneurStore.fetchAll(), businessStore.fetchAll()])
-    } catch (error) {
-      handleApiError(error as AppError, 'Failed to load initial data')
-    }
-  })
+onMounted(async () => {
+  try {
+    await Promise.all([entrepreneurStore.fetchAll(), businessStore.fetchAll()]);
+  } catch (error) {
+    handleApiError(error as AppError, 'Failed to load initial data');
+  }
+});
 </script>
 
 <template>

@@ -35,7 +35,7 @@ describe('BusinessForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Business = {
       id: '',
       name: '',
@@ -83,7 +83,7 @@ describe('BusinessForm.vue', () => {
 
     // Check for "new business" heading
     expect(wrapper.text()).toContain('New Business');
-    
+
     // Check for submit button
     const submitButton = wrapper.find('button[type="submit"]');
     expect(submitButton.text()).toContain('Submit');
@@ -94,7 +94,7 @@ describe('BusinessForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Business = {
       id: 'test-id',
       name: 'Test Business',
@@ -114,7 +114,7 @@ describe('BusinessForm.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://example.com',
       socialMedia: {
@@ -142,7 +142,7 @@ describe('BusinessForm.vue', () => {
 
     // Check for "edit business" heading
     expect(wrapper.text()).toContain('Edit Business');
-    
+
     // Check for update button
     const submitButton = wrapper.find('button[type="submit"]');
     expect(submitButton.text()).toContain('Update');
@@ -153,7 +153,7 @@ describe('BusinessForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Business = {
       id: '',
       name: '',
@@ -202,7 +202,7 @@ describe('BusinessForm.vue', () => {
     // Check for all form sections
     const sections = wrapper.findAll('.form-section');
     expect(sections.length).toBeGreaterThan(0);
-    
+
     // Check for specific section titles
     expect(wrapper.text()).toContain('General Information');
     expect(wrapper.text()).toContain('Location');
@@ -216,7 +216,7 @@ describe('BusinessForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Business = {
       id: '',
       name: '',
@@ -273,7 +273,7 @@ describe('BusinessForm.vue', () => {
       parse: vi.fn(),
       safeParse: vi.fn().mockReturnValue({ success: true, data: {} }),
     };
-    
+
     const mockInitialValues: Business = {
       id: '',
       name: '',

@@ -24,7 +24,7 @@ describe('BusinessOverview.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://test.com',
       socialMedia: {
@@ -114,7 +114,7 @@ describe('BusinessOverview.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://test.com',
       socialMedia: {
@@ -134,9 +134,9 @@ describe('BusinessOverview.vue', () => {
     });
 
     // Check that dates are formatted as expected (this will depend on the system's locale)
-    expect(wrapper.text()).toContain('1/1/2023');  // This might be different based on locale
-    expect(wrapper.text()).toContain('2/1/2023');  // This might be different based on locale
-    expect(wrapper.text()).toContain('3/1/2023');  // This might be different based on locale
+    expect(wrapper.text()).toContain('1/1/2023'); // This might be different based on locale
+    expect(wrapper.text()).toContain('2/1/2023'); // This might be different based on locale
+    expect(wrapper.text()).toContain('3/1/2023'); // This might be different based on locale
   });
 
   it('renders with the overview heading', () => {
@@ -159,7 +159,7 @@ describe('BusinessOverview.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://test.com',
       socialMedia: {
@@ -202,7 +202,7 @@ describe('BusinessOverview.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://test.com',
       socialMedia: {
@@ -224,7 +224,7 @@ describe('BusinessOverview.vue', () => {
     // Check for PrimeFlex grid classes
     expect(wrapper.classes()).toContain('grid');
     expect(wrapper.classes()).toContain('formgrid');
-    
+
     // Check for field classes
     expect(wrapper.findAll('.field').length).toBeGreaterThan(0);
   });
@@ -249,7 +249,7 @@ describe('BusinessOverview.vue', () => {
       },
       location: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       onlinePresence: 'https://test.com',
       socialMedia: {

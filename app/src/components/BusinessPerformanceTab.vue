@@ -1,17 +1,17 @@
 <script setup lang="ts">
-  import MetricCard from '@/components/common/MetricCard.vue'
-  import MaturityNexus from '@/components/MaturityNexus.vue'
-  import EvidenceStream from '@/components/MaturityEvidenceStream.vue'
-  import type { KPI, MaturityScore, TimelineEvent, Milestone } from '@/types/maturity'
+import MetricCard from '@/components/common/MetricCard.vue';
+import MaturityNexus from '@/components/MaturityNexus.vue';
+import EvidenceStream from '@/components/MaturityEvidenceStream.vue';
+import type { KPI, MaturityScore, TimelineEvent, Milestone } from '@/types/maturity';
 
-  // STRICT CONTRACT: Pure Presentation Component
-  // It receives data from the parent view (which gets it from Pinia)
-  defineProps<{
-    kpis: KPI[]
-    maturityScores: MaturityScore[]
-    milestones: Record<string, Milestone[]>
-    timelineEvents: TimelineEvent[]
-  }>()
+// STRICT CONTRACT: Pure Presentation Component
+// It receives data from the parent view (which gets it from Pinia)
+defineProps<{
+  kpis: KPI[];
+  maturityScores: MaturityScore[];
+  milestones: Record<string, Milestone[]>;
+  timelineEvents: TimelineEvent[];
+}>();
 </script>
 
 <template>
@@ -33,18 +33,18 @@
 </template>
 
 <style scoped>
-  .animate-fadein {
-    animation: fadein 0.4s ease-out forwards;
-  }
+.animate-fadein {
+  animation: fadein 0.4s ease-out forwards;
+}
 
-  @keyframes fadein {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>

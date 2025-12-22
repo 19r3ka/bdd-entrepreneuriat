@@ -14,13 +14,13 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check for the link with correct URL
     expect(wrapper.find('a').attributes('href')).toBe(url);
-    
+
     // Check for the correct aria-label
     expect(wrapper.find('a').attributes('aria-label')).toBe('LinkedIn Profile');
-    
+
     // Check for the presence of the icon
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check for the default label
     expect(wrapper.text()).toContain('LinkedIn');
   });
@@ -36,13 +36,13 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check for the link with correct URL
     expect(wrapper.find('a').attributes('href')).toBe(url);
-    
+
     // Check for the correct aria-label
     expect(wrapper.find('a').attributes('aria-label')).toBe('Twitter Profile');
-    
+
     // Check for the presence of the icon
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check for the default label
     expect(wrapper.text()).toContain('Twitter');
   });
@@ -58,13 +58,13 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check for the link with correct URL
     expect(wrapper.find('a').attributes('href')).toBe(url);
-    
+
     // Check for the correct aria-label
     expect(wrapper.find('a').attributes('aria-label')).toBe('Facebook Profile');
-    
+
     // Check for the presence of the icon
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check for the default label
     expect(wrapper.text()).toContain('Facebook');
   });
@@ -80,13 +80,13 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check for the link with correct URL
     expect(wrapper.find('a').attributes('href')).toBe(url);
-    
+
     // Check for the correct aria-label
     expect(wrapper.find('a').attributes('aria-label')).toBe('Instagram Profile');
-    
+
     // Check for the presence of the icon
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check for the default label
     expect(wrapper.text()).toContain('Instagram');
   });
@@ -102,13 +102,13 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check for the link with correct URL
     expect(wrapper.find('a').attributes('href')).toBe(url);
-    
+
     // Check for the correct aria-label
     expect(wrapper.find('a').attributes('aria-label')).toBe('TikTok Profile');
-    
+
     // Check for the presence of the icon
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check for the default label
     expect(wrapper.text()).toContain('TikTok');
   });
@@ -116,7 +116,7 @@ describe('SocialMediaIcon.vue', () => {
   it('uses custom label when provided', () => {
     const url = 'https://linkedin.com/in/test';
     const customLabel = 'My LinkedIn';
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaIcon, {
       props: {
         icon: 'linkedin',
@@ -142,7 +142,7 @@ describe('SocialMediaIcon.vue', () => {
     expect(wrapper.classes()).toContain('p-button');
     expect(wrapper.classes()).toContain('p-button-text');
     expect(wrapper.classes()).toContain('p-button-rounded');
-    
+
     // Check for flex classes
     expect(wrapper.classes()).toContain('flex');
     expect(wrapper.classes()).toContain('items-center');
@@ -175,7 +175,7 @@ describe('SocialMediaIcon.vue', () => {
     // Check for the icon container with specific dimensions
     const iconContainer = wrapper.find('span').element.children[0];
     expect(iconContainer).toBeDefined();
-    
+
     // Check for text size class
     const textElement = wrapper.find('span.text-sm');
     expect(textElement.exists()).toBe(true);
@@ -191,7 +191,7 @@ describe('SocialMediaIcon.vue', () => {
 
     // Check that the SVG element is rendered
     expect(wrapper.find('svg').exists()).toBe(true);
-    
+
     // Check that the SVG has the proper attributes
     const svg = wrapper.find('svg');
     expect(svg.attributes('viewBox')).toBe('0 0 24 24');

@@ -8,7 +8,7 @@ describe('SelectFilter.vue', () => {
       { label: 'Option 1', value: 'option1' },
       { label: 'Option 2', value: 'option2' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -25,7 +25,7 @@ describe('SelectFilter.vue', () => {
       { label: 'Active', value: 'active' },
       { label: 'Inactive', value: 'inactive' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -43,7 +43,7 @@ describe('SelectFilter.vue', () => {
       { label: 'Option 1', value: 'option1' },
       { label: 'Option 2', value: 'option2' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -60,10 +60,8 @@ describe('SelectFilter.vue', () => {
 
   it('accepts placeholder text', () => {
     const placeholder = 'Select an option';
-    const options = [
-      { label: 'Option 1', value: 'option1' },
-    ];
-    
+    const options = [{ label: 'Option 1', value: 'option1' }];
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -77,10 +75,8 @@ describe('SelectFilter.vue', () => {
   });
 
   it('has correct class applied', () => {
-    const options = [
-      { label: 'Option 1', value: 'option1' },
-    ];
-    
+    const options = [{ label: 'Option 1', value: 'option1' }];
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -97,7 +93,7 @@ describe('SelectFilter.vue', () => {
       { label: 'Option 1', value: 'option1' },
       { label: 'Option 2', value: 'option2' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: 'option1',
@@ -115,7 +111,7 @@ describe('SelectFilter.vue', () => {
       { label: 'Medium Priority', value: 'medium' },
       { label: 'Low Priority', value: 'low' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -133,7 +129,7 @@ describe('SelectFilter.vue', () => {
       { label: 'No', value: false },
       { label: 'Unknown', value: null },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -155,7 +151,7 @@ describe('SelectFilter.vue', () => {
       { label: 'First', value: 1 },
       { label: 'Second', value: 2 },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,
@@ -169,10 +165,8 @@ describe('SelectFilter.vue', () => {
   });
 
   it('has expected structure', () => {
-    const options = [
-      { label: 'Test Option', value: 'test' },
-    ];
-    
+    const options = [{ label: 'Test Option', value: 'test' }];
+
     const wrapper = mountWithGlobalComponents(SelectFilter, {
       props: {
         modelValue: null,

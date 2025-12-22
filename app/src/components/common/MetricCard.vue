@@ -1,32 +1,32 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Card from 'primevue/card'
+import { computed } from 'vue';
+import Card from 'primevue/card';
 
-  // Unified Interface
-  export interface MetricData {
-    label: string
-    value: string | number
-    // Context A: Portfolio Style
-    icon?: string // Material symbol name
-    iconColorClass?: string // e.g. 'text-primary'
-    // Context B: Report/Entity Style
-    sdgTag?: string // e.g. 'SDG 8'
-    // Bottom Section
-    subtext?: string // Plain text description
-    trend?: {
-      value: string // e.g. '+12%'
-      direction: 'UP' | 'DOWN'
-    }
-  }
+// Unified Interface
+export interface MetricData {
+  label: string;
+  value: string | number;
+  // Context A: Portfolio Style
+  icon?: string; // Material symbol name
+  iconColorClass?: string; // e.g. 'text-primary'
+  // Context B: Report/Entity Style
+  sdgTag?: string; // e.g. 'SDG 8'
+  // Bottom Section
+  subtext?: string; // Plain text description
+  trend?: {
+    value: string; // e.g. '+12%'
+    direction: 'UP' | 'DOWN';
+  };
+}
 
-  const props = defineProps<{
-    data: MetricData
-    // Optional: Allow overriding size for Hero vs Grid usage
-    size?: 'normal' | 'large'
-  }>()
+const props = defineProps<{
+  data: MetricData;
+  // Optional: Allow overriding size for Hero vs Grid usage
+  size?: 'normal' | 'large';
+}>();
 
-  const isPositive = computed(() => props.data.trend?.direction === 'UP')
-  const textSize = computed(() => (props.size === 'large' ? 'text-4xl' : 'text-2xl'))
+const isPositive = computed(() => props.data.trend?.direction === 'UP');
+const textSize = computed(() => (props.size === 'large' ? 'text-4xl' : 'text-2xl'));
 </script>
 
 <template>
@@ -74,7 +74,7 @@
             v-else-if="data.subtext"
             class="text-500 dark:text-400 text-sm"
             :class="{
-              'text-orange-500 font-semibold': data.subtext.toLowerCase().includes('attention')
+              'text-orange-500 font-semibold': data.subtext.toLowerCase().includes('attention'),
             }"
           >
             {{ data.subtext }}
@@ -86,7 +86,7 @@
 </template>
 
 <style scoped>
-  :deep(.p-card-content) {
-    padding: 0;
-  }
+:deep(.p-card-content) {
+  padding: 0;
+}
 </style>

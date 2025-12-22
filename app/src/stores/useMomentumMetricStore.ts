@@ -1,12 +1,12 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { db } from '@/services/local-db'
-import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric'
-import { v4 as uuidv4 } from 'uuid'
-import { serializeForDb, deserializeFromDb } from '@/utils/db-serialization'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { db } from '@/services/local-db';
+import type { MomentumMetric } from '@/types/monitoring-evaluation/MomentumMetric';
+import { v4 as uuidv4 } from 'uuid';
+import { serializeForDb, deserializeFromDb } from '@/utils/db-serialization';
 
 export const useMomentumMetricStore = defineStore('momentumMetric', () => {
-  const metrics = ref<MomentumMetric[]>([])
+  const metrics = ref<MomentumMetric[]>([]);
 
   /**
    *
@@ -18,14 +18,14 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
       ...metric,
       momentumMetricId: uuidv4(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    };
 
     // Serialize dates before saving to IndexedDB
-    const serialized = serializeForDb(newMetric)
-    await db.momentumMetrics.add(serialized)
-    metrics.value.push(newMetric)
-    return newMetric
+    const serialized = serializeForDb(newMetric);
+    await db.momentumMetrics.add(serialized);
+    metrics.value.push(newMetric);
+    return newMetric;
   }
 
   /**
@@ -34,21 +34,21 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
   async function updateMetric(id: string, updates: Partial<MomentumMetric>) {
     const updated = {
       ...updates,
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    };
 
     // Serialize dates before saving to IndexedDB
-    const serialized = serializeForDb(updated)
-    await db.momentumMetrics.update(id, serialized)
+    const serialized = serializeForDb(updated);
+    await db.momentumMetrics.update(id, serialized);
 
-    const updatedMetric = await db.momentumMetrics.get(id)
+    const updatedMetric = await db.momentumMetrics.get(id);
     if (updatedMetric) {
-      const deserialized = deserializeFromDb(updatedMetric)
-      const index = metrics.value.findIndex((m) => m.momentumMetricId === id)
+      const deserialized = deserializeFromDb(updatedMetric);
+      const index = metrics.value.findIndex(m => m.momentumMetricId === id);
       if (index !== -1) {
-        metrics.value[index] = deserialized
+        metrics.value[index] = deserialized;
       }
-      return deserialized
+      return deserialized;
     }
   }
 
@@ -56,16 +56,16 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
    *
    */
   async function deleteMetric(id: string) {
-    await db.momentumMetrics.delete(id)
-    metrics.value = metrics.value.filter((m) => m.momentumMetricId !== id)
+    await db.momentumMetrics.delete(id);
+    metrics.value = metrics.value.filter(m => m.momentumMetricId !== id);
   }
 
   /**
    *
    */
   async function getMetricById(id: string) {
-    const metric = await db.momentumMetrics.get(id)
-    return metric ? deserializeFromDb(metric) : undefined
+    const metric = await db.momentumMetrics.get(id);
+    return metric ? deserializeFromDb(metric) : undefined;
   }
 
   /**
@@ -76,8 +76,8 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
       .where('businessId')
       .equals(businessId)
       .reverse()
-      .sortBy('createdAt')
-    return result.map((m) => deserializeFromDb(m))
+      .sortBy('createdAt');
+    return result.map(m => deserializeFromDb(m));
   }
 
   /**
@@ -88,17 +88,17 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
       .where('quickWinId')
       .equals(quickWinId)
       .reverse()
-      .sortBy('createdAt')
-    return result.map((m) => deserializeFromDb(m))
+      .sortBy('createdAt');
+    return result.map(m => deserializeFromDb(m));
   }
 
   /**
    *
    */
   async function fetchAll() {
-    const result = await db.momentumMetrics.toArray()
-    metrics.value = result.map((m) => deserializeFromDb(m))
-    return metrics.value
+    const result = await db.momentumMetrics.toArray();
+    metrics.value = result.map(m => deserializeFromDb(m));
+    return metrics.value;
   }
 
   return {
@@ -109,6 +109,6 @@ export const useMomentumMetricStore = defineStore('momentumMetric', () => {
     getMetricById,
     getMetricsByBusinessId,
     getMetricsByQuickWinId,
-    fetchAll
-  }
-})
+    fetchAll,
+  };
+});

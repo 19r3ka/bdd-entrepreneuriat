@@ -6,13 +6,8 @@
         <h1 class="m-0">{{ isEdit ? $t('pages.businesses.edit') : $t('pages.businesses.new') }}</h1>
 
         <BaseForm
-          v-slot="{
-            defineField,
-            canSubmit,
-            isSubmitting,
-            rawErrors,
-            setFieldValue
-          }"
+          ref="formRef"
+          v-slot="{ defineField, canSubmit, isSubmitting, rawErrors, values, setFieldValue }"
           :schema="schema"
           :initial-values="initialValues"
           :on-submit="handleSubmit"
@@ -62,7 +57,7 @@
               >
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <EntrepreneurAutoComplete
-                    :model-value="modelValue"
+                    :model-value="modelValue as string"
                     :placeholder="$t('placeholders.search')"
                     :class="{ 'p-invalid': hasError }"
                     @update:model-value="updateModelValue"
@@ -83,7 +78,7 @@
                     :model-value="modelValue"
                     :options="businessAreaOptions"
                     option-label="name"
-                    option-value="name"
+                    option-value="code"
                     :class="['w-full', { 'p-invalid': hasError }]"
                     @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
@@ -102,7 +97,7 @@
                     :model-value="modelValue"
                     :options="businessAreaOptions"
                     option-label="name"
-                    option-value="name"
+                    option-value="code"
                     :class="['w-full', { 'p-invalid': hasError }]"
                     @update:model-value="updateModelValue"
                     @blur="onBlur && onBlur()"
@@ -118,7 +113,7 @@
               >
                 <template #input="{ modelValue, updateModelValue, hasError, errorText }">
                   <AvatarUpload
-                    :model-value="modelValue"
+                    :model-value="modelValue as string | File | null | undefined"
                     :label="$t('common.logo')"
                     alt-text="Logo"
                     :has-error="hasError"
@@ -130,25 +125,13 @@
             </div>
           </Section>
 
-          <!-- Geolocation -->
-          <Section :title="$t('common.location')">
-            <InteractiveMap
-              :locations="mapLocations"
-              :is-editable="true"
-              height="350px"
-              @update:location="
-                (newCoords) => {
-                  setFieldValue('location.latitude', newCoords.lat)
-                  setFieldValue('location.longitude', newCoords.lng)
-                }
-              "
-              @update:address="
-                (address) => {
-                  setFieldValue('location.address', address)
-                }
-              "
-            />
-          </Section>
+          <!-- Location -->
+          <LocationFormSection
+            prefix="location"
+            :values="values as Record<string, any>"
+            :set-field-value="setFieldValue"
+            :define-field="defineField"
+          />
 
           <!-- Business Information -->
           <Section :title="$t('common.businessInformation')">
@@ -167,11 +150,15 @@
               >
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
-                    :model-value="modelValue"
+                    :model-value="
+                      modelValue ? new Date(modelValue as string | number | Date) : null
+                    "
                     :max-date="maxDate"
                     show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
-                    @update:model-value="updateModelValue"
+                    @update:model-value="
+                      val => updateModelValue(val ? (val as Date).toISOString() : null)
+                    "
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -185,11 +172,15 @@
               >
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
-                    :model-value="modelValue"
+                    :model-value="
+                      modelValue ? new Date(modelValue as string | number | Date) : null
+                    "
                     :max-date="maxDate"
                     show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
-                    @update:model-value="updateModelValue"
+                    @update:model-value="
+                      val => updateModelValue(val ? (val as Date).toISOString() : null)
+                    "
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -203,11 +194,15 @@
               >
                 <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
                   <DatePicker
-                    :model-value="modelValue"
+                    :model-value="
+                      modelValue ? new Date(modelValue as string | number | Date) : null
+                    "
                     :max-date="maxDate"
                     show-icon
                     :class="['w-full', { 'p-invalid': hasError }]"
-                    @update:model-value="updateModelValue"
+                    @update:model-value="
+                      val => updateModelValue(val ? (val as Date).toISOString() : null)
+                    "
                     @blur="onBlur && onBlur()"
                   />
                 </template>
@@ -222,25 +217,19 @@
 
           <!-- Online Presence -->
           <Section :title="$t('common.onlinePresenceAndSocialMedia')">
-            <div class="formgrid grid">
-              <!-- Website / Online presence -->
-              <FormField
-                name="onlinePresence"
-                :label="$t('common.onlinePresence')"
-                v-bind="defineField('onlinePresence')"
-                field-class="col-12 md:col-6"
-              />
-            </div>
             <SocialMediaFields
               :define-field="defineField"
               show-facebook
               show-instagram
+              :show-website="true"
             />
           </Section>
 
           <!-- Submit -->
           <div class="flex justify-content-between align-items-center mt-4">
-            <small class="text-500">{{ $t('common.required') }}</small>
+            <small class="text-500"
+              >{{ $t('common.requiredMarker') }} {{ $t('common.required') }}</small
+            >
             <Button
               type="submit"
               :label="isEdit ? $t('common.update') : $t('common.submit')"
@@ -256,98 +245,91 @@
 </template>
 
 <script setup lang="ts">
-  import Button from 'primevue/button'
-  import DatePicker from 'primevue/datepicker'
-  import Message from 'primevue/message'
-  import Select from 'primevue/select'
-  import Toast from 'primevue/toast'
-  import { useToast } from 'primevue/usetoast'
-  import { useI18n } from 'vue-i18n'
-  import { useRouter } from 'vue-router'
-  import type { ZodSchema } from 'zod'
-  import { computed } from 'vue'
+import Button from 'primevue/button';
+import DatePicker from 'primevue/datepicker';
+import Message from 'primevue/message';
+import Select from 'primevue/select';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import { useRouter } from 'vue-router';
+import type { ZodSchema } from 'zod';
+import { computed, ref } from 'vue';
 
-  const { t } = useI18n()
+const formRef = ref();
 
-  import AvatarUpload from '@/components/common/AvatarUpload.vue'
-  import BaseForm from '@/components/common/BaseForm.vue'
-  import EntrepreneurAutoComplete from '@/components/common/EntrepreneurAutoComplete.vue'
-  import FormField from '@/components/common/FormField.vue'
-  import Section from '@/components/common/FormSection.vue'
-  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
-  import type { UniqueChecks } from '@/composables/useValidationForm'
-  import { businessAreaOptions } from '@/constants/businessAreas'
-  import { useBusinessStore } from '@/stores/useBusinessStore'
-  import type { Business } from '@/types/business'
-  import InteractiveMap from '@/components/InteractiveMap.vue'
-  import ContactInfoFields from '@/components/common/ContactInfoFields.vue'
-  import SocialMediaFields from '@/components/common/SocialMediaFields.vue'
+import AvatarUpload from '@/components/common/AvatarUpload.vue';
+import BaseForm from '@/components/common/BaseForm.vue';
+import EntrepreneurAutoComplete from '@/components/common/EntrepreneurAutoComplete.vue';
+import FormField from '@/components/common/FormField.vue';
+import Section from '@/components/common/FormSection.vue';
+import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
+import type { UniqueChecks } from '@/composables/useValidationForm';
+import { useBusinessAreaOptions } from '@/composables/useBusinessAreaOptions';
+import { useBusinessStore } from '@/stores/useBusinessStore';
+import type { Business } from '@/types/business';
+import ContactInfoFields from '@/components/common/ContactInfoFields.vue';
+import SocialMediaFields from '@/components/common/SocialMediaFields.vue';
+import LocationFormSection from '@/components/common/LocationFormSection.vue';
 
-  const props = defineProps<{
-    isEdit: boolean
-    initialValues: Business
-    schema: ZodSchema
-    uniqueChecks?: UniqueChecks
-  }>()
+const props = defineProps<{
+  isEdit: boolean;
+  initialValues: Business;
+  schema: ZodSchema;
+  uniqueChecks?: UniqueChecks;
+}>();
 
-  const router = useRouter()
-  const businessStore = useBusinessStore()
-  const toast = useToast()
-  const { handleApiError } = useErrorHandler()
+const router = useRouter();
+const businessStore = useBusinessStore();
+const toast = useToast();
+const { handleApiError } = useErrorHandler();
+const { getBusinessAreaOptions } = useBusinessAreaOptions();
+const businessAreaOptions = computed(() => getBusinessAreaOptions());
 
-  const maxDate = new Date()
+const maxDate = new Date();
 
-  const mapLocations = computed(() => {
-    if (props.initialValues.location?.latitude && props.initialValues.location?.longitude) {
-      return [
-        {
-          lat: props.initialValues.location.latitude,
-          lng: props.initialValues.location.longitude,
-          name: props.initialValues.name || t('common.businessLocation')
-        }
-      ]
-    }
-    return []
-  })
+/**
+ *
+ */
 
-  /**
-   *
-   */
-  async function handleSubmit(data: any) {
-    if (!data.socialMedia.linkedin) {
-      data.socialMedia.linkedin = null
-    }
-    try {
-      if (props.isEdit) {
-        await businessStore.update(data)
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Business updated successfully',
-          life: 3000
-        })
-      } else {
-        await businessStore.add(data)
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Business created successfully',
-          life: 3000
-        })
-      }
-      router.push('/businesses')
-    } catch (error) {
-      handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} business`)
-    }
+/**
+ *
+ */
+async function handleSubmit(formData: unknown) {
+  const data = formData as Business;
+  if (data.socialMedia && !data.socialMedia.linkedin) {
+    data.socialMedia.linkedin = '';
   }
+  try {
+    if (props.isEdit) {
+      await businessStore.update(data);
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Business updated successfully',
+        life: 3000,
+      });
+    } else {
+      await businessStore.add(data);
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Business created successfully',
+        life: 3000,
+      });
+    }
+    router.push('/businesses');
+  } catch (error) {
+    handleApiError(error as AppError, `Failed to ${props.isEdit ? 'update' : 'create'} business`);
+  }
+}
 </script>
 
 <style scoped>
-  /* Ensure DatePicker fills available width */
-  .p-datepicker {
-    width: 100% !important;
-  }
-  .p-datepicker .p-inputtext {
-    width: 100% !important;
-  }
+/* Ensure DatePicker fills available width */
+.p-datepicker {
+  width: 100% !important;
+}
+.p-datepicker .p-inputtext {
+  width: 100% !important;
+}
 </style>

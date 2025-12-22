@@ -43,96 +43,94 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Timeline from 'primevue/timeline'
-  import Card from 'primevue/card'
-  import { useSupportStore } from '@/stores/useSupportStore'
-  import { useIndicatorStore } from '@/stores/useIndicatorStore'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
-  import type { IndicatorDefinition, Measurement } from '@/types/monitoring-evaluation/Indicator'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Timeline from 'primevue/timeline';
+import Card from 'primevue/card';
+import { useSupportStore } from '@/stores/useSupportStore';
+import { useIndicatorStore } from '@/stores/useIndicatorStore';
+import type { Support } from '@/types/monitoring-evaluation/Support';
+import type { IndicatorDefinition, Measurement } from '@/types/monitoring-evaluation/Indicator';
 
-  const props = defineProps<{
-    businessId: string
-  }>()
+const props = defineProps<{
+  businessId: string;
+}>();
 
-  const { t, d } = useI18n()
-  const supportStore = useSupportStore()
-  const indicatorStore = useIndicatorStore()
+const { t, d } = useI18n();
+const supportStore = useSupportStore();
+const indicatorStore = useIndicatorStore();
 
-  const loading = ref(true)
+const loading = ref(true);
 
-  interface TimelineEvent {
-    id: string
-    date: string // Formatted date string
-    rawDate: Date // For sorting
-    title: string // Main title for the event (e.g., support title, indicator name)
-    typeLabel: string // Label for the type of event (e.g., "Support", "Measurement")
-    description: string // Main description for the event (e.g., support notes, measurement narrative)
-    details?: string // Optional additional details (e.g., current value for measurement)
-    icon: string
-    color: string
-  }
+interface TimelineEvent {
+  id: string;
+  date: string; // Formatted date string
+  rawDate: Date; // For sorting
+  title: string; // Main title for the event (e.g., support title, indicator name)
+  typeLabel: string; // Label for the type of event (e.g., "Support", "Measurement")
+  description: string; // Main description for the event (e.g., support notes, measurement narrative)
+  details?: string; // Optional additional details (e.g., current value for measurement)
+  icon: string;
+  color: string;
+}
 
-  const events = ref<TimelineEvent[]>([])
+const events = ref<TimelineEvent[]>([]);
 
-  onMounted(async () => {
-    loading.value = true
-    try {
-      const supports: Support[] = await supportStore.getSupportsByBusinessId(props.businessId)
-      const indicators: IndicatorDefinition[] = await indicatorStore.getIndicatorsByBusinessId(
-        props.businessId
-      )
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const supports: Support[] = await supportStore.getSupportsByBusinessId(props.businessId);
+    const indicators: IndicatorDefinition[] = await indicatorStore.getIndicatorsByBusinessId(
+      props.businessId
+    );
 
-      const timelineEvents: TimelineEvent[] = []
+    const timelineEvents: TimelineEvent[] = [];
 
-      // Process Supports
-      supports.forEach((s: Support) => {
+    // Process Supports
+    supports.forEach((s: Support) => {
+      timelineEvents.push({
+        id: s.id,
+        date: d(new Date(s.startDate), 'long'),
+        rawDate: new Date(s.startDate),
+        title: t(`supportBoost.boostType.${s.boostType}`), // Translate boostType for title
+        typeLabel: t('meTimeline.support'),
+        description: s.notes || s.title, // Use notes or title as description
+        icon: 'pi pi-gift',
+        color: 'bg-blue-500',
+      });
+    });
+
+    // Process Measurements
+    for (const ind of indicators) {
+      const measurements: Measurement[] = await indicatorStore.getMeasurementsByIndicatorId(ind.id);
+      measurements.forEach((m: Measurement) => {
         timelineEvents.push({
-          id: s.id,
-          date: d(new Date(s.startDate), 'long'),
-          rawDate: new Date(s.startDate),
-          title: t(`supportBoost.boostType.${s.boostType}`), // Translate boostType for title
-          typeLabel: t('meTimeline.support'),
-          description: s.notes || s.title, // Use notes or title as description
-          icon: 'pi pi-gift',
-          color: 'bg-blue-500'
-        })
-      })
-
-      // Process Measurements
-      for (const ind of indicators) {
-        const measurements: Measurement[] = await indicatorStore.getMeasurementsByIndicatorId(
-          ind.id
-        )
-        measurements.forEach((m: Measurement) => {
-          timelineEvents.push({
-            id: m.id,
-            date: d(new Date(m.dateRecorded), 'long'),
-            rawDate: new Date(m.dateRecorded),
-            title: ind.name,
-            typeLabel: t('meTimeline.measurement'),
-            description: m.contributionNarrative || '', // Use narrative or empty string
-            details: `${t('measurementForm.currentValue')}: ${m.currentValue}`,
-            icon: 'pi pi-chart-line',
-            color: 'bg-green-500'
-          })
-        })
-      }
-
-      // Sort by date descending
-      events.value = timelineEvents.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime())
-    } finally {
-      loading.value = false
+          id: m.id,
+          date: d(new Date(m.dateRecorded), 'long'),
+          rawDate: new Date(m.dateRecorded),
+          title: ind.name,
+          typeLabel: t('meTimeline.measurement'),
+          description: m.contributionNarrative || '', // Use narrative or empty string
+          details: `${t('measurementForm.currentValue')}: ${m.currentValue}`,
+          icon: 'pi pi-chart-line',
+          color: 'bg-green-500',
+        });
+      });
     }
-  })
+
+    // Sort by date descending
+    events.value = timelineEvents.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped>
-  .customized-timeline :deep(.p-timeline-event-opposite) {
-    flex: 0.2;
-  }
-  .customized-timeline :deep(.p-timeline-event-content) {
-    flex: 0.8;
-  }
+.customized-timeline :deep(.p-timeline-event-opposite) {
+  flex: 0.2;
+}
+.customized-timeline :deep(.p-timeline-event-content) {
+  flex: 0.8;
+}
 </style>

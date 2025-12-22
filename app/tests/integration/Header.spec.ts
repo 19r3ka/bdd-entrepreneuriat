@@ -9,7 +9,7 @@ describe('Header.vue', () => {
 
     expect(wrapper.find('img').exists()).toBe(true);
     expect(wrapper.find('img').attributes('src')).toBe('/logo.svg');
-    
+
     // Check that the app name is rendered (using mock translation)
     expect(wrapper.text()).toContain('Entrepreneur App');
   });
@@ -19,16 +19,16 @@ describe('Header.vue', () => {
 
     const navLinks = wrapper.findAll('a');
     expect(navLinks).toHaveLength(4);
-    
+
     expect(navLinks[0].attributes('href')).toBe('/');
     expect(navLinks[0].text()).toContain('Dashboard');
-    
+
     expect(navLinks[1].attributes('href')).toBe('/entrepreneurs');
     expect(navLinks[1].text()).toContain('Entrepreneurs');
-    
+
     expect(navLinks[2].attributes('href')).toBe('/businesses');
     expect(navLinks[2].text()).toContain('Businesses');
-    
+
     expect(navLinks[3].attributes('href')).toBe('/reports');
     expect(navLinks[3].text()).toContain('Reports');
   });
@@ -38,7 +38,7 @@ describe('Header.vue', () => {
 
     // Check for notification button
     expect(wrapper.find('.p-button-text').exists()).toBe(true);
-    
+
     // Check for user avatar
     expect(wrapper.find('.p-avatar').exists()).toBe(true);
   });
@@ -58,12 +58,12 @@ describe('Header.vue', () => {
     // Check main container classes
     expect(wrapper.classes()).toContain('surface-0');
     expect(wrapper.classes()).toContain('p-3');
-    
+
     // Check flex layout classes
     expect(wrapper.classes()).toContain('flex');
     expect(wrapper.classes()).toContain('align-items-center');
     expect(wrapper.classes()).toContain('justify-content-between');
-    
+
     // Check border classes
     expect(wrapper.classes()).toContain('border-b');
     expect(wrapper.classes()).toContain('surface-border');

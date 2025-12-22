@@ -1,41 +1,42 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import Chart from 'primevue/chart'
-  import Card from 'primevue/card'
+import { ref } from 'vue';
+import Chart from 'primevue/chart';
+import Card from 'primevue/card';
+import type { ChartData } from 'chart.js';
 
-  const props = defineProps<{
-    chartData: any
-  }>()
+defineProps<{
+  chartData: ChartData;
+}>();
 
-  const chartOptions = ref({
-    maintainAspectRatio: false,
-    aspectRatio: 0.6,
-    plugins: {
-      legend: {
-        labels: {
-          color: '#64748b'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: '#64748b'
-        },
-        grid: {
-          color: '#e2e8f0'
-        }
+const chartOptions = ref({
+  maintainAspectRatio: false,
+  aspectRatio: 0.6,
+  plugins: {
+    legend: {
+      labels: {
+        color: '#64748b',
       },
-      y: {
-        ticks: {
-          color: '#64748b'
-        },
-        grid: {
-          color: '#e2e8f0'
-        }
-      }
-    }
-  })
+    },
+  },
+  scales: {
+    x: {
+      ticks: {
+        color: '#64748b',
+      },
+      grid: {
+        color: '#e2e8f0',
+      },
+    },
+    y: {
+      ticks: {
+        color: '#64748b',
+      },
+      grid: {
+        color: '#e2e8f0',
+      },
+    },
+  },
+});
 </script>
 
 <template>

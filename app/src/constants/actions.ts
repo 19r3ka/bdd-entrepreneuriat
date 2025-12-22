@@ -7,10 +7,10 @@ export const BUSINESS_ACTIONS = {
   DELETE: 'delete',
   LOG_INTERVENTION: 'log_intervention',
   LOG_QUICK_WIN: 'log_quick_win',
-  TRACK_PERFORMANCE: 'track_performance'
-} as const
+  TRACK_PERFORMANCE: 'track_performance',
+} as const;
 
 /**
  * Type definition for BusinessAction derived from the constants.
  */
-export type BusinessAction = (typeof BUSINESS_ACTIONS)[keyof typeof BUSINESS_ACTIONS]
+export type BusinessAction = (typeof BUSINESS_ACTIONS)[keyof typeof BUSINESS_ACTIONS];

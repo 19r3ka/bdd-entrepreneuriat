@@ -1,99 +1,126 @@
-import { defineStore } from 'pinia'
-import { useCrudStore } from '@/composables/useCrudStore'
-import { EntrepreneurSchema } from '@/schemas/entrepreneur'
-import { db } from '@/services/local-db'
-import type { Entrepreneur } from '@/types/entrepreneur'
-import { isProfileCompletedStrict } from '@/utils/schemaCompletion'
-import { useActivityLogStore } from './useActivityLogStore'
+import { defineStore } from 'pinia';
+import { computed } from 'vue';
+import { z } from 'zod';
+import { useCrudStore } from '@/composables/useCrudStore';
+import { EntrepreneurSchema } from '@/schemas/entrepreneur';
+import type { Entrepreneur } from '@/schemas/entrepreneur';
+import { db } from '@/services/local-db';
+import { useActivityLogStore } from './useActivityLogStore';
+import { v4 as uuidv4 } from 'uuid';
+import { enrichEntrepreneur, type EnrichedEntrepreneur } from '@/utils/entrepreneurHelpers';
 
 export const useEntrepreneurStore = defineStore('entrepreneur', () => {
-  const crudStore = useCrudStore<Entrepreneur>({
-    schema: EntrepreneurSchema,
-    tableName: 'entrepreneurs',
-    db
-  })
+  const EntrepreneurSchemaWithId = EntrepreneurSchema.extend({
+    id: z.string().uuid(),
+  });
 
-  const activityLogStore = useActivityLogStore()
+  type EntrepreneurWithId = z.infer<typeof EntrepreneurSchemaWithId>;
+
+  const crudStore = useCrudStore<EntrepreneurWithId>({
+    schema: EntrepreneurSchemaWithId,
+    tableName: 'entrepreneurs',
+    db,
+  });
+
+  const activityLogStore = useActivityLogStore();
 
   const {
-    items: entrepreneurs,
+    items: rawEntrepreneurRecords,
     loading,
     error,
     fetchAll: baseFetchAll,
     fetchOne: baseFetchOne,
-    add: baseAdd,
-    update: baseUpdate,
+    add: addRaw,
+    update: updateRaw,
     remove: baseRemove,
-    removeMany
-  } = crudStore
+    removeMany,
+  } = crudStore;
 
-  /** Enrichment logic for entrepreneurs */
-  const enrichEntrepreneur = (entrepreneur: Entrepreneur): Entrepreneur => {
-    return {
-      ...entrepreneur,
-      profileCompleted: isProfileCompletedStrict(EntrepreneurSchema, entrepreneur)
-    }
-  }
+  const parsedEntrepreneurs = computed<Entrepreneur[]>(() => {
+    return rawEntrepreneurRecords.value
+      .map((rawRecord: Entrepreneur & { id: string }) => {
+        try {
+          return EntrepreneurSchema.parse(rawRecord);
+        } catch (err) {
+          console.error('Entrepreneur validation failed for record:', rawRecord, err);
+          return null;
+        }
+      })
+      .filter((e: Entrepreneur | null): e is Entrepreneur => e !== null);
+  });
 
-  /** Override fetchAll to enrich entrepreneurs */
   const fetchAll = async () => {
-    await baseFetchAll()
-    entrepreneurs.value = entrepreneurs.value.map(enrichEntrepreneur)
-  }
+    await baseFetchAll();
+  };
 
-  /** Override fetchOne to enrich a single entrepreneur */
   const fetchOne = async (id: string) => {
-    const entrepreneur = await baseFetchOne(id)
-    return entrepreneur ? enrichEntrepreneur(entrepreneur) : null
-  }
+    const rawRecord = await baseFetchOne(id);
+    if (!rawRecord) return null;
+    const entrepreneur = EntrepreneurSchema.parse(rawRecord);
+    return enrichEntrepreneur(entrepreneur);
+  };
 
   const add = async (entrepreneur: Entrepreneur) => {
-    await baseAdd(entrepreneur)
+    const entrepreneurToPersist = {
+      ...entrepreneur,
+      id: entrepreneur.id || uuidv4(),
+    } as EntrepreneurWithId;
+    await addRaw(entrepreneurToPersist);
     await activityLogStore.logAction(
       'create',
       'entrepreneur',
-      entrepreneur.id || 'unknown',
-      `${entrepreneur.firstName} ${entrepreneur.lastName}`
-    )
-  }
+      entrepreneurToPersist.id,
+      `${entrepreneurToPersist.firstName} ${entrepreneurToPersist.lastName}`
+    );
+  };
 
   const update = async (entrepreneur: Entrepreneur) => {
-    await baseUpdate(entrepreneur)
+    if (!entrepreneur.id) throw new Error('Cannot update entrepreneur without an ID.');
+    await updateRaw(entrepreneur as EntrepreneurWithId);
     await activityLogStore.logAction(
       'update',
       'entrepreneur',
-      entrepreneur.id || 'unknown',
+      entrepreneur.id,
       `${entrepreneur.firstName} ${entrepreneur.lastName}`
-    )
-  }
+    );
+  };
 
   const remove = async (id: string) => {
-    const entrepreneur = getById(id)
+    const entrepreneur = getById(id);
     const name = entrepreneur
       ? `${entrepreneur.firstName} ${entrepreneur.lastName}`
-      : 'Unknown Entrepreneur'
-    await baseRemove(id)
-    await activityLogStore.logAction('delete', 'entrepreneur', id, name)
-  }
+      : 'Unknown Entrepreneur';
+    await baseRemove(id);
+    await activityLogStore.logAction('delete', 'entrepreneur', id, name);
+  };
 
-  // Canonical getters
-  const getById = (id: string) => entrepreneurs.value.find((e) => e.id === id)
-  const getBySlug = (slug: string) => entrepreneurs.value.find((e) => e.slug === slug)
-  const getByEmail = (email: string) => entrepreneurs.value.find((e) => e.contact?.email === email)
+  const enrichedEntrepreneurs = computed<EnrichedEntrepreneur[]>(() =>
+    parsedEntrepreneurs.value.map(enrichEntrepreneur)
+  );
 
-  // Canonical searches
+  const getById = (id: string): EnrichedEntrepreneur | undefined =>
+    enrichedEntrepreneurs.value.find(e => e.id === id);
+  const getBySlug = (slug: string): EnrichedEntrepreneur | undefined =>
+    enrichedEntrepreneurs.value.find(e => e.slug === slug);
+  const getByEmail = (email: string): EnrichedEntrepreneur | undefined =>
+    enrichedEntrepreneurs.value.find(e => e.contact?.email === email);
+
   const searchByName = (query: string) =>
-    entrepreneurs.value.filter((e) =>
-      `${e.firstName} ${e.lastName}`.toLowerCase().includes(query.toLowerCase())
-    )
+    computed<EnrichedEntrepreneur[]>(() =>
+      enrichedEntrepreneurs.value.filter(e =>
+        `${e.firstName} ${e.lastName}`.toLowerCase().includes(query.toLowerCase())
+      )
+    );
 
   const searchByEmail = (query: string) =>
-    entrepreneurs.value.filter((e) =>
-      (e.contact?.email || '').toLowerCase().includes(query.toLowerCase())
-    )
+    computed<EnrichedEntrepreneur[]>(() =>
+      enrichedEntrepreneurs.value.filter(e =>
+        (e.contact?.email || '').toLowerCase().includes(query.toLowerCase())
+      )
+    );
 
   return {
-    entrepreneurs,
+    entrepreneurs: enrichedEntrepreneurs,
     loading,
     error,
     fetchAll,
@@ -106,6 +133,6 @@ export const useEntrepreneurStore = defineStore('entrepreneur', () => {
     getBySlug,
     getByEmail,
     searchByName,
-    searchByEmail
-  }
-})
+    searchByEmail,
+  };
+});

@@ -43,7 +43,7 @@ describe('ContactDetailsCard.vue', () => {
     });
 
     expect(wrapper.text()).toContain(email);
-    
+
     // Check for the mailto link
     const mailLink = wrapper.find(`a[href="mailto:${email}"]`);
     expect(mailLink.exists()).toBe(true);
@@ -59,7 +59,7 @@ describe('ContactDetailsCard.vue', () => {
     });
 
     expect(wrapper.text()).toContain(telephone);
-    
+
     // Check for the tel link
     const telLink = wrapper.find(`a[href="tel:${telephone}"]`);
     expect(telLink.exists()).toBe(true);
@@ -86,7 +86,7 @@ describe('ContactDetailsCard.vue', () => {
     });
 
     expect(wrapper.text()).toContain('example.com'); // Displayed host only
-    
+
     // Check for the website link
     const websiteLink = wrapper.find(`a[href="${website}"]`);
     expect(websiteLink.exists()).toBe(true);
@@ -103,7 +103,7 @@ describe('ContactDetailsCard.vue', () => {
     // Should add https:// prefix to URLs that don't have a protocol
     const websiteLink = wrapper.find(`a[href="https://${website}"]`);
     expect(websiteLink.exists()).toBe(true);
-    
+
     // Should still display the clean host name
     expect(wrapper.text()).toContain('example.com');
   });
@@ -161,7 +161,7 @@ describe('ContactDetailsCard.vue', () => {
     // Check for the presence of relevant icons
     const icons = wrapper.findAll('i');
     expect(icons).toHaveLength(4); // One for each contact type
-    
+
     // Check for specific icon classes
     expect(wrapper.find('.pi-envelope').exists()).toBe(true);
     expect(wrapper.find('.pi-phone').exists()).toBe(true);
@@ -180,12 +180,12 @@ describe('ContactDetailsCard.vue', () => {
     // Mock window.location assignment
     const originalHref = window.location.href;
     const mailLink = wrapper.find(`a[href="mailto:${email}"]`);
-    
+
     await mailLink.trigger('click');
-    
+
     // The click handler should update window.location.href
     expect(window.location.href).toBe(`mailto:${email}`);
-    
+
     // Reset for other tests
     window.location.href = originalHref;
   });

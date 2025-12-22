@@ -55,13 +55,6 @@
                       @click="confirmDeleteSelected"
                     />
                     <Button
-                      :label="$t('common.exportCsv')"
-                      icon="pi pi-file-excel"
-                      class="p-button-success"
-                      :disabled="selectedIds.size === 0"
-                      @click="exportCSV"
-                    />
-                    <Button
                       :label="$t('common.cancel')"
                       icon="pi pi-times"
                       class="p-button-secondary"
@@ -195,110 +188,105 @@
 </template>
 
 <script setup lang="ts">
-  import Button from 'primevue/button'
-  import Column from 'primevue/column'
-  import DataTable from 'primevue/datatable'
-  import Calendar from 'primevue/calendar' // Corrected import
-  import IconField from 'primevue/iconfield'
-  import InputIcon from 'primevue/inputicon'
-  import InputNumber from 'primevue/inputnumber'
-  import InputText from 'primevue/inputtext'
-  import { computed, ref } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import BooleanFilter from '@/components/common/BooleanFilter.vue'
-  import SelectFilter from '@/components/common/SelectFilter.vue'
-  import TextFilter from '@/components/common/TextFilter.vue'
-  import { useConfirmation } from '@/composables/useConfirmation'
-  import { resolveField } from '@/utils/resolveField'
+import Button from 'primevue/button';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Calendar from 'primevue/calendar'; // Corrected import
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import BooleanFilter from '@/components/common/BooleanFilter.vue';
+import SelectFilter from '@/components/common/SelectFilter.vue';
+import TextFilter from '@/components/common/TextFilter.vue';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { resolveField } from '@/utils/resolveField';
 
-  interface SelectOption {
-    label: string
-    value: unknown
-  }
+interface SelectOption {
+  label: string;
+  value: unknown;
+}
 
-  interface ColumnDefinition {
-    field: string
-    header: string
-    sortable?: boolean
-    filterField?: string
-    dataType?: 'text' | 'date' | 'boolean' | 'numeric'
-    selectOptions?: SelectOption[] // optional default select options for basic mode
-  }
+interface ColumnDefinition {
+  field: string;
+  header: string;
+  sortable?: boolean;
+  filterField?: string;
+  dataType?: 'text' | 'date' | 'boolean' | 'numeric';
+  selectOptions?: SelectOption[]; // optional default select options for basic mode
+}
 
-  interface FilterValue {
-    value: string | number | boolean | Date | null
-    matchMode?: string
-  }
+interface FilterValue {
+  value: string | number | boolean | Date | null;
+  matchMode?: string;
+}
 
-  interface FilterState {
-    global?: FilterValue
-    [key: string]: FilterValue | undefined // For dynamic filter fields
-  }
+interface FilterState {
+  global?: FilterValue;
+  [key: string]: FilterValue | undefined; // For dynamic filter fields
+}
 
-  const props = defineProps({
-    data: { type: Array as () => unknown[], required: true },
-    columns: { type: Array as () => ColumnDefinition[], required: true },
-    dataKey: { type: String, required: true },
-    resourceName: { type: String, required: true },
-    globalFilterFields: { type: Array as () => string[], default: () => [] },
-    filterMode: { type: String as () => 'basic' | 'advanced', default: 'basic' }
-  })
+const props = defineProps({
+  data: { type: Array as () => unknown[], required: true },
+  columns: { type: Array as () => ColumnDefinition[], required: true },
+  dataKey: { type: String, required: true },
+  resourceName: { type: String, required: true },
+  globalFilterFields: { type: Array as () => string[], default: () => [] },
+  filterMode: { type: String as () => 'basic' | 'advanced', default: 'basic' },
+});
 
-  const filters = defineModel<FilterState>('filters')
-  const emit = defineEmits(['add', 'view', 'edit', 'delete', 'delete-selected', 'export-csv'])
-  const { showConfirmation } = useConfirmation()
-  const { t, d } = useI18n()
+const filters = defineModel<FilterState>('filters');
+const emit = defineEmits(['add', 'view', 'edit', 'delete', 'delete-selected', 'export-csv']);
+const { showConfirmation } = useConfirmation();
+const { t, d } = useI18n();
 
-  /* Selection and actions */
-  const isMultiSelect = ref(false)
-  const selectedItems = ref<unknown[]>([])
-  const selectedIds = computed(() => {
-    const ids = selectedItems.value
-      .map((item) => (item as Record<string, unknown>)[props.dataKey] as string | undefined)
-      .filter((id): id is string => typeof id === 'string')
-    return new Set(ids)
-  })
+/* Selection and actions */
+const isMultiSelect = ref(false);
+const selectedItems = ref<unknown[]>([]);
+const selectedIds = computed(() => {
+  const ids = selectedItems.value
+    .map(item => (item as Record<string, unknown>)[props.dataKey] as string | undefined)
+    .filter((id): id is string => typeof id === 'string');
+  return new Set(ids);
+});
 
-  const resolveFieldData = (data: unknown, field: string): unknown =>
-    resolveField(data as Record<string, unknown>, field)
+const resolveFieldData = (data: unknown, field: string): unknown =>
+  resolveField(data as Record<string, unknown>, field);
 
-  const confirmDeleteSelected = () => {
-    showConfirmation(
-      t(`pages.${props.resourceName}.deleteSelectedConfirmation`, {
-        count: selectedIds.value.size
-      }),
-      t(`pages.${props.resourceName}.deleteTitle`),
-      () => {
-        emit('delete-selected', [...selectedIds.value])
-        cancelMultiSelect()
-      }
-    )
-  }
+const confirmDeleteSelected = () => {
+  showConfirmation(
+    t(`pages.${props.resourceName}.deleteSelectedConfirmation`, {
+      count: selectedIds.value.size,
+    }),
+    t(`pages.${props.resourceName}.deleteTitle`),
+    () => {
+      emit('delete-selected', [...selectedIds.value]);
+      cancelMultiSelect();
+    }
+  );
+};
 
-  const exportCSV = () => {
-    const dataToExport = selectedItems.value.length > 0 ? selectedItems.value : props.data
-    emit('export-csv', dataToExport)
-  }
+const cancelMultiSelect = () => {
+  isMultiSelect.value = false;
+  selectedItems.value = [];
+};
 
-  const cancelMultiSelect = () => {
-    isMultiSelect.value = false
-    selectedItems.value = []
-  }
-
-  // Expose selected items to parent components
-  defineExpose({
-    selectedItems,
-    selectedIds,
-    isMultiSelect
-  })
+// Expose selected items to parent components
+defineExpose({
+  selectedItems,
+  selectedIds,
+  isMultiSelect,
+});
 </script>
 
 <style scoped>
-  .card {
-    background: var(--surface-card);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-  }
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+}
 </style>

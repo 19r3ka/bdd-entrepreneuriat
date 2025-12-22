@@ -1,24 +1,26 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Card from 'primevue/card'
+import { computed } from 'vue';
+import Card from 'primevue/card';
 
-  interface Stage {
-    label: string
-    count: number
-    color: string
-  }
+interface Stage {
+  label: string;
+  count: number;
+  color: string;
+}
 
-  const props = defineProps<{
-    stages: Stage[]
-  }>()
+const MIN_BAR_WIDTH_PERCENT = 5;
 
-  const maxCount = computed(() => {
-    return Math.max(...props.stages.map((s) => s.count), 1) // Avoid div by zero
-  })
+const props = defineProps<{
+  stages: Stage[];
+}>();
 
-  const getWidth = (count: number) => {
-    return `${Math.max((count / maxCount.value) * 100, 5)}%`
-  }
+const maxCount = computed(() => {
+  return Math.max(...props.stages.map(s => s.count), 1); // Avoid div by zero
+});
+
+const getWidth = (count: number) => {
+  return `${Math.max((count / maxCount.value) * 100, MIN_BAR_WIDTH_PERCENT)}%`;
+};
 </script>
 
 <template>
@@ -49,7 +51,11 @@
 
           <!-- Conversion Rate (skip for first item) -->
           <div v-if="index > 0" class="text-xs text-500 mt-1 text-right">
-            {{ $t('pages.dashboard.pipeline.conversion', { rate: Math.round((stage.count / stages[index - 1]!.count) * 100) || 0 }) }}
+            {{
+              $t('pages.dashboard.pipeline.conversion', {
+                rate: Math.round((stage.count / stages[index - 1]!.count) * 100) || 0,
+              })
+            }}
           </div>
         </div>
       </div>
@@ -58,7 +64,7 @@
 </template>
 
 <style scoped>
-  .pipeline-stage {
-    position: relative;
-  }
+.pipeline-stage {
+  position: relative;
+}
 </style>

@@ -59,10 +59,10 @@ describe('EntrepreneurAutoComplete.vue', () => {
 
     // Check for the label
     expect(wrapper.find('label').text()).toBe(label);
-    
+
     // Check for the autocomplete input
     expect(wrapper.find('.p-autocomplete').exists()).toBe(true);
-    
+
     // Check for the placeholder
     expect(wrapper.find('input').attributes('placeholder')).toBe('Search entrepreneurs...');
   });
@@ -78,7 +78,7 @@ describe('EntrepreneurAutoComplete.vue', () => {
 
     // Check for error class
     expect(wrapper.find('.p-autocomplete').classes()).toContain('p-invalid');
-    
+
     // Check for error message
     expect(wrapper.text()).toContain('This field is required');
   });
@@ -92,10 +92,10 @@ describe('EntrepreneurAutoComplete.vue', () => {
 
     // Simulate selecting an entrepreneur from the suggestions
     const autocomplete = wrapper.find('.p-autocomplete');
-    
+
     // Simulate the update:modelValue event with an entrepreneur object
     await autocomplete.trigger('update:modelValue', { id: '1', name: 'John Doe' });
-    
+
     // Check that the update:modelValue event was emitted with the ID
     expect(wrapper.emitted('update:modelValue')).toBeTruthy();
     expect(wrapper.emitted('update:modelValue')![0]).toEqual(['1']);
@@ -110,7 +110,7 @@ describe('EntrepreneurAutoComplete.vue', () => {
 
     // Simulate typing without selecting from suggestions
     await wrapper.find('.p-autocomplete').trigger('update:modelValue', 'some text');
-    
+
     // Should emit empty string when the value is not an object with an id
     expect(wrapper.emitted('update:modelValue')![0]).toEqual(['']);
   });

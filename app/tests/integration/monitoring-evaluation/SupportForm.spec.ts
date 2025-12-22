@@ -79,14 +79,17 @@ describe('SupportForm.vue', () => {
     render(SupportForm, {
       props: {
         isEdit: false,
-        initialValues: { ...initialValues, description: 'New test description', theoryOfChange: 'New test theory' },
+        initialValues: {
+          ...initialValues,
+          description: 'New test description',
+          theoryOfChange: 'New test theory',
+        },
         businessId,
       },
       global: {
         plugins: [i18n],
       },
     });
-
 
     // We are not simulating a click, but the form submission logic
     // This is a workaround for the complexity of interacting with the BaseForm component
@@ -104,7 +107,6 @@ describe('SupportForm.vue', () => {
     // expect(addSupportSpy).toHaveBeenCalled();
     // expect(emitted().success).toBeTruthy();
   });
-
 
   it('emits a cancel event when the cancel button is clicked', async () => {
     const { emitted } = render(SupportForm, {

@@ -1,28 +1,15 @@
-import { z } from 'zod'
+import { z } from 'zod';
+import { StandardIndicatorSchema } from './indicators/standard';
+import { MeasurementSchema as CommonMeasurementSchema } from './common/reading';
 
-export const IndicatorTypeEnum = z.enum(['Economic', 'Behavioral', 'Institutional'])
+/**
+ * @deprecated Use StandardIndicatorSchema from './indicators/standard' instead.
+ * This re-export is maintained for backward compatibility during the refactoring process.
+ * The schema now aligns with the new StandardIndicator structure,
+ * which implies a 'type: "standard"' literal.
+ */
+export const IndicatorDefinitionSchema = StandardIndicatorSchema;
 
-export const IndicatorDefinitionSchema = z.object({
-  id: z.string().uuid(),
-  businessId: z.string().uuid(),
-  type: IndicatorTypeEnum,
-  name: z.string().min(1),
-  description: z.string().optional(),
-  baselineValue: z.number(),
-  baselineDate: z.date(),
-  targetValue: z.number(),
-  targetDate: z.date(),
-  createdAt: z.date(),
-  updatedAt: z.date()
-})
+export const MeasurementSchema = CommonMeasurementSchema;
 
-export const MeasurementSchema = z.object({
-  id: z.string().uuid(),
-  indicatorId: z.string().uuid(),
-  currentValue: z.number(),
-  dateRecorded: z.date(),
-  evidenceSource: z.string().min(1), // Assuming this will be a reference to an uploaded file's ID
-  contributionNarrative: z.string().min(1),
-  createdAt: z.date(),
-  updatedAt: z.date()
-})
+export type Measurement = z.infer<typeof MeasurementSchema>;

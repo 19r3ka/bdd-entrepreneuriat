@@ -69,14 +69,22 @@ describe('ME-Timeline.vue', () => {
         },
       },
     });
-    
+
     const supportStore = useSupportStore();
     const indicatorStore = useIndicatorStore();
 
     // Override stubs with mocks that return data
-    supportStore.getSupportsByBusinessId = vi.fn().mockResolvedValue([
-      { id: 's1', date: new Date(), modality: 'Training', description: 'Desc', genderMarker: 'GEN1' }
-    ]);
+    supportStore.getSupportsByBusinessId = vi
+      .fn()
+      .mockResolvedValue([
+        {
+          id: 's1',
+          date: new Date(),
+          modality: 'Training',
+          description: 'Desc',
+          genderMarker: 'GEN1',
+        },
+      ]);
     indicatorStore.getIndicatorsByBusinessId = vi.fn().mockResolvedValue([]);
     indicatorStore.getMeasurementsByIndicatorId = vi.fn().mockResolvedValue([]);
 
@@ -84,9 +92,9 @@ describe('ME-Timeline.vue', () => {
     // Note: In a real scenario, we would just wait for the first mount to finish if we mocked it before mount.
     // But here we mocked it after mount (which triggers onMounted immediately).
     // So we unmount and remount.
-    
+
     wrapper.unmount();
-    
+
     // Remount
     const wrapper2 = mount(METimeline, {
       props: {
@@ -107,16 +115,24 @@ describe('ME-Timeline.vue', () => {
     });
 
     const supportStore2 = useSupportStore();
-    supportStore2.getSupportsByBusinessId = vi.fn().mockResolvedValue([
-      { id: 's1', date: new Date('2023-01-01'), modality: 'Training', description: 'Desc', genderMarker: 'GEN1' }
-    ]);
+    supportStore2.getSupportsByBusinessId = vi
+      .fn()
+      .mockResolvedValue([
+        {
+          id: 's1',
+          date: new Date('2023-01-01'),
+          modality: 'Training',
+          description: 'Desc',
+          genderMarker: 'GEN1',
+        },
+      ]);
     const indicatorStore2 = useIndicatorStore();
     indicatorStore2.getIndicatorsByBusinessId = vi.fn().mockResolvedValue([]);
     indicatorStore2.getMeasurementsByIndicatorId = vi.fn().mockResolvedValue([]);
 
     await new Promise(resolve => setTimeout(resolve, 10));
     await wrapper2.vm.$nextTick();
-    
+
     expect(wrapper2.find('.customized-timeline').exists()).toBe(true);
   });
 });

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mountWithGlobalComponents } from './test-utils';
 import ResourceDataTable from '@/components/common/ResourceDataTable.vue';
-import { useConfirmation } from '@/composables/useConfirmation';
 
-// Mock the confirmation composable
-const mockShowConfirmation = vi.fn();
+const { mockShowConfirmation } = vi.hoisted(() => ({
+  mockShowConfirmation: vi.fn(),
+}));
 
 vi.mock('@/composables/useConfirmation', () => ({
   useConfirmation: vi.fn(() => ({
@@ -16,7 +16,7 @@ describe('ResourceDataTable.vue', () => {
   it('renders the data table with correct title', () => {
     const mockData = [{ id: '1', name: 'Test Item' }];
     const mockColumns = [{ field: 'name', header: 'Name' }];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -34,7 +34,7 @@ describe('ResourceDataTable.vue', () => {
   it('renders add button with correct label', () => {
     const mockData = [{ id: '1', name: 'Test Item' }];
     const mockColumns = [{ field: 'name', header: 'Name' }];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -52,7 +52,7 @@ describe('ResourceDataTable.vue', () => {
   it('emits add event when add button is clicked', async () => {
     const mockData = [{ id: '1', name: 'Test Item' }];
     const mockColumns = [{ field: 'name', header: 'Name' }];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -79,7 +79,7 @@ describe('ResourceDataTable.vue', () => {
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -98,7 +98,7 @@ describe('ResourceDataTable.vue', () => {
   it('shows "No Data" message when data array is empty', () => {
     const mockData: any[] = [];
     const mockColumns = [{ field: 'name', header: 'Name' }];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -122,7 +122,7 @@ describe('ResourceDataTable.vue', () => {
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -151,7 +151,7 @@ describe('ResourceDataTable.vue', () => {
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -164,20 +164,18 @@ describe('ResourceDataTable.vue', () => {
 
     // Enter multi-select mode
     await wrapper.find('button[label*="Multi-Select"]').trigger('click');
-    
+
     // Check that selection controls are available
     expect(wrapper.find('.p-checkbox').exists()).toBe(true);
   });
 
   it('emits delete event when delete button is clicked in row', async () => {
-    const mockData = [
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-    ];
+    const mockData = [{ id: '1', name: 'John Doe', email: 'john@example.com' }];
     const mockColumns = [
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -197,14 +195,12 @@ describe('ResourceDataTable.vue', () => {
   });
 
   it('emits edit event when edit button is clicked in row', async () => {
-    const mockData = [
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-    ];
+    const mockData = [{ id: '1', name: 'John Doe', email: 'john@example.com' }];
     const mockColumns = [
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -224,14 +220,12 @@ describe('ResourceDataTable.vue', () => {
   });
 
   it('emits view event when view button is clicked in row', async () => {
-    const mockData = [
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-    ];
+    const mockData = [{ id: '1', name: 'John Doe', email: 'john@example.com' }];
     const mockColumns = [
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -253,7 +247,7 @@ describe('ResourceDataTable.vue', () => {
   it('renders with correct CSS structure', () => {
     const mockData = [{ id: '1', name: 'Test Item' }];
     const mockColumns = [{ field: 'name', header: 'Name' }];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,
@@ -266,10 +260,10 @@ describe('ResourceDataTable.vue', () => {
 
     // Check for grid structure
     expect(wrapper.classes()).toContain('grid');
-    
+
     // Check for card wrapper
     expect(wrapper.find('.card').exists()).toBe(true);
-    
+
     // Check for data table
     expect(wrapper.find('.p-datatable').exists()).toBe(true);
   });
@@ -283,7 +277,7 @@ describe('ResourceDataTable.vue', () => {
       { field: 'name', header: 'Name' },
       { field: 'email', header: 'Email' },
     ];
-    
+
     const wrapper = mountWithGlobalComponents(ResourceDataTable, {
       props: {
         data: mockData,

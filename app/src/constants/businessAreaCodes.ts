@@ -23,7 +23,7 @@ export const VALID_BUSINESS_AREA_CODES = [
   'R',
   'S',
   'T',
-  'U'
-] as const
+  'U',
+] as const;
 
-export type BusinessAreaCode = (typeof VALID_BUSINESS_AREA_CODES)[number]
+export type BusinessAreaCode = (typeof VALID_BUSINESS_AREA_CODES)[number];

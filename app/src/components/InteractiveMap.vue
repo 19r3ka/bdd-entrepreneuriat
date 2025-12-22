@@ -39,278 +39,376 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
-import 'leaflet/dist/leaflet.css'
-import 'leaflet.markercluster/dist/MarkerCluster.css'
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import { LMap, LTileLayer } from '@vue-leaflet/vue-leaflet'
-import L from 'leaflet'
-import 'leaflet.markercluster'
-import { searchAddress, reverseGeocode } from '@/services/geocoding'
-import { useDebounceFn } from '@vueuse/core'
+import { computed, ref, watch } from 'vue';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { LMap, LTileLayer } from '@vue-leaflet/vue-leaflet';
+import L from 'leaflet';
+import 'leaflet.markercluster';
+import { searchAddress, reverseGeocode, type GeocodeResult } from '@/services/geocoding';
+import { useDebounceFn } from '@vueuse/core';
 
 // Fix for Leaflet markers disappearing in Vue
-import icon from 'leaflet/dist/images/marker-icon.png'
-import iconRetina from 'leaflet/dist/images/marker-icon-2x.png'
-import iconShadow from 'leaflet/dist/images/marker-shadow.png'
-import type { LatLngBounds } from 'leaflet'
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import type { LatLngBounds } from 'leaflet';
 
-type LeafletMap = InstanceType<typeof LMap>
+type LeafletMap = InstanceType<typeof LMap>;
 
 interface Location {
-  lat: number
-  lng: number
-  name: string
-  address?: string
+  lat: number;
+  lng: number;
+  name: string;
+  address?: string;
 }
 
-interface GeocodeResult {
-  lat: string
-  lon: string
-  display_name: string
-}
+// interface GeocodeResult is now imported
 
 const props = withDefaults(
   defineProps<{
-    locations: Location[]
-    isEditable: boolean
-    height?: string
-    width?: string
+    locations: Location[];
+    isEditable: boolean;
+    height?: string;
+    width?: string;
   }>(),
   {
     height: '400px',
-    width: '100%'
+    width: '100%',
   }
-)
+);
 
 const emit = defineEmits<{
-  (e: 'update:location', value: { lat: number; lng: number }): void
-  (e: 'update:address', value: string): void
-  (e: 'update:bounds', value: LatLngBounds): void
-}>()
+  (e: 'update:location', value: { lat: number; lng: number }): void;
+  (e: 'update:address', value: string): void;
+  (e: 'update:structured-address', value: GeocodeResult['address'] | undefined): void;
+  (e: 'update:bounds', value: LatLngBounds): void;
+}>();
 
-  // Fix Leaflet icon issue - type workaround
-  if ((L.Icon.Default.prototype as any)._getIconUrl) {
-    delete (L.Icon.Default.prototype as any)._getIconUrl
-  }
+// Fix Leaflet icon issue - type workaround
+if ('_getIconUrl' in L.Icon.Default.prototype) {
+  delete (L.Icon.Default.prototype as Record<string, unknown>)._getIconUrl;
+}
 
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: iconRetina,
-    iconUrl: icon,
-  shadowUrl: iconShadow
-})
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: iconRetina,
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+});
 
-const zoom = ref(2)
-const center = ref<[number, number]>([47.41322, -1.219482])
-const mapRef = ref<LeafletMap | null>(null)
-let markerClusterGroup: L.MarkerClusterGroup | null = null
-let editableMarker: L.Marker | null = null
+const DEFAULT_CENTER_LAT = 6.124756330755172;
+const DEFAULT_CENTER_LNG = 1.2171878686183069;
+const EDITABLE_ZOOM = 14;
+const SINGLE_LOCATION_ZOOM = 13;
+const DETAIL_ZOOM = 18;
+const MAX_CLUSTER_ZOOM = 12;
+const MAP_PADDING = 50;
+const SEARCH_DEBOUNCE_MS = 500;
+const BOUNDS_UPDATE_DELAY_MS = 500;
 
-const searchQuery = ref('')
-const searchResults = ref<GeocodeResult[]>([])
+const zoom = ref(2);
+const center = ref<[number, number]>([DEFAULT_CENTER_LAT, DEFAULT_CENTER_LNG]);
+const mapRef = ref<LeafletMap | null>(null);
+let markerClusterGroup: L.MarkerClusterGroup | null = null;
+let editableMarker: L.Marker | null = null;
+
+const searchQuery = ref('');
+const searchResults = ref<GeocodeResult[]>([]);
 
 const containerStyle = computed(() => ({
   height: props.height,
-  width: props.width
-}))
+  width: props.width,
+}));
 
 const hasLocations = computed(
   () =>
     props.locations &&
     props.locations.length > 0 &&
-    props.locations.some((loc) => loc.lat != null && loc.lng != null)
-)
-const showOverlay = computed(() => !props.isEditable && !hasLocations.value)
+    props.locations.some(loc => loc.lat != null && loc.lng != null)
+);
+const showOverlay = computed(() => !props.isEditable && !hasLocations.value);
+
+/**
+ * Helpers functions to make much easier to reduce complexity
+ */
+
+/**
+ * Helper function to update location and geocode
+ * @param lat - latitude
+ * @param lng - longitude
+ * @returns void
+ */
+const updateLocationAndGeocode = async (lat: number, lng: number) => {
+  emit('update:location', { lat, lng });
+  try {
+    const result = await reverseGeocode(lat, lng);
+    emit('update:address', result.display_name);
+    emit('update:structured-address', result.address);
+  } catch (error) {
+    console.error('Reverse geocoding failed:', error);
+  }
+};
+
+/**
+ * Helper function to setup editable marker
+ * @param map - Leaflet map instance
+ * @returns void
+ */
+const setupEditableMarker = (map: L.Map) => {
+  const initialLatLng =
+    props.locations.length > 0
+      ? L.latLng(props.locations[0]!.lat, props.locations[0]!.lng)
+      : L.latLng(center.value[0], center.value[1]);
+
+  editableMarker = L.marker(initialLatLng, {
+    draggable: true,
+    autoPan: true,
+  }).addTo(map);
+
+  editableMarker.on('dragend', async event => {
+    const newLatLng = event.target.getLatLng();
+    await updateLocationAndGeocode(newLatLng.lat, newLatLng.lng);
+  });
+
+  map.on('click', async (e: L.LeafletMouseEvent) => {
+    if (editableMarker) {
+      editableMarker.setLatLng(e.latlng);
+      await updateLocationAndGeocode(e.latlng.lat, e.latlng.lng);
+    }
+  });
+
+  center.value = [initialLatLng.lat, initialLatLng.lng];
+  zoom.value = EDITABLE_ZOOM;
+};
+
+/**
+ * Helper function to fit map to single location
+ * @param map - Leaflet map instance
+ * @param loc - location object
+ * @returns void
+ */
+const fitToSingleLocation = (map: L.Map, loc: Location) => {
+  if (loc && loc.lat != null && loc.lng != null) {
+    center.value = [loc.lat, loc.lng];
+    zoom.value = SINGLE_LOCATION_ZOOM;
+    map.setView([loc.lat, loc.lng], SINGLE_LOCATION_ZOOM);
+  }
+};
+
+/**
+ * Helper function to fit map to multiple locations
+ * @param map - Leaflet map instance
+ * @param locations - array of location objects
+ * @returns void
+ */
+const fitToMultipleLocations = (map: L.Map, locations: Location[]) => {
+  const bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
+  map.fitBounds(bounds, {
+    padding: [MAP_PADDING, MAP_PADDING],
+    maxZoom: MAX_CLUSTER_ZOOM,
+  });
+};
+
+/**
+ * Helper function to setup bounds tracking
+ * @param map - Leaflet map instance
+ * @returns void
+ */
+const setupBoundsTracking = (map: L.Map) => {
+  setTimeout(() => {
+    if (mapRef.value?.leafletObject) {
+      const bounds = (mapRef.value.leafletObject as L.Map).getBounds();
+      emit('update:bounds', bounds);
+    }
+  }, BOUNDS_UPDATE_DELAY_MS);
+
+  map.on('moveend', () => {
+    if (mapRef.value?.leafletObject) {
+      const bounds = mapRef.value.leafletObject.getBounds();
+      emit('update:bounds', bounds);
+    }
+  });
+};
+
+/**
+ * Helper function to setup readonly map
+ * @param map - Leaflet map instance
+ * @returns void
+ */
+const setupReadonlyMap = (map: L.Map) => {
+  markerClusterGroup = L.markerClusterGroup();
+  map.addLayer(markerClusterGroup);
+  updateMarkers(props.locations);
+
+  if (props.locations.length > 0) {
+    if (props.locations.length === 1) {
+      fitToSingleLocation(map, props.locations[0]!);
+    } else {
+      fitToMultipleLocations(map, props.locations);
+    }
+  }
+
+  setupBoundsTracking(map);
+};
+
+/**
+ * Helper function to update readonly map view based on locations
+ * @param map - Leaflet map instance
+ * @param locations - array of location objects
+ * @returns void
+ */
+const updateReadonlyMapView = (map: L.Map, locations: Location[]) => {
+  if (locations.length === 0) return;
+
+  if (locations.length === 1) {
+    fitToSingleLocation(map, locations[0]!);
+  } else {
+    fitToMultipleLocations(map, locations);
+  }
+};
+
+/**
+ * Helper function to create or update editable marker
+ * @param map - Leaflet map instance
+ * @param loc - location object
+ * @returns void
+ */
+const updateEditableMarker = (map: L.Map, loc: Location) => {
+  if (!loc || loc.lat == null || loc.lng == null) return;
+
+  const latLng = L.latLng(loc.lat, loc.lng);
+
+  if (editableMarker) {
+    editableMarker.setLatLng(latLng);
+  } else {
+    editableMarker = L.marker([loc.lat, loc.lng], {
+      draggable: true,
+      autoPan: true,
+    }).addTo(map);
+
+    editableMarker.on('dragend', event => {
+      const newLatLng = event.target.getLatLng();
+      emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng });
+    });
+  }
+
+  center.value = [loc.lat, loc.lng];
+  zoom.value = EDITABLE_ZOOM;
+};
+
+/**
+ * Helper function to handle readonly mode location updates
+ * @param map - Leaflet map instance
+ * @param locations - array of location objects
+ * @returns void
+ */
+const handleReadonlyLocationUpdate = (map: L.Map, locations: Location[]) => {
+  updateMarkers(locations);
+  updateReadonlyMapView(map, locations);
+};
+
+/**
+ * Helper function to handle editable mode location updates
+ * @param map - Leaflet map instance
+ * @param locations - array of location objects
+ * @returns void
+ */
+const handleEditableLocationUpdate = (map: L.Map, locations: Location[]) => {
+  if (locations.length === 0) return;
+  updateEditableMarker(map, locations[0]!);
+};
 
 const performSearch = async () => {
   if (searchQuery.value.length > 2) {
     try {
-      searchResults.value = await searchAddress(searchQuery.value)
+      searchResults.value = await searchAddress(searchQuery.value);
     } catch (error) {
-      console.error('Error searching address:', error)
-      searchResults.value = []
+      console.error('Error searching address:', error);
+      searchResults.value = [];
     }
   } else {
-    searchResults.value = []
+    searchResults.value = [];
   }
-}
+};
 
-const debouncedSearch = useDebounceFn(performSearch, 500)
+const debouncedSearch = useDebounceFn(performSearch, SEARCH_DEBOUNCE_MS);
 
 const selectSearchResult = (result: GeocodeResult) => {
-  const lat = parseFloat(result.lat)
-  const lng = parseFloat(result.lon)
-  center.value = [lat, lng]
-  zoom.value = 14
-  searchQuery.value = result.display_name
-  searchResults.value = []
+  const lat = parseFloat(result.lat);
+  const lng = parseFloat(result.lon);
+  center.value = [lat, lng];
+  zoom.value = 14;
+  searchQuery.value = '';
+  searchResults.value = [];
 
   if (props.isEditable && mapRef.value?.leafletObject) {
-    const map = mapRef.value.leafletObject as L.Map
+    const map = mapRef.value.leafletObject as L.Map;
     if (editableMarker) {
-      editableMarker.setLatLng([lat, lng])
+      editableMarker.setLatLng([lat, lng]);
     } else {
       editableMarker = L.marker([lat, lng], {
         draggable: true,
-        autoPan: true
-      }).addTo(map)
-      editableMarker.on('dragend', (event) => {
-        const newLatLng = event.target.getLatLng()
-        emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng })
-      })
+        autoPan: true,
+      }).addTo(map);
+      editableMarker.on('dragend', event => {
+        const newLatLng = event.target.getLatLng();
+        emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng });
+      });
     }
-    emit('update:location', { lat, lng })
+    emit('update:location', { lat, lng });
+    emit('update:address', result.display_name);
+    emit('update:structured-address', result.address);
   }
-}
+};
 
 const onMapReady = () => {
-  if (mapRef.value?.leafletObject) {
-    const map = mapRef.value.leafletObject as L.Map
-    if (props.isEditable) {
-      const initialLatLng =
-        props.locations.length > 0
-          ? L.latLng(props.locations[0]!.lat, props.locations[0]!.lng)
-          : L.latLng(center.value[0], center.value[1])
+  if (!mapRef.value?.leafletObject) return;
 
-      editableMarker = L.marker(initialLatLng, {
-        draggable: true,
-        autoPan: true
-      }).addTo(map)
+  const map = mapRef.value.leafletObject as L.Map;
 
-      editableMarker.on('dragend', async (event) => {
-        const newLatLng = event.target.getLatLng()
-        emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng })
-        try {
-          const address = await reverseGeocode(newLatLng.lat, newLatLng.lng)
-          emit('update:address', address)
-        } catch (error) {
-          console.error('Reverse geocoding failed:', error)
-        }
-      })
-
-      map.on('click', async (e: L.LeafletMouseEvent) => {
-        if (editableMarker) {
-          editableMarker.setLatLng(e.latlng)
-          emit('update:location', { lat: e.latlng.lat, lng: e.latlng.lng })
-          try {
-            const address = await reverseGeocode(e.latlng.lat, e.latlng.lng)
-            emit('update:address', address)
-          } catch (error) {
-            console.error('Reverse geocoding failed:', error)
-          }
-        }
-      })
-
-      center.value = [initialLatLng.lat, initialLatLng.lng]
-      zoom.value = 14
-    } else {
-      markerClusterGroup = L.markerClusterGroup()
-      map.addLayer(markerClusterGroup)
-      updateMarkers(props.locations)
-
-      if (props.locations.length > 0) {
-        if (props.locations.length === 1) {
-          const loc = props.locations[0]
-          if (loc && loc.lat != null && loc.lng != null) {
-            center.value = [loc.lat, loc.lng]
-            zoom.value = 13
-            map.setView([loc.lat, loc.lng], 13)
-          }
-        } else {
-          const bounds = L.latLngBounds(props.locations.map((l) => [l.lat, l.lng]))
-          map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 12
-          })
-        }
-      }
-
-      setTimeout(() => {
-        if (mapRef.value?.leafletObject) {
-          const bounds = (mapRef.value.leafletObject as L.Map).getBounds()
-          emit('update:bounds', bounds)
-        }
-      }, 500)
-
-      map.on('moveend', () => {
-        if (mapRef.value?.leafletObject) {
-          const bounds = mapRef.value.leafletObject.getBounds()
-          emit('update:bounds', bounds)
-        }
-      })
-    }
+  if (props.isEditable) {
+    setupEditableMarker(map);
+  } else {
+    setupReadonlyMap(map);
   }
-}
+};
 
 const updateMarkers = (locations: Location[]) => {
   if (markerClusterGroup) {
-    markerClusterGroup.clearLayers()
-    locations.forEach((loc) => {
-      const marker = L.marker([loc.lat, loc.lng])
+    markerClusterGroup.clearLayers();
+    locations.forEach(loc => {
+      const marker = L.marker([loc.lat, loc.lng]);
       const popupContent = loc.address
         ? `<b>${loc.name}</b><br>${loc.address}`
-        : `<b>${loc.name}</b>`
-      marker.bindPopup(popupContent)
+        : `<b>${loc.name}</b>`;
+      marker.bindPopup(popupContent);
 
       marker.on('click', () => {
         if (mapRef.value?.leafletObject) {
-          ;(mapRef.value.leafletObject as L.Map).setView([loc.lat, loc.lng], 18)
+          (mapRef.value.leafletObject as L.Map).setView([loc.lat, loc.lng], DETAIL_ZOOM);
         }
-      })
+      });
 
-      markerClusterGroup?.addLayer(marker)
-    })
+      markerClusterGroup?.addLayer(marker);
+    });
   }
-}
+};
 
 watch(
   () => props.locations,
-  (newLocations) => {
-    const map = mapRef.value?.leafletObject as L.Map
-    if (!map) return
+  newLocations => {
+    const map = mapRef.value?.leafletObject as L.Map;
+    if (!map) return;
 
-    if (!props.isEditable) {
-      updateMarkers(newLocations)
-        if (newLocations.length > 0) {
-          if (newLocations.length === 1) {
-            const loc = newLocations[0]
-            if (loc && loc.lat != null && loc.lng != null) {
-              center.value = [loc.lat, loc.lng]
-              zoom.value = 13
-              if (map) {
-                map.setView([loc.lat, loc.lng], 13)
-              }
-            }
-          } else {
-            const bounds = L.latLngBounds(newLocations.map((l) => [l.lat, l.lng]))
-            map.fitBounds(bounds, {
-              padding: [50, 50],
-              maxZoom: 12
-            })
-          }
-        }
-      } else if (newLocations.length > 0) {
-        const loc = newLocations[0]
-        if (map && loc && loc.lat != null && loc.lng != null) {
-          if (editableMarker) {
-            editableMarker.setLatLng(L.latLng(loc.lat, loc.lng))
-          } else {
-            editableMarker = L.marker([loc.lat, loc.lng], {
-              draggable: true,
-              autoPan: true
-            }).addTo(map)
-            editableMarker.on('dragend', (event) => {
-              const newLatLng = event.target.getLatLng()
-              emit('update:location', { lat: newLatLng.lat, lng: newLatLng.lng })
-            })
-          }
-          center.value = [loc.lat, loc.lng]
-      zoom.value = 14
+    if (props.isEditable) {
+      handleEditableLocationUpdate(map, newLocations);
+    } else {
+      handleReadonlyLocationUpdate(map, newLocations);
     }
-  }
   },
   { deep: true, immediate: true }
-)
+);
 </script>
 
 <style scoped>

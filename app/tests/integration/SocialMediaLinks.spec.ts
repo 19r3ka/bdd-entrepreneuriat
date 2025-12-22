@@ -23,7 +23,7 @@ describe('SocialMediaLinks.vue', () => {
       instagram: 'https://instagram.com/test',
       tiktok: null,
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -34,7 +34,7 @@ describe('SocialMediaLinks.vue', () => {
     expect(wrapper.text()).toContain('https://linkedin.com/in/test');
     expect(wrapper.text()).toContain('https://twitter.com/test');
     expect(wrapper.text()).toContain('https://instagram.com/test');
-    
+
     // Check that labels are displayed
     expect(wrapper.text()).toContain('LinkedIn');
     expect(wrapper.text()).toContain('Twitter');
@@ -49,7 +49,7 @@ describe('SocialMediaLinks.vue', () => {
       instagram: null,
       tiktok: null,
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -78,7 +78,7 @@ describe('SocialMediaLinks.vue', () => {
       instagram: null,
       tiktok: null,
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -96,7 +96,7 @@ describe('SocialMediaLinks.vue', () => {
       instagram: null,
       tiktok: null,
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -106,7 +106,7 @@ describe('SocialMediaLinks.vue', () => {
     // Check for PrimeFlex grid classes
     expect(wrapper.classes()).toContain('grid');
     expect(wrapper.classes()).toContain('formgrid');
-    
+
     // Check for field classes
     expect(wrapper.findAll('.field').length).toBeGreaterThan(0);
   });
@@ -119,7 +119,7 @@ describe('SocialMediaLinks.vue', () => {
       instagram: 'https://instagram.com/test',
       tiktok: 'https://tiktok.com/@test',
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -139,7 +139,7 @@ describe('SocialMediaLinks.vue', () => {
       linkedin: 'https://linkedin.com/in/test',
       twitter: 'https://twitter.com/test',
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -157,7 +157,7 @@ describe('SocialMediaLinks.vue', () => {
       twitter: 'https://twitter.com/test',
       facebook: 'https://facebook.com/test',
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,
@@ -174,7 +174,7 @@ describe('SocialMediaLinks.vue', () => {
     const mockSocialMedia: SocialMedia = {
       linkedin: 'https://linkedin.com/in/test',
     };
-    
+
     const wrapper = mountWithGlobalComponents(SocialMediaLinks, {
       props: {
         socialMedia: mockSocialMedia,

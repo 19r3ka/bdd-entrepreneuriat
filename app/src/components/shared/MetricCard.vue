@@ -1,11 +1,11 @@
 <script setup lang="ts">
-  import Card from 'primevue/card'
+import Card from 'primevue/card';
 
-  defineProps<{
-    title: string
-    icon: string
-    iconClass?: string
-  }>()
+defineProps<{
+  title: string;
+  icon: string;
+  iconClass?: string;
+}>();
 </script>
 
 <template>
@@ -55,18 +55,18 @@
 </template>
 
 <style scoped>
-  /* Ensure proper spacing and remove default Card padding */
-  :deep(.p-card-header) {
-    padding: 0;
-  }
-  :deep(.p-card-body) {
-    padding: 0;
-  }
-  :deep(.p-card-content) {
-    padding: 0;
-  }
-  :deep(.p-card-footer) {
-    padding: 0;
-    border-top: none;
-  }
+/* Ensure proper spacing and remove default Card padding */
+:deep(.p-card-header) {
+  padding: 0;
+}
+:deep(.p-card-body) {
+  padding: 0;
+}
+:deep(.p-card-content) {
+  padding: 0;
+}
+:deep(.p-card-footer) {
+  padding: 0;
+  border-top: none;
+}
 </style>

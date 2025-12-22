@@ -1,33 +1,33 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Chart from 'primevue/chart'
-  import type { SectorData } from '@/types/portfolio'
+import { computed } from 'vue';
+import Chart from 'primevue/chart';
+import type { SectorData } from '@/types/portfolio';
 
-  const props = defineProps<{
-    sectors: SectorData[]
-  }>()
+const props = defineProps<{
+  sectors: SectorData[];
+}>();
 
-  // Chart.js Data Structure
-  const chartData = computed(() => ({
-    labels: props.sectors.map((s) => s.label),
-    datasets: [
-      {
-        data: props.sectors.map((s) => s.value),
-        backgroundColor: props.sectors.map((s) => s.color),
-        borderWidth: 0
-      }
-    ]
-  }))
+// Chart.js Data Structure
+const chartData = computed(() => ({
+  labels: props.sectors.map(s => s.label),
+  datasets: [
+    {
+      data: props.sectors.map(s => s.value),
+      backgroundColor: props.sectors.map(s => s.color),
+      borderWidth: 0,
+    },
+  ],
+}));
 
-  const chartOptions = {
-    cutout: '60%',
-    plugins: { legend: { display: false } } // We build a custom legend
-  }
+const chartOptions = {
+  cutout: '60%',
+  plugins: { legend: { display: false } }, // We build a custom legend
+};
 
-  // Find top sector for the center text
-  const topSector = computed(() => {
-    return [...props.sectors].sort((a, b) => b.value - a.value)[0]
-  })
+// Find top sector for the center text
+const topSector = computed(() => {
+  return [...props.sectors].sort((a, b) => b.value - a.value)[0];
+});
 </script>
 
 <template>

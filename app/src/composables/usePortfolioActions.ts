@@ -1,19 +1,31 @@
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import type { Business } from '@/types/business'
-import type { Support } from '@/types/monitoring-evaluation/Support'
-import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { Business } from '@/types/business';
+import type { Support } from '@/types/monitoring-evaluation/Support';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
 export interface ActionItem {
-  id: string
-  type: 'urgent' | 'opportunity'
-  title: string
-  description: string
-  entityId?: string
-  entityType?: 'business' | 'support' | 'quickwin'
-  date?: string
-  priority: 'high' | 'medium' | 'low'
+  id: string;
+  type: 'urgent' | 'opportunity';
+  title: string;
+  description: string;
+  entityId?: string;
+  entityType?: 'business' | 'support' | 'quickwin';
+  date?: string;
+  priority: 'high' | 'medium' | 'low';
 }
+
+/**
+ *
+ */
+// Constants for time calculations and thresholds
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const INACTIVITY_THRESHOLD_DAYS = 90;
+const MAX_URGENT_ACTIONS = 5;
+const SCALING_THRESHOLD = 2.5;
+const MAX_OPPORTUNITIES = 5;
 
 /**
  *
@@ -23,24 +35,27 @@ export function usePortfolioActions(
   supports: () => Support[],
   quickWins: () => QuickWin[]
 ) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const urgentActions = computed<ActionItem[]>(() => {
-    const actions: ActionItem[] = []
-    const now = new Date()
+    const actions: ActionItem[] = [];
+    const now = new Date();
 
     // 1. Businesses with no recent activity (mock logic for now, using registration date as proxy)
     // In a real app, we'd check the last activity log or support date
-    businesses().forEach((b) => {
-      if (!b.registrationDate) return
-      const regDate = new Date(b.registrationDate)
-      const diffDays = Math.floor((now.getTime() - regDate.getTime()) / (1000 * 60 * 60 * 24))
+    businesses().forEach(b => {
+      if (!b.registrationDate) return;
+      const regDate = new Date(b.registrationDate);
+      const diffDays = Math.floor(
+        (now.getTime() - regDate.getTime()) /
+          (1000 * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY)
+      );
 
-      // If registered > 90 days ago and no support/quick wins (simplified check)
-      const hasSupport = supports().some((s) => s.businessId === b.id)
-      const hasQuickWin = quickWins().some((q) => q.businessId === b.id)
+      // If registered > INACTIVITY_THRESHOLD_DAYS days ago and no support/quick wins (simplified check)
+      const hasSupport = supports().some(s => s.businessId === b.id);
+      const hasQuickWin = quickWins().some(q => q.businessId === b.id);
 
-      if (diffDays > 90 && !hasSupport && !hasQuickWin) {
+      if (diffDays > INACTIVITY_THRESHOLD_DAYS && !hasSupport && !hasQuickWin) {
         actions.push({
           id: `inactive-${b.id}`,
           type: 'urgent',
@@ -48,13 +63,13 @@ export function usePortfolioActions(
           description: t('pages.dashboard.actions.inactiveBusiness.description', { name: b.name }),
           entityId: b.id,
           entityType: 'business',
-          priority: 'high'
-        })
+          priority: 'high',
+        });
       }
-    })
+    });
 
     // 2. Incomplete Maturity Assessments (Mock: businesses with no maturity levels)
-    businesses().forEach((b) => {
+    businesses().forEach(b => {
       if (!b.maturityLevels || Object.keys(b.maturityLevels).length === 0) {
         actions.push({
           id: `no-maturity-${b.id}`,
@@ -63,43 +78,43 @@ export function usePortfolioActions(
           description: t('pages.dashboard.actions.missingAssessment.description', { name: b.name }),
           entityId: b.id,
           entityType: 'business',
-          priority: 'medium'
-        })
+          priority: 'medium',
+        });
       }
-    })
+    });
 
-    return actions.slice(0, 5) // Limit to top 5
-  })
+    return actions.slice(0, MAX_URGENT_ACTIONS); // Limit to top MAX_URGENT_ACTIONS
+  });
 
   const opportunities = computed<ActionItem[]>(() => {
-    const opps: ActionItem[] = []
+    const opps: ActionItem[] = [];
 
     // 1. Ready for Scaling (High maturity but low support count?)
-    businesses().forEach((b) => {
-      if (!b.maturityLevels) return
-      const levels = Object.values(b.maturityLevels) as number[]
-      if (levels.length === 0) return
-      const avg = levels.reduce((a, b) => a + b, 0) / levels.length
+    businesses().forEach(b => {
+      if (!b.maturityLevels) return;
+      const levels = Object.values(b.maturityLevels) as number[];
+      if (levels.length === 0) return;
+      const avg = levels.reduce((a, b) => a + b, 0) / levels.length;
 
-      if (avg > 2.5) {
+      if (avg > SCALING_THRESHOLD) {
         opps.push({
           id: `scaling-${b.id}`,
           type: 'opportunity',
           title: t('pages.dashboard.actions.readyForScaling.title'),
           description: t('pages.dashboard.actions.readyForScaling.description', {
             name: b.name,
-            avg: avg.toFixed(1)
+            avg: avg.toFixed(1),
           }),
           entityId: b.id,
           entityType: 'business',
-          priority: 'high'
-        })
+          priority: 'high',
+        });
       }
-    })
+    });
 
     // 2. High Momentum (Many Quick Wins)
-    businesses().forEach((b) => {
-      const wins = quickWins().filter((q) => q.businessId === b.id)
+    businesses().forEach(b => {
+      const wins = quickWins().filter(q => q.businessId === b.id);
       if (wins.length >= 2) {
         opps.push({
           id: `momentum-${b.id}`,
@@ -107,23 +122,23 @@ export function usePortfolioActions(
           title: t('pages.dashboard.actions.highMomentum.title'),
           description: t('pages.dashboard.actions.highMomentum.description', {
             name: b.name,
-            count: wins.length
+            count: wins.length,
           }),
           entityId: b.id,
           entityType: 'business',
-          priority: 'medium'
-        })
+          priority: 'medium',
+        });
       }
-    })
+    });
 
     // 2. Quick Wins pending documentation (Mock: just a placeholder logic)
     // In reality, maybe check for "draft" quick wins if that status existed
 
-    return opps.slice(0, 5)
-  })
+    return opps.slice(0, MAX_OPPORTUNITIES);
+  });
 
   return {
     urgentActions,
-    opportunities
-  }
+    opportunities,
+  };
 }

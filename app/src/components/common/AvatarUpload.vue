@@ -1,42 +1,42 @@
 <script setup lang="ts">
-  import { computed, toRef } from 'vue'
-  import Button from 'primevue/button'
-  import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
-  import { useImageResolver } from '@/composables/useImageResolver'
+import { computed, toRef } from 'vue';
+import Button from 'primevue/button';
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload';
+import { useImageResolver } from '@/composables/useImageResolver';
 
-  const props = defineProps<{
-    modelValue: string | File | null | undefined
-    label?: string
-    altText?: string
-    hasError?: boolean
-    errorMessage?: string
-  }>()
+const props = defineProps<{
+  modelValue: string | File | null | undefined;
+  label?: string;
+  altText?: string;
+  hasError?: boolean;
+  errorMessage?: string;
+}>();
 
-  const emit = defineEmits<{
-    (e: 'update:modelValue', value: File | null): void
-  }>()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: File | null): void;
+}>();
 
-  const chooseLabel = computed(() => props.label || 'Choose Avatar')
+const chooseLabel = computed(() => props.label || 'Choose Avatar');
 
-  const modelValueRef = toRef(props, 'modelValue')
-  const { resolvedSrc: previewSrc } = useImageResolver(modelValueRef)
+const modelValueRef = toRef(props, 'modelValue');
+const { resolvedSrc: previewSrc } = useImageResolver(modelValueRef);
 
-  /**
-   *
-   */
-  function onFileSelect(event: FileUploadSelectEvent) {
-    const file = event.files[0]
-    if (file) {
-      emit('update:modelValue', file)
-    }
+/**
+ *
+ */
+function onFileSelect(event: FileUploadSelectEvent) {
+  const file = event.files[0];
+  if (file) {
+    emit('update:modelValue', file);
   }
+}
 
-  /**
-   *
-   */
-  function clearAvatar() {
-    emit('update:modelValue', null)
-  }
+/**
+ *
+ */
+function clearAvatar() {
+  emit('update:modelValue', null);
+}
 </script>
 
 <template>

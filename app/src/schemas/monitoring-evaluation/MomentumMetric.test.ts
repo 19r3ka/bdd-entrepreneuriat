@@ -1,6 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { MomentumMetricSchema } from './MomentumMetric'
-import { z } from 'zod'
+import { describe, it, expect } from 'vitest';
+import { MomentumMetricSchema } from './MomentumMetric';
 
 describe('MomentumMetricSchema', () => {
   const validMomentumMetric = {
@@ -12,8 +11,10 @@ describe('MomentumMetricSchema', () => {
     rbmLevel: 'outcome',
     indicators: [
       {
+        id: '123e4567-e89b-12d3-a456-426614174002',
         name: 'Monthly Revenue',
         unit: 'currency',
+        type: 'momentum',
         baseline: 5000,
         target: 7500,
         currency: 'USD',
@@ -21,60 +22,64 @@ describe('MomentumMetricSchema', () => {
           {
             value: 6000,
             asOf: '2023-06-15',
-            currency: 'USD'
-          }
-        ]
-      }
+            currency: 'USD',
+          },
+        ],
+      },
     ],
     evidenceIds: ['123e4567-e89b-12d3-a456-426614174003', '123e4567-e89b-12d3-a456-426614174004'],
     contributionNarrative: 'Increased revenue through new marketing channel',
     createdAt: '2023-01-01T00:00:00Z',
     createdBy: 'test-user',
     updatedAt: '2023-01-01T00:00:00Z',
-    updatedBy: 'test-user'
-  }
+    updatedBy: 'test-user',
+  };
 
   it('should accept valid momentum metric data', () => {
-    const result = MomentumMetricSchema.safeParse(validMomentumMetric)
-    expect(result.success).toBe(true)
-  })
+    const result = MomentumMetricSchema.safeParse(validMomentumMetric);
+    expect(result.success).toBe(true);
+  });
 
   it('should reject momentum metric with invalid UUIDs', () => {
     const invalidMomentumMetric = {
       ...validMomentumMetric,
-      momentumMetricId: 'invalid-uuid'
-    }
-    const result = MomentumMetricSchema.safeParse(invalidMomentumMetric)
-    expect(result.success).toBe(false)
-  })
+      momentumMetricId: 'invalid-uuid',
+    };
+    const result = MomentumMetricSchema.safeParse(invalidMomentumMetric);
+    expect(result.success).toBe(false);
+  });
 
   it('should reject momentum metric with missing required fields', () => {
     const incompleteMomentumMetric = {
       ...validMomentumMetric,
-      title: '' // Missing required field
-    }
-    const result = MomentumMetricSchema.safeParse(incompleteMomentumMetric)
-    expect(result.success).toBe(false)
-    expect(result.error!.issues[0]!.message).toContain('Too small') // Updated to match actual error message
-  })
+      title: '', // Missing required field
+    };
+    const result = MomentumMetricSchema.safeParse(incompleteMomentumMetric);
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toMatch(
+      /required|requis|too small|validation\.required/i
+    );
+  });
 
   it('should require currency code when unit is currency', () => {
     const momentumMetricWithInvalidIndicator = {
       ...validMomentumMetric,
       indicators: [
         {
+          id: '123e4567-e89b-12d3-a456-426614174002',
           name: 'Monthly Revenue',
-          unit: 'currency', // Currency unit requires currency code
+          unit: 'currency',
+          type: 'momentum',
           baseline: 5000,
-          target: 7500
+          target: 7500,
           // Missing currency field
-        }
-      ]
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidIndicator)
-    expect(result.success).toBe(false)
-    expect(result.error!.issues[0]!.message).toContain("Indicators with unit='currency' must include a 3-letter currency code.")
-  })
+        },
+      ],
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidIndicator);
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toMatch(/currency code|unit='currency'/i);
+  });
 
   it('should accept momentum metric with valid category values', () => {
     const categories = [
@@ -85,40 +90,40 @@ describe('MomentumMetricSchema', () => {
       'sustainability',
       'resilience',
       'digital_adoption',
-      'market_integration'
-    ]
+      'market_integration',
+    ];
 
     for (const category of categories) {
       const momentumMetric = {
         ...validMomentumMetric,
-        category: category
-      }
-      const result = MomentumMetricSchema.safeParse(momentumMetric)
-      expect(result.success).toBe(true)
+        category: category,
+      };
+      const result = MomentumMetricSchema.safeParse(momentumMetric);
+      expect(result.success).toBe(true);
     }
-  })
+  });
 
   it('should reject momentum metric with invalid category', () => {
     const invalidMomentumMetric = {
       ...validMomentumMetric,
-      category: 'invalid_category' as any
-    }
-    const result = MomentumMetricSchema.safeParse(invalidMomentumMetric)
-    expect(result.success).toBe(false)
-  })
+      category: 'invalid_category' as any,
+    };
+    const result = MomentumMetricSchema.safeParse(invalidMomentumMetric);
+    expect(result.success).toBe(false);
+  });
 
   it('should accept momentum metric with valid dimension values', () => {
-    const dimensions = ['Digital', 'Finance', 'Market', 'Green', 'Formalization']
+    const dimensions = ['Digital', 'Finance', 'Market', 'Green', 'Formalization'];
 
     for (const dimension of dimensions) {
       const momentumMetric = {
         ...validMomentumMetric,
-        dimension: dimension
-      }
-      const result = MomentumMetricSchema.safeParse(momentumMetric)
-      expect(result.success).toBe(true)
+        dimension: dimension,
+      };
+      const result = MomentumMetricSchema.safeParse(momentumMetric);
+      expect(result.success).toBe(true);
     }
-  })
+  });
 
   it('should accept momentum metric with optional fields omitted', () => {
     const momentumMetricWithoutOptionals = {
@@ -126,11 +131,11 @@ describe('MomentumMetricSchema', () => {
       businessId: '123e4567-e89b-12d3-a456-426614174001',
       title: 'Revenue Growth',
       category: 'performance',
-      rbmLevel: 'outcome' // rbmLevel has a default value
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithoutOptionals)
-    expect(result.success).toBe(true)
-  })
+      rbmLevel: 'outcome', // rbmLevel has a default value
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithoutOptionals);
+    expect(result.success).toBe(true);
+  });
 
   it('should accept momentum metric with complex indicators and readings', () => {
     const complexMomentumMetric = {
@@ -140,8 +145,10 @@ describe('MomentumMetricSchema', () => {
       category: 'performance',
       indicators: [
         {
+          id: '123e4567-e89b-12d3-a456-426614174002',
           name: 'New Customers',
           unit: 'count',
+          type: 'momentum',
           baseline: 100,
           target: 200,
           readings: [
@@ -149,19 +156,19 @@ describe('MomentumMetricSchema', () => {
               value: 120,
               asOf: '2023-04-15',
               disagg: {
-                gender: 'female',
+                gender: 'Woman',
                 ageBand: '25-34',
                 disability: false,
-                location: 'Urban'
-              }
-            }
-          ]
-        }
-      ]
-    }
-    const result = MomentumMetricSchema.safeParse(complexMomentumMetric)
-    expect(result.success).toBe(true)
-  })
+                location: 'Urban',
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const result = MomentumMetricSchema.safeParse(complexMomentumMetric);
+    expect(result.success).toBe(true);
+  });
 
   it('should validate date format in indicator readings', () => {
     const momentumMetricWithInvalidDate = {
@@ -176,15 +183,15 @@ describe('MomentumMetricSchema', () => {
           readings: [
             {
               value: 6000,
-              asOf: 'invalid-date' // Invalid date format
-            }
-          ]
-        }
-      ]
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidDate)
-    expect(result.success).toBe(false)
-  })
+              asOf: 'invalid-date', // Invalid date format
+            },
+          ],
+        },
+      ],
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidDate);
+    expect(result.success).toBe(false);
+  });
 
   it('should validate currency code format', () => {
     const momentumMetricWithInvalidCurrency = {
@@ -195,29 +202,32 @@ describe('MomentumMetricSchema', () => {
           unit: 'currency',
           baseline: 5000,
           target: 7500,
-          currency: 'US' // Invalid currency code - should be 3 letters
-        }
-      ]
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidCurrency)
-    expect(result.success).toBe(false)
-  })
+          currency: 'US', // Invalid currency code - should be 3 letters
+        },
+      ],
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidCurrency);
+    expect(result.success).toBe(false);
+  });
 
   it('should validate UUID format in evidenceIds', () => {
     const momentumMetricWithInvalidEvidenceIds = {
       ...validMomentumMetric,
-      evidenceIds: ['invalid-uuid']
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidEvidenceIds)
-    expect(result.success).toBe(false)
-  })
+      evidenceIds: ['invalid-uuid'],
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithInvalidEvidenceIds);
+    expect(result.success).toBe(false);
+  });
+
+  const MAX_NARRATIVE_LENGTH = 500;
+  const EXCEEDING_NARRATIVE_LENGTH = MAX_NARRATIVE_LENGTH + 1; // 501
 
   it('should respect max length for contributionNarrative', () => {
     const momentumMetricWithLongNarrative = {
       ...validMomentumMetric,
-      contributionNarrative: 'a'.repeat(501) // Exceeds max length of 500
-    }
-    const result = MomentumMetricSchema.safeParse(momentumMetricWithLongNarrative)
-    expect(result.success).toBe(false)
-  })
-})
+      contributionNarrative: 'a'.repeat(EXCEEDING_NARRATIVE_LENGTH), // Exceeds max length of MAX_NARRATIVE_LENGTH
+    };
+    const result = MomentumMetricSchema.safeParse(momentumMetricWithLongNarrative);
+    expect(result.success).toBe(false);
+  });
+});

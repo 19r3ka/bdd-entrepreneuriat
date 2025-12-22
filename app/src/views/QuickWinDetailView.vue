@@ -290,206 +290,206 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import { useI18n } from 'vue-i18n'
-  import Button from 'primevue/button'
-  import Tag from 'primevue/tag'
-  import DataTable from 'primevue/datatable'
-  import Column from 'primevue/column'
-  import Tabs from 'primevue/tabs'
-  import TabList from 'primevue/tablist'
-  import Tab from 'primevue/tab'
-  import TabPanels from 'primevue/tabpanels'
-  import TabPanel from 'primevue/tabpanel'
-  import Card from 'primevue/card'
-  import QuickWinHeroCard from '@/components/monitoring-evaluation/QuickWinHeroCard.vue'
-  import EvidenceCard from '@/components/common/EvidenceCard.vue'
-  import DetailViewFooter from '@/components/common/DetailViewFooter.vue'
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
+import Tag from 'primevue/tag';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import Card from 'primevue/card';
+import QuickWinHeroCard from '@/components/monitoring-evaluation/QuickWinHeroCard.vue';
+import EvidenceCard from '@/components/common/EvidenceCard.vue';
+import DetailViewFooter from '@/components/common/DetailViewFooter.vue';
 
-  const { t } = useI18n()
-  import { useQuickWinStore } from '@/stores/useQuickWinStore'
-  import { useOutputIndicatorStore } from '@/stores/useOutputIndicatorStore'
-  import { db } from '@/services/local-db'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
-  import type { OutputIndicator } from '@/types/monitoring-evaluation/OutputIndicator'
+const { t } = useI18n();
+import { useQuickWinStore } from '@/stores/useQuickWinStore';
+import { useOutputIndicatorStore } from '@/stores/useOutputIndicatorStore';
+import { db } from '@/services/local-db';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
+import type { OutputIndicator } from '@/types/monitoring-evaluation/OutputIndicator';
 
-  import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore'
-  import MomentumMetricForm from '@/components/monitoring-evaluation/MomentumMetricForm.vue'
-  import Dialog from 'primevue/dialog'
-  import { useToast } from 'primevue/usetoast'
+import { useMomentumMetricStore } from '@/stores/useMomentumMetricStore';
+import MomentumMetricForm from '@/components/monitoring-evaluation/MomentumMetricForm.vue';
+import Dialog from 'primevue/dialog';
+import { useToast } from 'primevue/usetoast';
 
-  const route = useRoute()
-  const router = useRouter()
-  const store = useQuickWinStore()
-  const indicatorStore = useOutputIndicatorStore()
-  const momentumMetricStore = useMomentumMetricStore()
-  const toast = useToast()
+const route = useRoute();
+const router = useRouter();
+const store = useQuickWinStore();
+const indicatorStore = useOutputIndicatorStore();
+const momentumMetricStore = useMomentumMetricStore();
+const toast = useToast();
 
-  const quickWinId = route.params.id as string
-  const quickWin = ref<QuickWin | undefined>(undefined)
-  const business = ref<any>(undefined)
-  const support = ref<any>(undefined)
-  const loading = ref(true)
-  const indicatorsMap = ref<Record<string, OutputIndicator>>({})
-  const fileInput = ref<HTMLInputElement | null>(null)
+const quickWinId = route.params.id as string;
+const quickWin = ref<QuickWin | undefined>(undefined);
+const business = ref<any>(undefined);
+const support = ref<any>(undefined);
+const loading = ref(true);
+const indicatorsMap = ref<Record<string, OutputIndicator>>({});
+const fileInput = ref<HTMLInputElement | null>(null);
 
-  // Momentum Metrics State
-  const isMomentumFormVisible = ref(false)
+// Momentum Metrics State
+const isMomentumFormVisible = ref(false);
 
-  // Mock evidence list (placeholder for future implementation)
-  const evidenceList = ref<any[]>([])
+// Mock evidence list (placeholder for future implementation)
+const evidenceList = ref<any[]>([]);
 
-  onMounted(async () => {
-    try {
-      quickWin.value = await store.getQuickWinById(quickWinId)
+onMounted(async () => {
+  try {
+    quickWin.value = await store.getQuickWinById(quickWinId);
 
-      if (quickWin.value) {
-        // Load business
-        business.value = await db.businesses.get(quickWin.value.businessId)
+    if (quickWin.value) {
+      // Load business
+      business.value = await db.businesses.get(quickWin.value.businessId);
 
-        // Load support if exists
-        if (quickWin.value.supportBoostId) {
-          support.value = await db.supports.get(quickWin.value.supportBoostId)
-        }
+      // Load support if exists
+      if (quickWin.value.supportBoostId) {
+        support.value = await db.supports.get(quickWin.value.supportBoostId);
+      }
 
-        // Load indicators
-        for (const val of quickWin.value.indicatorValues || []) {
-          const ind = await indicatorStore.getIndicatorById(val.indicatorId)
-          if (ind) {
-            indicatorsMap.value[ind.id] = ind
-          }
+      // Load indicators
+      for (const val of quickWin.value.indicatorValues || []) {
+        const ind = await indicatorStore.getIndicatorById(val.indicatorId);
+        if (ind) {
+          indicatorsMap.value[ind.id] = ind;
         }
       }
-    } catch (error) {
-      console.error('Failed to load quick win', error)
-    } finally {
-      loading.value = false
     }
-  })
-
-  const goBack = () => {
-    router.back()
+  } catch (error) {
+    console.error('Failed to load quick win', error);
+  } finally {
+    loading.value = false;
   }
+});
 
-  const editQuickWin = () => {
-    router.push(`/quick-wins/${quickWinId}/edit`)
+const goBack = () => {
+  router.back();
+};
+
+const editQuickWin = () => {
+  router.push(`/quick-wins/${quickWinId}/edit`);
+};
+
+const goToBusiness = () => {
+  if (business.value) {
+    router.push(`/businesses/${business.value.id}`);
   }
+};
 
-  const goToBusiness = () => {
-    if (business.value) {
-      router.push(`/businesses/${business.value.id}`)
-    }
+const goToSupport = () => {
+  if (quickWin.value?.supportBoostId) {
+    router.push(`/supports/${quickWin.value.supportBoostId}`);
   }
+};
 
-  const goToSupport = () => {
-    if (quickWin.value?.supportBoostId) {
-      router.push(`/supports/${quickWin.value.supportBoostId}`)
-    }
-  }
+const handleDelete = async () => {
+  if (!quickWin.value) return;
 
-  const handleDelete = async () => {
-    if (!quickWin.value) return
-
-    if (confirm('Are you sure you want to delete this Quick Win? This action cannot be undone.')) {
-      try {
-        await store.deleteQuickWin(quickWin.value.id)
-        router.push('/quick-wins')
-      } catch (error) {
-        console.error('Failed to delete quick win', error)
-      }
-    }
-  }
-
-  const formatValue = (val?: number | string | boolean) => {
-    if (val === undefined || val === null) return '-'
-    if (typeof val === 'boolean') return val ? 'Yes' : 'No'
-    return val
-  }
-
-  const getIndicatorName = (id: string) => indicatorsMap.value[id]?.name || 'Unknown Indicator'
-
-  // Evidence handling (placeholder)
-  const handleAddEvidence = () => {
-    triggerFileUpload()
-  }
-
-  const triggerFileUpload = () => {
-    fileInput.value?.click()
-  }
-
-  const handleFileSelect = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (target.files) {
-      handleFiles(Array.from(target.files))
-    }
-  }
-
-  const handleFileDrop = (event: DragEvent) => {
-    if (event.dataTransfer?.files) {
-      handleFiles(Array.from(event.dataTransfer.files))
-    }
-  }
-
-  const handleFiles = (files: File[]) => {
-    // Placeholder for file upload logic
-    console.log('Files to upload:', files)
-    // TODO: Implement actual file upload and evidence creation
-  }
-
-  const handleDownloadEvidence = (evidence: any) => {
-    // Placeholder for download logic
-    console.log('Download evidence:', evidence)
-    // TODO: Implement actual download logic
-  }
-
-  // Momentum Metrics Handlers
-  const openMomentumForm = () => {
-    isMomentumFormVisible.value = true
-  }
-
-  const handleMomentumSubmit = async (data: any) => {
+  if (confirm('Are you sure you want to delete this Quick Win? This action cannot be undone.')) {
     try {
-      await momentumMetricStore.addMetric(data)
-      toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Outcome metric created successfully',
-        life: 3000
-      })
-      isMomentumFormVisible.value = false
-      // Optionally refresh or navigate
+      await store.deleteQuickWin(quickWin.value.id);
+      router.push('/quick-wins');
     } catch (error) {
-      console.error(error)
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save outcome metric',
-        life: 3000
-      })
+      console.error('Failed to delete quick win', error);
     }
   }
+};
+
+const formatValue = (val?: number | string | boolean) => {
+  if (val === undefined || val === null) return '-';
+  if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+  return val;
+};
+
+const getIndicatorName = (id: string) => indicatorsMap.value[id]?.name || 'Unknown Indicator';
+
+// Evidence handling (placeholder)
+const handleAddEvidence = () => {
+  triggerFileUpload();
+};
+
+const triggerFileUpload = () => {
+  fileInput.value?.click();
+};
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files) {
+    handleFiles(Array.from(target.files));
+  }
+};
+
+const handleFileDrop = (event: DragEvent) => {
+  if (event.dataTransfer?.files) {
+    handleFiles(Array.from(event.dataTransfer.files));
+  }
+};
+
+const handleFiles = (files: File[]) => {
+  // Placeholder for file upload logic
+  console.log('Files to upload:', files);
+  // TODO: Implement actual file upload and evidence creation
+};
+
+const handleDownloadEvidence = (evidence: any) => {
+  // Placeholder for download logic
+  console.log('Download evidence:', evidence);
+  // TODO: Implement actual download logic
+};
+
+// Momentum Metrics Handlers
+const openMomentumForm = () => {
+  isMomentumFormVisible.value = true;
+};
+
+const handleMomentumSubmit = async (data: any) => {
+  try {
+    await momentumMetricStore.addMetric(data);
+    toast.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Outcome metric created successfully',
+      life: 3000,
+    });
+    isMomentumFormVisible.value = false;
+    // Optionally refresh or navigate
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to save outcome metric',
+      life: 3000,
+    });
+  }
+};
 </script>
 
 <style scoped>
-  .quick-win-detail-view :deep(.p-datatable .p-datatable-thead > tr > th) {
-    background-color: var(--surface-50);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    color: var(--text-color-secondary);
-  }
+.quick-win-detail-view :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: var(--surface-50);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--text-color-secondary);
+}
 
-  .quick-win-detail-view :deep(.p-datatable .p-datatable-tbody > tr) {
-    background-color: var(--surface-0);
-  }
+.quick-win-detail-view :deep(.p-datatable .p-datatable-tbody > tr) {
+  background-color: var(--surface-0);
+}
 
-  .quick-win-detail-view :deep(.p-datatable .p-datatable-tbody > tr:hover) {
-    background-color: var(--surface-50);
-  }
+.quick-win-detail-view :deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: var(--surface-50);
+}
 
-  .hidden {
-    display: none;
-  }
+.hidden {
+  display: none;
+}
 </style>

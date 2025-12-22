@@ -92,122 +92,122 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import Card from 'primevue/card'
-  import Tag from 'primevue/tag'
-  import Button from 'primevue/button'
-  import type { Support } from '@/types/monitoring-evaluation/Support'
-  import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Card from 'primevue/card';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import type { Support } from '@/types/monitoring-evaluation/Support';
+import type { QuickWin } from '@/types/monitoring-evaluation/QuickWin';
 
-  const { d } = useI18n()
+const { d } = useI18n();
 
-  const props = defineProps<{
-    activity: {
-      type: 'support' | 'quickWin'
-      data: Support | QuickWin
-      date: string
-    }
-    showBusiness?: boolean
-  }>()
+const props = defineProps<{
+  activity: {
+    type: 'support' | 'quickWin';
+    data: Support | QuickWin;
+    date: string;
+  };
+  showBusiness?: boolean;
+}>();
 
-  defineEmits<{
-    (e: 'view'): void
-    (e: 'edit'): void
-  }>()
+defineEmits<{
+  (e: 'view'): void;
+  (e: 'edit'): void;
+}>();
 
-  const type = computed(() => props.activity.type)
-  const data = computed(() => props.activity.data)
+const type = computed(() => props.activity.type);
+const data = computed(() => props.activity.data);
 
-  const title = computed(() => {
-    if (type.value === 'support') return (data.value as Support).title
-    return (data.value as QuickWin).title
-  })
+const title = computed(() => {
+  if (type.value === 'support') return (data.value as Support).title;
+  return (data.value as QuickWin).title;
+});
 
-  const date = computed(() => props.activity.date)
+const date = computed(() => props.activity.date);
 
-  const description = computed(() => {
-    if (type.value === 'support') return (data.value as Support).notes || ''
-    return (data.value as QuickWin).resultSummary
-  })
+const description = computed(() => {
+  if (type.value === 'support') return (data.value as Support).notes || '';
+  return (data.value as QuickWin).resultSummary;
+});
 
-  const businessName = computed(() => {
-    // Assuming business name might be available in data or handled by parent if needed
-    // For now, returning empty as it wasn't passed down explicitly in previous components
-    // If needed, we can fetch it or pass it down.
-    // The previous QuickWinCard had logic for this but relied on `quickWin.businessId`.
-    // We'll keep it simple for now.
-    return ''
-  })
+const businessName = computed(() => {
+  // Assuming business name might be available in data or handled by parent if needed
+  // For now, returning empty as it wasn't passed down explicitly in previous components
+  // If needed, we can fetch it or pass it down.
+  // The previous QuickWinCard had logic for this but relied on `quickWin.businessId`.
+  // We'll keep it simple for now.
+  return '';
+});
 
-  const linkedItem = computed(() => {
-    if (type.value === 'quickWin' && (data.value as QuickWin).supportBoostId) {
-      return 'Linked Support' // Or translate
-    }
-    return null
-  })
-
-  const color = computed(() => {
-    if (type.value === 'quickWin') return 'cyan'
-    return 'purple' // Default for support
-  })
-
-  // QuickWin specific
-  const indicatorCount = computed(() => {
-    if (type.value === 'quickWin') return (data.value as QuickWin).indicatorValues?.length || 0
-    return undefined
-  })
-
-  const tags = computed(() => {
-    if (type.value === 'quickWin') return (data.value as QuickWin).tags || []
-    return []
-  })
-
-  // Support specific
-  const boostType = computed(() => {
-    if (type.value === 'support') return (data.value as Support).boostType
-    return undefined
-  })
-
-  const quantity = computed(() => {
-    if (type.value === 'support') {
-      const q = (data.value as Support).quantity
-      if (!q || !q.value) return undefined
-      const unit = q.unit === 'currency' ? q.currency : q.unit
-      return `${q.value} ${unit || ''}`
-    }
-    return undefined
-  })
-
-  // Common
-  const genderMarker = computed(() => data.value.genderMarker)
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return ''
-    return d(new Date(dateStr), 'short')
+const linkedItem = computed(() => {
+  if (type.value === 'quickWin' && (data.value as QuickWin).supportBoostId) {
+    return 'Linked Support'; // Or translate
   }
+  return null;
+});
 
-  const truncate = (text: string, length: number) => {
-    if (!text || text.length <= length) return text
-    return text.substring(0, length) + '...'
-  }
+const color = computed(() => {
+  if (type.value === 'quickWin') return 'cyan';
+  return 'purple'; // Default for support
+});
 
-  const formatType = (type: string) => {
-    return type
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+// QuickWin specific
+const indicatorCount = computed(() => {
+  if (type.value === 'quickWin') return (data.value as QuickWin).indicatorValues?.length || 0;
+  return undefined;
+});
+
+const tags = computed(() => {
+  if (type.value === 'quickWin') return (data.value as QuickWin).tags || [];
+  return [];
+});
+
+// Support specific
+const boostType = computed(() => {
+  if (type.value === 'support') return (data.value as Support).boostType;
+  return undefined;
+});
+
+const quantity = computed(() => {
+  if (type.value === 'support') {
+    const q = (data.value as Support).quantity;
+    if (!q || !q.value) return undefined;
+    const unit = q.unit === 'currency' ? q.currency : q.unit;
+    return `${q.value} ${unit || ''}`;
   }
+  return undefined;
+});
+
+// Common
+const genderMarker = computed(() => data.value.genderMarker);
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  return d(new Date(dateStr), 'short');
+};
+
+const truncate = (text: string, length: number) => {
+  if (!text || text.length <= length) return text;
+  return text.substring(0, length) + '...';
+};
+
+const formatType = (type: string) => {
+  return type
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 </script>
 
 <style scoped>
-  /* Border colors are handled by utility classes */
-  .activity-card-hover {
-    transition: all 0.2s ease-in-out;
-  }
+/* Border colors are handled by utility classes */
+.activity-card-hover {
+  transition: all 0.2s ease-in-out;
+}
 
-  .activity-card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-  }
+.activity-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
 </style>

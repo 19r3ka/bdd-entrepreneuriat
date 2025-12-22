@@ -1,45 +1,49 @@
 <script setup lang="ts">
-  import { computed, toRef, ref } from 'vue'
-  import { MaturityDimensions, type MaturityDimension } from '@/constants/maturityCatalog'
-  import type { Business } from '@/types/business'
-  import { useMaturityCalculations } from '@/composables/useMaturityCalculations'
-  import Card from 'primevue/card'
-  import MaturityRadarChart from '@/components/shared/MaturityRadarChart.vue'
-  import AdvisoryItem from '@/components/dashboard/AdvisoryItem.vue'
-  import BusinessListModal from '@/components/dashboard/BusinessListModal.vue'
+import { computed, toRef, ref } from 'vue';
+import { MaturityDimensions, type MaturityDimension } from '@/constants/maturityCatalog';
+import type { Business } from '@/types/business';
+import { useMaturityCalculations } from '@/composables/useMaturityCalculations';
+import Card from 'primevue/card';
+import MaturityRadarChart from '@/components/shared/MaturityRadarChart.vue';
+import AdvisoryItem from '@/components/dashboard/AdvisoryItem.vue';
+import BusinessListModal from '@/components/dashboard/BusinessListModal.vue';
 
-  const props = defineProps<{
-    businesses: Business[]
-  }>()
+const props = defineProps<{
+  businesses: Business[];
+}>();
 
-  // Use shared composable for maturity calculations
-  const { avgMaturityLevels, milestoneDistribution, nextMilestoneAdvisories } =
-    useMaturityCalculations(toRef(props, 'businesses'))
+// Use shared composable for maturity calculations
+const { avgMaturityLevels, milestoneDistribution, nextMilestoneAdvisories } =
+  useMaturityCalculations(toRef(props, 'businesses'));
 
-  // Modal state
-  const showModal = ref(false)
-  const selectedAdvisory = ref<{
-    dimension: MaturityDimension
-    level: number
-    nextLevel: number
-    businesses: Business[]
-  } | null>(null)
+// Modal state
+const showModal = ref(false);
+const selectedAdvisory = ref<{
+  dimension: MaturityDimension;
+  level: number;
+  nextLevel: number;
+  businesses: Business[];
+} | null>(null);
 
-  // Advisory list from real calculations (limit to top 5 for UI)
-  const advisoryList = computed(() => {
-    return nextMilestoneAdvisories.value.slice(0, 5)
-  })
+const MAX_DISPLAYED_ADVISORIES = 5;
 
-  const openBusinessModal = (advisory: (typeof nextMilestoneAdvisories.value)[0]) => {
-    selectedAdvisory.value = advisory
-    showModal.value = true
-  }
+// Advisory list from real calculations (limit to top 5 for UI)
+const advisoryList = computed(() => {
+  return nextMilestoneAdvisories.value.slice(0, MAX_DISPLAYED_ADVISORIES);
+});
+
+const openBusinessModal = (advisory: (typeof nextMilestoneAdvisories.value)[0]) => {
+  selectedAdvisory.value = advisory;
+  showModal.value = true;
+};
 </script>
 
 <template>
   <Card class="mb-6 border-1 border-surface-200 dark:border-surface-700 shadow-sm">
     <template #title>
-      <h2 class="text-900 dark:text-0 text-lg font-bold m-0">{{ $t('pages.dashboard.maturity.title') }}</h2>
+      <h2 class="text-900 dark:text-0 text-lg font-bold m-0">
+        {{ $t('pages.dashboard.maturity.title') }}
+      </h2>
     </template>
     <template #content>
       <div class="flex flex-column lg:flex-row gap-4">
@@ -55,14 +59,18 @@
         <div class="flex-1" style="min-width: 300px">
           <!-- Progress Table -->
           <div class="mb-4">
-            <h3 class="font-bold text-800 dark:text-100 mb-2 text-base">{{ $t('pages.dashboard.maturity.milestoneProgress') }}</h3>
+            <h3 class="font-bold text-800 dark:text-100 mb-2 text-base">
+              {{ $t('pages.dashboard.maturity.milestoneProgress') }}
+            </h3>
             <div class="overflow-x-auto">
               <table class="w-full text-sm text-left border-collapse">
                 <thead
                   class="text-xs text-500 dark:text-400 uppercase bg-surface-50 dark:bg-surface-800"
                 >
                   <tr>
-                    <th class="px-4 py-2 font-semibold">{{ $t('pages.dashboard.maturity.dimension') }}</th>
+                    <th class="px-4 py-2 font-semibold">
+                      {{ $t('pages.dashboard.maturity.dimension') }}
+                    </th>
                     <th v-for="i in 4" :key="i" class="px-4 py-2 text-center font-semibold">
                       {{ $t('pages.dashboard.maturity.level', { level: i }) }}
                     </th>
@@ -125,5 +133,5 @@
 </template>
 
 <style scoped>
-  /* PrimeFlex grid overrides or helpers if needed */
+/* PrimeFlex grid overrides or helpers if needed */
 </style>

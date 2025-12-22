@@ -1,57 +1,57 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import Card from 'primevue/card'
+import { computed } from 'vue';
+import Card from 'primevue/card';
 
-  interface KPIMetric {
-    label: string
-    value: number | string
-    change?: number
-    changeLabel?: string
-    trend?: 'up' | 'down' | 'neutral'
-    icon?: string
-    severity?: 'success' | 'warning' | 'danger' | 'info'
-    tooltip?: string
-  }
+// interface KPIMetric {
+//   label: string
+//   value: number | string
+//   change?: number
+//   changeLabel?: string
+//   trend?: 'up' | 'down' | 'neutral'
+//   icon?: string
+//   severity?: 'success' | 'warning' | 'danger' | 'info'
+//   tooltip?: string
+// }
 
-  const props = defineProps<{
-    label: string
-    value: number | string
-    change?: number
-    changeLabel?: string
-    trend?: 'up' | 'down' | 'neutral'
-    icon?: string
-    severity?: 'success' | 'warning' | 'danger' | 'info'
-    tooltip?: string
-  }>()
+const props = defineProps<{
+  label: string;
+  value: number | string;
+  change?: number;
+  changeLabel?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  icon?: string;
+  severity?: 'success' | 'warning' | 'danger' | 'info';
+  tooltip?: string;
+}>();
 
-  const trendIcon = computed(() => {
-    if (!props.trend) return ''
-    return props.trend === 'up'
-      ? 'pi pi-arrow-up'
-      : props.trend === 'down'
-        ? 'pi pi-arrow-down'
-        : 'pi pi-minus'
-  })
+const trendIcon = computed(() => {
+  if (!props.trend) return '';
+  return props.trend === 'up'
+    ? 'pi pi-arrow-up'
+    : props.trend === 'down'
+      ? 'pi pi-arrow-down'
+      : 'pi pi-minus';
+});
 
-  const trendColor = computed(() => {
-    if (!props.trend) return 'text-500'
-    return props.trend === 'up'
-      ? 'text-green-500'
-      : props.trend === 'down'
-        ? 'text-red-500'
-        : 'text-500'
-  })
+const trendColor = computed(() => {
+  if (!props.trend) return 'text-500';
+  return props.trend === 'up'
+    ? 'text-green-500'
+    : props.trend === 'down'
+      ? 'text-red-500'
+      : 'text-500';
+});
 
-  const severityColor = computed(() => {
-    if (!props.severity) return 'primary'
-    const colorMap: Record<string, string> = {
-      success: 'green',
-      warning: 'orange',
-      danger: 'red',
-      info: 'blue'
-    }
-    return colorMap[props.severity] || 'primary'
-  })
+const severityColor = computed(() => {
+  if (!props.severity) return 'primary';
+  const colorMap: Record<string, string> = {
+    success: 'green',
+    warning: 'orange',
+    danger: 'red',
+    info: 'blue',
+  };
+  return colorMap[props.severity] || 'primary';
+});
 </script>
 
 <template>
@@ -98,13 +98,13 @@
 </template>
 
 <style scoped>
-  .kpi-card {
-    border: 1px solid var(--surface-border);
-    transition: all 0.2s ease;
-  }
+.kpi-card {
+  border: 1px solid var(--surface-border);
+  transition: all 0.2s ease;
+}
 
-  .kpi-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-  }
+.kpi-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
 </style>

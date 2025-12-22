@@ -1,57 +1,57 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useRouter } from 'vue-router'
-  import { useI18n } from 'vue-i18n'
-  import SplitButton from 'primevue/splitbutton'
-  import Tag from 'primevue/tag'
-  import AvatarDisplay from '@/components/common/AvatarDisplay.vue'
-  import type { Business } from '@/types/business'
-  import type { Entrepreneur } from '@/types/entrepreneur'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import SplitButton from 'primevue/splitbutton';
+import Tag from 'primevue/tag';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+import type { Business } from '@/types/business';
+import type { Entrepreneur } from '@/types/entrepreneur';
 
-  import { BUSINESS_ACTIONS, type BusinessAction } from '@/constants/actions'
+import { BUSINESS_ACTIONS, type BusinessAction } from '@/constants/actions';
 
-  // STRICT CONTRACT
-  interface Props {
-    business: Business
-    entrepreneur?: Entrepreneur | null
+// STRICT CONTRACT
+interface Props {
+  business: Business;
+  entrepreneur?: Entrepreneur | null;
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: 'action', actionType: BusinessAction): void;
+}>();
+
+const router = useRouter();
+const { t } = useI18n();
+
+// Actions Menu
+const actionItems = [
+  {
+    label: t('common.edit'),
+    icon: 'pi pi-pencil',
+    command: () => emit('action', BUSINESS_ACTIONS.EDIT),
+  },
+  { separator: true },
+  {
+    label: t('common.delete') + ' ' + t('business.label'),
+    icon: 'pi pi-trash',
+    class: 'text-red-500',
+    command: () => emit('action', BUSINESS_ACTIONS.DELETE),
+  },
+];
+
+// Computed Helpers
+const statusSeverity = computed(() => {
+  // Assuming you might have a status field, defaulting to success/active for now
+  return 'success';
+});
+
+const goToOwner = () => {
+  if (props.entrepreneur?.id) {
+    router.push(`/entrepreneurs/${props.entrepreneur.id}`);
   }
-
-  const props = defineProps<Props>()
-
-  const emit = defineEmits<{
-    (e: 'action', actionType: BusinessAction): void
-  }>()
-
-  const router = useRouter()
-  const { t } = useI18n()
-
-  // Actions Menu
-  const actionItems = [
-    {
-      label: t('common.edit'),
-      icon: 'pi pi-pencil',
-      command: () => emit('action', BUSINESS_ACTIONS.EDIT)
-    },
-    { separator: true },
-    {
-      label: t('common.delete') + ' ' + t('business.label'),
-      icon: 'pi pi-trash',
-      class: 'text-red-500',
-      command: () => emit('action', BUSINESS_ACTIONS.DELETE)
-    }
-  ]
-
-  // Computed Helpers
-  const statusSeverity = computed(() => {
-    // Assuming you might have a status field, defaulting to success/active for now
-    return 'success'
-  })
-
-  const goToOwner = () => {
-    if (props.entrepreneur?.id) {
-      router.push(`/entrepreneurs/${props.entrepreneur.id}`)
-    }
-  }
+};
 </script>
 
 <template>

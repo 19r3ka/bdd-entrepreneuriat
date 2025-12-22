@@ -4,339 +4,411 @@
     <h1 v-if="!hideTitle" class="m-0 mb-3">
       {{ isEdit ? 'Edit Support Intervention' : 'New Support Intervention' }}
     </h1>
-    <BaseForm
-      v-slot="{ defineField, canSubmit, isSubmitting }"
-      :schema="SupportBoostSchema"
-      :initial-values="initialValues"
-      :on-submit="handleSubmit"
-    >
-      <Section title="Intervention Details">
-        <div class="formgrid grid">
-          <FormField
-            v-if="!businessId"
-            name="businessId"
-            label="Business"
-            v-bind="defineField('businessId')"
-            required
-            field-class="col-12"
-          >
-            <template #input="{ modelValue, updateModelValue, hasError }">
-              <BusinessAutocomplete
-                :model-value="modelValue"
-                label="Select Business"
-                placeholder="Search for a business..."
-                :error="{ _errors: hasError ? ['Business is required'] : [] }"
-                @update:model-value="updateModelValue"
-              />
-            </template>
-          </FormField>
+    <BaseForm :schema="SupportBoostSchema" :initial-values="initialValues" @submit="handleSubmit">
+      <template #default="{ defineField, canSubmit, isSubmitting, values }">
+        <Section title="Intervention Details">
+          <div class="formgrid grid">
+            <FormField
+              v-if="!businessId"
+              name="businessId"
+              label="Business"
+              v-bind="defineField('businessId')"
+              required
+              field-class="col-12"
+            >
+              <template #input="{ modelValue, updateModelValue, hasError }">
+                <BusinessAutocomplete
+                  :model-value="modelValue as string"
+                  label="Select Business"
+                  placeholder="Search for a business..."
+                  :class="{ 'p-invalid': hasError }"
+                  @update:model-value="updateModelValue"
+                />
+              </template>
+            </FormField>
 
-          <FormField
-            name="date"
-            label="Date of Intervention"
-            v-bind="defineField('date')"
-            required
-            field-class="col-12 md:col-6"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <DatePicker
-                :model-value="modelValue"
-                show-icon
-                date-format="yy-mm-dd"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
+            <FormField
+              name="title"
+              label="Title"
+              v-bind="defineField('title')"
+              required
+              field-class="col-12"
+              placeholder="e.g. Digital Marketing Training"
+            />
 
-          <FormField
-            name="modality"
-            label="Modality"
-            v-bind="defineField('modality')"
-            required
-            field-class="col-12 md:col-6"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <Select
-                :model-value="modelValue"
-                :options="SupportModalityOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Select a modality"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
+            <FormField
+              name="boostType"
+              label="Boost Type"
+              v-bind="defineField('boostType')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="boostTypeOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a boost type"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
 
-          <FormField
-            v-if="defineField('modality').modelValue.value === 'capacity_dev'"
-            name="duration"
-            :label="$t('supportForm.duration')"
-            v-bind="defineField('duration')"
-            required
-            field-class="col-12 md:col-6"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <InputNumber
-                :model-value="modelValue"
-                mode="decimal"
-                :min-fraction-digits="0"
-                :max-fraction-digits="2"
-                suffix=" hrs"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
+            <FormField
+              name="modality"
+              label="Modality"
+              v-bind="defineField('modality')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="modalityOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a modality"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
 
-          <FormField
-            name="description"
-            label="Description"
-            v-bind="defineField('description')"
-            required
-            type="textarea"
-            field-class="col-12"
-            class="w-full"
+            <FormField
+              name="startDate"
+              label="Start Date"
+              v-bind="defineField('startDate')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <DatePicker
+                  :model-value="
+                    (modelValue as any) instanceof Date
+                      ? (modelValue as any)
+                      : modelValue
+                        ? new Date(modelValue as string)
+                        : null
+                  "
+                  show-icon
+                  date-format="yy-mm-dd"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+
+            <FormField
+              name="endDate"
+              label="End Date"
+              v-bind="defineField('endDate')"
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <DatePicker
+                  :model-value="
+                    (modelValue as any) instanceof Date
+                      ? (modelValue as any)
+                      : modelValue
+                        ? new Date(modelValue as string)
+                        : null
+                  "
+                  show-icon
+                  date-format="yy-mm-dd"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+
+            <FormField
+              name="channel"
+              label="Channel"
+              v-bind="defineField('channel')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="channelOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a channel"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+
+            <FormField
+              name="provider"
+              label="Provider"
+              v-bind="defineField('provider')"
+              field-class="col-12 md:col-6"
+              placeholder="e.g. UNDP"
+            />
+
+            <FormField
+              name="beneficiaryGroup"
+              label="Beneficiary Group"
+              v-bind="defineField('beneficiaryGroup')"
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="beneficiaryGroupOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a beneficiary group"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+            <FormField
+              name="genderMarker"
+              label="Gender Marker"
+              v-bind="defineField('genderMarker')"
+              required
+              field-class="col-12 md:col-6"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="genderMarkerOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a gender marker"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+          </div>
+        </Section>
+
+        <Section title="Quantity (if applicable)">
+          <div class="formgrid grid">
+            <FormField
+              name="quantity.value"
+              label="Value"
+              v-bind="defineField('quantity.value')"
+              field-class="col-12 md:col-4"
+              :placeholder="$t('pages.quickWins.valuePlaceholder')"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <InputNumber
+                  :model-value="typeof modelValue === 'number' ? modelValue : null"
+                  mode="decimal"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+
+            <FormField
+              name="quantity.unit"
+              label="Unit"
+              v-bind="defineField('quantity.unit')"
+              field-class="col-12 md:col-4"
+            >
+              <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
+                <Select
+                  :model-value="modelValue"
+                  :options="supportQuantityUnitOptions"
+                  option-label="label"
+                  option-value="value"
+                  :placeholder="$t('pages.quickWins.selectUnit')"
+                  :class="['w-full', { 'p-invalid': hasError }]"
+                  @update:model-value="updateModelValue"
+                  @blur="onBlur && onBlur()"
+                />
+              </template>
+            </FormField>
+
+            <FormField
+              v-if="(values as any).quantity?.unit === 'currency'"
+              name="quantity.currency"
+              label="Currency"
+              v-bind="defineField('quantity.currency')"
+              field-class="col-12 md:col-4"
+              :placeholder="$t('pages.quickWins.currencyPlaceholder')"
+            />
+          </div>
+        </Section>
+
+        <FormField
+          name="notes"
+          label="Notes"
+          v-bind="defineField('notes')"
+          type="textarea"
+          field-class="col-12"
+          placeholder="Any additional notes"
+        />
+
+        <div class="flex justify-content-end mt-4">
+          <Button
+            type="button"
+            :label="$t('common.cancel')"
+            icon="pi pi-times"
+            class="p-button-secondary mr-2"
+            @click="emit('cancel')"
+          />
+          <Button
+            type="submit"
+            :label="isEdit ? $t('common.update') : $t('common.submit')"
+            :disabled="!canSubmit"
+            :loading="isSubmitting"
           />
         </div>
-      </Section>
-
-      <Section title="Classification">
-        <div class="formgrid grid">
-          <FormField
-            name="theoryOfChange"
-            label="Theory of Change"
-            v-bind="defineField('theoryOfChange')"
-            required
-            type="textarea"
-            field-class="col-12"
-            class="w-full"
-          />
-
-          <FormField
-            name="sesRiskCategory"
-            label="SES Risk Category"
-            v-bind="defineField('sesRiskCategory')"
-            required
-            field-class="col-12 md:col-6"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <Select
-                :model-value="modelValue"
-                :options="sesRiskCategoryOptions"
-                placeholder="Select a SES risk category"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
-
-          <FormField
-            name="genderMarker"
-            label="Gender Marker"
-            v-bind="defineField('genderMarker')"
-            required
-            field-class="col-12 md:col-6"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <Select
-                :model-value="modelValue"
-                :options="genderMarkerOptions"
-                placeholder="Select a gender marker"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
-        </div>
-      </Section>
-
-      <Section
-        v-if="defineField('modality').modelValue.value === 'financial_grant'"
-        title="Finance Details"
-      >
-        <div class="formgrid grid">
-          <FormField
-            name="financeDetails.instrument"
-            label="Financial Instrument"
-            v-bind="defineField('financeDetails.instrument')"
-            required
-            field-class="col-12 md:col-4"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <Select
-                :model-value="modelValue"
-                :options="FinanceInstrumentOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Select an instrument"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
-          <FormField
-            name="financeDetails.source"
-            label="Financial Source"
-            v-bind="defineField('financeDetails.source')"
-            required
-            field-class="col-12 md:col-4"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <Select
-                :model-value="modelValue"
-                :options="FinanceSourceOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Select a source"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
-          <FormField
-            name="financeDetails.amount"
-            label="Amount"
-            v-bind="defineField('financeDetails.amount')"
-            required
-            field-class="col-12 md:col-4"
-          >
-            <template #input="{ modelValue, updateModelValue, onBlur, hasError }">
-              <InputNumber
-                :model-value="modelValue"
-                mode="currency"
-                currency="USD"
-                locale="en-US"
-                :class="{ 'p-invalid': hasError }"
-                class="w-full"
-                @update:model-value="updateModelValue"
-                @blur="onBlur && onBlur()"
-              />
-            </template>
-          </FormField>
-        </div>
-      </Section>
-
-      <div class="flex justify-content-end mt-4">
-        <Button
-          type="button"
-          :label="$t('common.cancel')"
-          icon="pi pi-times"
-          class="p-button-secondary mr-2"
-          @click="emit('cancel')"
-        />
-        <Button
-          type="submit"
-          :label="isEdit ? $t('common.update') : $t('common.submit')"
-          :disabled="!canSubmit"
-          :loading="isSubmitting"
-        />
-      </div>
+      </template>
     </BaseForm>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import { useToast } from 'primevue/usetoast'
-  import BaseForm from '@/components/common/BaseForm.vue'
-  import FormField from '@/components/common/FormField.vue'
-  import Section from '@/components/common/FormSection.vue'
-  import Button from 'primevue/button'
-  import Select from 'primevue/select'
-  import InputNumber from 'primevue/inputnumber'
-  import DatePicker from 'primevue/datepicker'
-  import Toast from 'primevue/toast'
-  import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue'
-  import { useSupportStore } from '@/stores/useSupportStore'
-  import { SupportBoostSchema } from '@/schemas/monitoring-evaluation/Support'
-  import type { Support as SupportType } from '@/types/monitoring-evaluation/Support'
-  import { useErrorHandler, type AppError } from '@/composables/useErrorHandler'
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
+import BaseForm from '@/components/common/BaseForm.vue';
+import BusinessAutocomplete from '@/components/common/BusinessAutocomplete.vue';
+import FormField from '@/components/common/FormField.vue';
+import Section from '@/components/common/FormSection.vue';
+import Button from 'primevue/button';
+import Select from 'primevue/select';
+import InputNumber from 'primevue/inputnumber';
+import DatePicker from 'primevue/datepicker';
+import Toast from 'primevue/toast';
+import { v4 as uuidv4 } from 'uuid';
+import { useSupportStore } from '@/stores/useSupportStore';
+import { SupportBoostSchema, type Support } from '@/schemas/monitoring-evaluation/Support';
+import { useErrorHandler, type AppError } from '@/composables/useErrorHandler';
+import {
+  BoostTypeEnum,
+  ModalityEnum,
+  GenderMarkerEnum,
+  SupportQuantityUnitEnum,
+  ChannelEnum,
+} from '@/schemas/enums';
+import { useSupportOptions } from '@/composables/useSupportOptions';
 
-  const props = defineProps<{
-    isEdit: boolean
-    initialValues: Partial<SupportType>
-    businessId?: string
-    hideTitle?: boolean
-  }>()
+useI18n();
+const toast = useToast();
+const supportStore = useSupportStore();
+const { handleApiError } = useErrorHandler();
+const {
+  getBoostTypeOptions,
+  getModalityOptions,
+  getChannelOptions,
+  getGenderMarkerOptions,
+  getSupportQuantityUnitOptions,
+  getBeneficiaryGroupOptions,
+} = useSupportOptions();
 
-  const emit = defineEmits(['success', 'cancel'])
+const props = defineProps<{
+  isEdit: boolean;
+  initialValues: Partial<Support>;
+  businessId?: string;
+  hideTitle?: boolean;
+}>();
 
-  const { t } = useI18n()
-  const toast = useToast()
-  const supportStore = useSupportStore()
-  const { handleApiError } = useErrorHandler()
+const emit = defineEmits(['success', 'cancel']);
 
-  const SupportModalityOptions = computed(() =>
-    ['DIM', 'NIM', 'hybrid'].map((value) => ({ label: t(`supportModality.${value}`), value }))
-  )
+/**
+ * Helper function to build initial values and reduce cyclomatic complexity.
+ * @param initial - Optional partial support data.
+ * @param businessId - Optional business ID.
+ * @returns A complete Support object.
+ */
+function getInitialValues(
+  initial: Partial<Support> | undefined,
+  businessId: string | undefined
+): Support {
+  const defaultSupport = {
+    id: uuidv4(),
+    businessId: businessId || '',
+    title: '',
+    boostType: BoostTypeEnum.enum.Training,
+    modality: ModalityEnum.enum['In-person'],
+    startDate: new Date(),
+    provider: 'UNDP',
+    channel: ChannelEnum.enum['In-person'],
+    quantity: {
+      unit: SupportQuantityUnitEnum.enum.currency,
+    },
+    genderMarker: GenderMarkerEnum.enum.GEN0,
+    notes: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-  const sesRiskCategoryOptions = computed(() =>
-    (['Low', 'High'] as const).map((value) => ({ label: t(`sesRiskCategory.${value}`), value }))
-  )
+  if (!initial) return defaultSupport as Support;
 
-  const genderMarkerOptions = computed(() =>
-    (['GEN0', 'GEN1', 'GEN2', 'GEN3'] as const).map((value) => ({
-      label: t(`genderMarker.${value}`),
-      value
-    }))
-  )
+  return {
+    ...defaultSupport,
+    ...initial,
+    id: initial.id || defaultSupport.id,
+    businessId: initial.businessId || defaultSupport.businessId,
+    startDate: initial.startDate ? new Date(initial.startDate) : defaultSupport.startDate,
+    endDate: initial.endDate ? new Date(initial.endDate) : undefined,
+    quantity: {
+      ...defaultSupport.quantity,
+      ...initial.quantity,
+      value: initial.quantity?.value,
+    },
+    createdAt: initial.createdAt ? new Date(initial.createdAt) : defaultSupport.createdAt,
+    updatedAt: new Date(),
+  } as Support;
+}
 
-  const FinanceInstrumentOptions = computed(() =>
-    ['grant', 'loan', 'hybrid'].map((value) => ({ label: t(`financeInstrument.${value}`), value }))
-  )
+const initialValues = computed<Support>(() =>
+  getInitialValues(props.initialValues, props.businessId)
+);
 
-  const FinanceSourceOptions = computed(() =>
-    ['UNDP_core', 'donor', 'government', 'mixed'].map((value) => ({
-      label: t(`financeSource.${value}`),
-      value
-    }))
-  )
-
-  /**
-   *
-   */
-  async function handleSubmit(data: any) {
-    try {
-      if (props.isEdit) {
-        await supportStore.updateSupport(props.initialValues.id!, data)
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Support intervention updated successfully',
-          life: 3000
-        })
-      } else {
-        await supportStore.addSupport({ ...data, businessId: data.businessId || props.businessId })
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Support intervention created successfully',
-          life: 3000
-        })
-      }
-      emit('success')
-    } catch (error) {
-      handleApiError(
-        error as AppError,
-        `Failed to ${props.isEdit ? 'update' : 'create'} support intervention`
-      )
+const handleSubmit = async (data: Support) => {
+  try {
+    if (props.isEdit) {
+      await supportStore.updateSupport(data.id, data);
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Support intervention updated successfully',
+        life: 3000,
+      });
+    } else {
+      await supportStore.addSupport(data);
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Support intervention created successfully',
+        life: 3000,
+      });
     }
+    emit('success');
+  } catch (error) {
+    handleApiError(
+      error as AppError,
+      `Failed to ${props.isEdit ? 'update' : 'create'} support intervention`
+    );
   }
+};
+
+const boostTypeOptions = computed(() => getBoostTypeOptions());
+const modalityOptions = computed(() => getModalityOptions());
+const channelOptions = computed(() => getChannelOptions());
+const supportQuantityUnitOptions = computed(() => getSupportQuantityUnitOptions());
+const genderMarkerOptions = computed(() => getGenderMarkerOptions());
+const beneficiaryGroupOptions = computed(() => getBeneficiaryGroupOptions());
 </script>

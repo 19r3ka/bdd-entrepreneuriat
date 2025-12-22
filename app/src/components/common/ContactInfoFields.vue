@@ -18,15 +18,16 @@
 </template>
 
 <script setup lang="ts">
-  import FormField from '@/components/common/FormField.vue'
+import FormField from '@/components/common/FormField.vue';
+import type { DefineFieldReturn } from '@/composables/useValidationForm';
 
-  withDefaults(
-    defineProps<{
-      defineField: (name: string, ...args: any[]) => any
-      required?: boolean
-    }>(),
-    {
-      required: false
-    }
-  )
+withDefaults(
+  defineProps<{
+    defineField: (name: string, ...args: unknown[]) => DefineFieldReturn<unknown>;
+    required?: boolean;
+  }>(),
+  {
+    required: false,
+  }
+);
 </script>

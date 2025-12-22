@@ -1,12 +1,12 @@
-import { useConfirm } from 'primevue/useconfirm'
-import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 
 /**
  *
  */
 export const useConfirmation = () => {
-  const confirm = useConfirm()
-  const toast = useToast()
+  const confirm = useConfirm();
+  const toast = useToast();
 
   /**
    * Generic confirmation dialog
@@ -22,15 +22,15 @@ export const useConfirmation = () => {
       header,
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        acceptCallback()
+        acceptCallback();
       },
       reject: () => {
         if (rejectCallback) {
-          rejectCallback()
+          rejectCallback();
         }
-      }
-    })
-  }
+      },
+    });
+  };
 
   /**
    * Specialized delete confirmation for a single entity.
@@ -40,15 +40,15 @@ export const useConfirmation = () => {
       `Are you sure you want to delete this ${entityName}?`,
       `Delete ${entityName}`,
       async () => {
-        await acceptCallback()
+        await acceptCallback();
         toast.add({
           severity: 'success',
           summary: `${entityName} deleted`,
-          life: 3000
-        })
+          life: 3000,
+        });
       }
-    )
-  }
+    );
+  };
 
   /**
    * Specialized delete confirmation for multiple entities.
@@ -62,19 +62,19 @@ export const useConfirmation = () => {
       `Are you sure you want to delete ${count} ${entityName}(s)?`,
       `Delete ${entityName}(s)`,
       async () => {
-        await acceptCallback()
+        await acceptCallback();
         toast.add({
           severity: 'success',
           summary: `${count} ${entityName}(s) deleted`,
-          life: 3000
-        })
+          life: 3000,
+        });
       }
-    )
-  }
+    );
+  };
 
   return {
     showConfirmation,
     confirmDelete,
-    confirmDeleteSelected
-  }
-}
+    confirmDeleteSelected,
+  };
+};
